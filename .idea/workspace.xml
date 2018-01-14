@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8c380d3c-8a8a-48f9-96e6-4cef3e72dcc2" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/sbt__com_lihaoyi_fastparse_2_12_1_0_0_jar.xml" afterPath="$PROJECT_DIR$/.idea/libraries/sbt__com_lihaoyi_fastparse_2_12_1_0_0_jar.xml" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/Main.scala" afterPath="$PROJECT_DIR$/src/main/scala/Main.scala" />
       <change beforePath="$PROJECT_DIR$/src/main/scala/parser/CParser.scala" afterPath="$PROJECT_DIR$/src/main/scala/parser/CParser.scala" />
       <change beforePath="$PROJECT_DIR$/src/main/scala/parser/CTokens.scala" afterPath="$PROJECT_DIR$/src/main/scala/parser/CTokens.scala" />
       <change beforePath="$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala" afterPath="$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala" />
@@ -42,18 +42,18 @@
     </system>
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.47707888">
+    <splitter split-orientation="horizontal" split-proportion="0.54211086">
       <split-first>
-        <splitter split-orientation="vertical" split-proportion="0.653144">
+        <splitter split-orientation="vertical" split-proportion="0.673428">
           <split-first>
             <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
               <file leaf-file-name="CParser.scala" pinned="false" current-in-tab="true">
                 <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CParser.scala">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="133">
-                      <caret line="401" column="6" lean-forward="true" selection-start-line="401" selection-start-column="6" selection-end-line="401" selection-end-column="6" />
+                    <state relative-caret-position="162">
+                      <caret line="29" column="36" lean-forward="false" selection-start-line="29" selection-start-column="36" selection-end-line="29" selection-end-column="36" />
                       <folding>
-                        <element signature="e#375#389#0" expanded="true" />
+                        <element signature="e#1634#1648#0" expanded="true" />
                       </folding>
                     </state>
                   </provider>
@@ -92,10 +92,10 @@
               <file leaf-file-name="Main.scala" pinned="false" current-in-tab="false">
                 <entry file="file://$PROJECT_DIR$/src/main/scala/Main.scala">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="102">
-                      <caret line="6" column="10" lean-forward="false" selection-start-line="6" selection-start-column="10" selection-end-line="6" selection-end-column="10" />
+                    <state relative-caret-position="209">
+                      <caret line="19" column="93" lean-forward="false" selection-start-line="19" selection-start-column="93" selection-end-line="19" selection-end-column="93" />
                       <folding>
-                        <marker date="1515919048105" expanded="true" signature="174:181" ph="{...}" />
+                        <element signature="e#0#28#0" expanded="true" />
                       </folding>
                     </state>
                   </provider>
@@ -124,8 +124,8 @@
               <file leaf-file-name="WhitespaceApi.scala" pinned="false" current-in-tab="false">
                 <entry file="jar://$USER_HOME$/.ideaLibSources/fastparse_2.12-1.0.0-sources.jar!/fastparse/WhitespaceApi.scala">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="131">
-                      <caret line="25" column="37" lean-forward="false" selection-start-line="25" selection-start-column="37" selection-end-line="25" selection-end-column="37" />
+                    <state relative-caret-position="85">
+                      <caret line="38" column="45" lean-forward="false" selection-start-line="38" selection-start-column="45" selection-end-line="38" selection-end-column="45" />
                       <folding />
                     </state>
                   </provider>
@@ -158,8 +158,8 @@
               <file leaf-file-name="CTokens.scala" pinned="false" current-in-tab="true">
                 <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CTokens.scala">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="72">
-                      <caret line="145" column="47" lean-forward="false" selection-start-line="145" selection-start-column="47" selection-end-line="145" selection-end-column="47" />
+                    <state relative-caret-position="33">
+                      <caret line="94" column="43" lean-forward="false" selection-start-line="94" selection-start-column="43" selection-end-line="94" selection-end-column="43" />
                       <folding />
                     </state>
                   </provider>
@@ -204,8 +204,8 @@
           <file leaf-file-name="IndividualParserSpec.scala" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="445">
-                  <caret line="372" column="36" lean-forward="false" selection-start-line="372" selection-start-column="36" selection-end-line="372" selection-end-column="36" />
+                <state relative-caret-position="246">
+                  <caret line="364" column="52" lean-forward="true" selection-start-line="364" selection-start-column="52" selection-end-line="364" selection-end-column="52" />
                   <folding>
                     <element signature="e#16#38#0" expanded="true" />
                   </folding>
@@ -294,15 +294,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>typename</find>
-      <find>PostfixExpressionArgs</find>
-      <find>UnaryExpressionCast</find>
-      <find>UnaryExpressionPlusPlus</find>
-      <find>postfix</find>
-      <find>postfixExpressionSimple</find>
-      <find>PostfixRight2</find>
-      <find>Wrap</find>
-      <find>BinaryOpBuildWrap2(' '</find>
       <find>Helper).map(v =&gt; BinaryOpBuildWrap2</find>
       <find>binary2</find>
       <find>logicalor</find>
@@ -324,6 +315,15 @@
       <find>&quot;directDeclaratorHelper</find>
       <find>ParameterTypeList</find>
       <find>+:</find>
+      <find>blockitemlist</find>
+      <find>cunt</find>
+      <find>translat</find>
+      <find>DirectDeclaratorParameterTypeList</find>
+      <find>return</find>
+      <find>return</find>
+      <find>identi</find>
+      <find>digit</find>
+      <find>castexpr</find>
     </findStrings>
     <replaceStrings>
       <replace>&quot;</replace>
@@ -368,10 +368,10 @@
         <option value="$PROJECT_DIR$/src/test/scala/parser/BigParserSpec.scala" />
         <option value="$PROJECT_DIR$/project/build.properties" />
         <option value="$PROJECT_DIR$/project/plugins.sbt" />
-        <option value="$PROJECT_DIR$/src/main/scala/Main.scala" />
         <option value="$PROJECT_DIR$/build.sbt" />
         <option value="$PROJECT_DIR$/src/main/web/index.html" />
         <option value="$PROJECT_DIR$/src/main/scala/parser/CTokens.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/Main.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/parser/CParser.scala" />
       </list>
@@ -619,6 +619,22 @@
       <setting name="testKind" value="Class" />
       <setting name="path" value="parser.IndividualParserSpec" />
     </configuration>
+    <configuration name="IndividualParserSpec.0" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="ccompiler" />
+      <setting name="path" value="parser.IndividualParserSpec" />
+      <setting name="vmparams" value="" />
+      <setting name="params" value="" />
+      <setting name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <setting name="searchForTest" value="Across module dependencies" />
+      <setting name="showProgressMessages" value="true" />
+      <setting name="useSbt" value="false" />
+      <setting name="useUiWithSbt" value="false" />
+      <envs />
+      <setting name="testKind" value="Test name" />
+      <setting name="path" value="parser.IndividualParserSpec" />
+      <setting name="testName" value="0" />
+    </configuration>
     <configuration name="IndividualParserSpec.declarator" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
       <module name="ccompiler" />
@@ -666,22 +682,6 @@
       <setting name="testKind" value="Test name" />
       <setting name="path" value="parser.IndividualParserSpec" />
       <setting name="testName" value="function newlines" />
-    </configuration>
-    <configuration name="IndividualParserSpec.parameterTypeList" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
-      <module name="ccompiler" />
-      <setting name="path" value="parser.IndividualParserSpec" />
-      <setting name="vmparams" value="" />
-      <setting name="params" value="" />
-      <setting name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <setting name="searchForTest" value="Across module dependencies" />
-      <setting name="showProgressMessages" value="true" />
-      <setting name="useSbt" value="false" />
-      <setting name="useUiWithSbt" value="false" />
-      <envs />
-      <setting name="testKind" value="Test name" />
-      <setting name="path" value="parser.IndividualParserSpec" />
-      <setting name="testName" value="parameterTypeList" />
     </configuration>
     <configuration name="Stage1Spec" type="ScalaTestRunConfiguration" factoryName="ScalaTest" singleton="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
@@ -737,15 +737,15 @@
       <item index="2" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.function newlines" />
       <item index="3" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.declarator" />
       <item index="4" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.directDeclaratorHelper" />
-      <item index="5" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.parameterTypeList" />
+      <item index="5" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.0" />
     </list>
     <recent_temporary>
       <list size="5">
         <item index="0" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec" />
-        <item index="1" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.directDeclaratorHelper" />
-        <item index="2" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.parameterTypeList" />
-        <item index="3" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.declarator" />
-        <item index="4" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.function newlines" />
+        <item index="1" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.0" />
+        <item index="2" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.declarator" />
+        <item index="3" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.function newlines" />
+        <item index="4" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.directDeclaratorHelper" />
       </list>
     </recent_temporary>
   </component>
@@ -805,7 +805,7 @@
       <workItem from="1515728435989" duration="11862000" />
       <workItem from="1515740535365" duration="25323000" />
       <workItem from="1515833950040" duration="11492000" />
-      <workItem from="1515898636039" duration="18027000" />
+      <workItem from="1515898636039" duration="21838000" />
     </task>
     <task id="LOCAL-00001" summary="More statements working">
       <created>1515914550331</created>
@@ -828,43 +828,50 @@
       <option name="project" value="LOCAL" />
       <updated>1515919540191</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Functions better">
+      <created>1515927331790</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1515927331790</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="IndividualParserSpec - 2018.01.14 at 17h 55m 06s.xml">
+    <history-entry file="IndividualParserSpec - 2018.01.14 at 20h 05m 06s.xml">
       <configuration name="IndividualParserSpec" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec - 2018.01.14 at 17h 55m 22s.xml">
+    <history-entry file="IndividualParserSpec - 2018.01.14 at 20h 12m 27s.xml">
       <configuration name="IndividualParserSpec" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec_directDeclaratorHelper - 2018.01.14 at 17h 50m 02s.xml">
-      <configuration name="IndividualParserSpec.directDeclaratorHelper" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec - 2018.01.14 at 20h 22m 16s.xml">
+      <configuration name="IndividualParserSpec" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec_directDeclaratorHelper - 2018.01.14 at 17h 52m 25s.xml">
-      <configuration name="IndividualParserSpec.directDeclaratorHelper" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec_0 - 2018.01.14 at 20h 13m 21s.xml">
+      <configuration name="IndividualParserSpec.0" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec_directDeclaratorHelper - 2018.01.14 at 17h 53m 20s.xml">
-      <configuration name="IndividualParserSpec.directDeclaratorHelper" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec_0 - 2018.01.14 at 20h 17m 58s.xml">
+      <configuration name="IndividualParserSpec.0" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec_directDeclaratorHelper - 2018.01.14 at 17h 53m 31s.xml">
-      <configuration name="IndividualParserSpec.directDeclaratorHelper" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec_0 - 2018.01.14 at 20h 18m 26s.xml">
+      <configuration name="IndividualParserSpec.0" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec_directDeclaratorHelper - 2018.01.14 at 17h 53m 47s.xml">
-      <configuration name="IndividualParserSpec.directDeclaratorHelper" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec_0 - 2018.01.14 at 20h 20m 31s.xml">
+      <configuration name="IndividualParserSpec.0" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec_directDeclaratorHelper - 2018.01.14 at 17h 54m 25s.xml">
-      <configuration name="IndividualParserSpec.directDeclaratorHelper" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec_0 - 2018.01.14 at 20h 20m 40s.xml">
+      <configuration name="IndividualParserSpec.0" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec_directDeclaratorHelper - 2018.01.14 at 17h 54m 52s.xml">
-      <configuration name="IndividualParserSpec.directDeclaratorHelper" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec_0 - 2018.01.14 at 20h 21m 47s.xml">
+      <configuration name="IndividualParserSpec.0" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec_parameterTypeList - 2018.01.14 at 17h 49m 05s.xml">
-      <configuration name="IndividualParserSpec.parameterTypeList" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec_0 - 2018.01.14 at 20h 22m 03s.xml">
+      <configuration name="IndividualParserSpec.0" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="69865000" />
+    <option name="totallyTimeSpent" value="73676000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1920" height="1080" extended-state="6" />
@@ -881,7 +888,7 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.37931034" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.33975658" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21703854" sideWeight="0.49573562" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -916,7 +923,8 @@
     <MESSAGE value="More statements working" />
     <MESSAGE value="Tidyup" />
     <MESSAGE value="Web interface" />
-    <option name="LAST_COMMIT_MESSAGE" value="Web interface" />
+    <MESSAGE value="Functions better" />
+    <option name="LAST_COMMIT_MESSAGE" value="Functions better" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -927,13 +935,13 @@
         </breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala</url>
-          <line>328</line>
+          <line>344</line>
           <properties />
           <option name="timeStamp" value="30" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/src/main/scala/parser/CParser.scala</url>
-          <line>421</line>
+          <line>425</line>
           <properties>
             <option name="lambda-ordinal" value="-1" />
           </properties>
@@ -943,12 +951,27 @@
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="57" />
+      <option name="time" value="58" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>z.traced</expression-string>
+        <language-id>Scala</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>z</expression-string>
+        <language-id>Scala</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>x</expression-string>
+        <language-id>Scala</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
       <expression>
         <expression-string>x.toString</expression-string>
         <language-id>Scala</language-id>
@@ -980,24 +1003,6 @@
         <expression-string>z.input.asInstanceOf[utils.IndexedParserInput].data</expression-string>
         <language-id>Scala</language-id>
         <custom-info>fastparse.utils,fastparse.core.Parsed.Failure</custom-info>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>z.input</expression-string>
-        <language-id>Scala</language-id>
-        <custom-info>fastparse.core.Parsed.Failure</custom-info>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>z</expression-string>
-        <language-id>Scala</language-id>
-        <custom-info>fastparse.core.Parsed.Failure</custom-info>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>p.extra.input.data.substring(8)</expression-string>
-        <language-id>Scala</language-id>
-        <custom-info>fastparse.core.Parsed.Failure.Extra,fastparse.core.Parsed.Failure</custom-info>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
     </expressions>
@@ -1284,16 +1289,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/Main.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="6" column="10" lean-forward="false" selection-start-line="6" selection-start-column="10" selection-end-line="6" selection-end-column="10" />
-          <folding>
-            <marker date="1515919048105" expanded="true" signature="174:181" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/build.sbt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="323">
@@ -1360,14 +1355,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://$USER_HOME$/.ideaLibSources/fastparse_2.12-1.0.0-sources.jar!/fastparse/WhitespaceApi.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="131">
-          <caret line="25" column="37" lean-forward="false" selection-start-line="25" selection-start-column="37" selection-end-line="25" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/.ideaLibSources/fastparse_2.12-1.0.0-sources.jar!/fastparse/Api.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17">
@@ -1376,30 +1363,48 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CTokens.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/Main.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="72">
-          <caret line="145" column="47" lean-forward="false" selection-start-line="145" selection-start-column="47" selection-end-line="145" selection-end-column="47" />
+        <state relative-caret-position="209">
+          <caret line="19" column="93" lean-forward="false" selection-start-line="19" selection-start-column="93" selection-end-line="19" selection-end-column="93" />
+          <folding>
+            <element signature="e#0#28#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.ideaLibSources/fastparse_2.12-1.0.0-sources.jar!/fastparse/WhitespaceApi.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="38" column="45" lean-forward="false" selection-start-line="38" selection-start-column="45" selection-end-line="38" selection-end-column="45" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CTokens.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="445">
-          <caret line="372" column="36" lean-forward="false" selection-start-line="372" selection-start-column="36" selection-end-line="372" selection-end-column="36" />
-          <folding>
-            <element signature="e#16#38#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="33">
+          <caret line="94" column="43" lean-forward="false" selection-start-line="94" selection-start-column="43" selection-end-line="94" selection-end-column="43" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CParser.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="133">
-          <caret line="401" column="6" lean-forward="true" selection-start-line="401" selection-start-column="6" selection-end-line="401" selection-end-column="6" />
+        <state relative-caret-position="162">
+          <caret line="29" column="36" lean-forward="false" selection-start-line="29" selection-start-column="36" selection-end-line="29" selection-end-column="36" />
           <folding>
-            <element signature="e#375#389#0" expanded="true" />
+            <element signature="e#1634#1648#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="246">
+          <caret line="364" column="52" lean-forward="true" selection-start-line="364" selection-start-column="52" selection-end-line="364" selection-end-column="52" />
+          <folding>
+            <element signature="e#16#38#0" expanded="true" />
           </folding>
         </state>
       </provider>

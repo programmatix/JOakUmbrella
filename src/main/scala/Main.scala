@@ -1,3 +1,4 @@
+import fastparse.core.Parsed
 import parser.CParser
 
 import scala.scalajs.js.annotation.JSExport
@@ -12,6 +13,13 @@ class Main {
   @JSExport
   def parse(in: String): String = {
     val parsed = parser.parse(in)
-    parsed.toString
+    parsed match {
+      case Parsed.Success(x, y) =>
+        parsed.toString
+      case Parsed.Failure(x, y, z) =>
+        // Couldn't parse as a full C file, try again as though it's the inside of a function
+        val parsedSnippet = parser.parseSnippet(in)
+        parsedSnippet.toString
+    }
   }
 }

@@ -94,6 +94,7 @@ sealed trait JumpStatement extends Statement
 case class Goto(v: Identifier) extends JumpStatement
 case class Continue() extends JumpStatement
 case class Break() extends JumpStatement
+case class Return(v: Option[Expression]) extends JumpStatement
 case class ExpressionStatement(expression: Expression) extends Statement
 case class ExpressionEmptyStatement() extends Statement
 sealed trait SelectionStatement extends Statement
@@ -115,8 +116,8 @@ case class LabelledDefault(v2: Statement) extends LabelledStatement
 // Not completely sure what these are yet
 case class Declaration(v: String) extends ExternalDeclaration with BlockItem
 case class StatementDeclaration(v: Declaration) extends Statement
-case class CompoundStatement(v: Option[BlockItemList]) extends Statement
-case class BlockItemList(v: Seq[BlockItem])
+case class CompoundStatement(v: Seq[BlockItem]) extends Statement
+//case class BlockItemList(v: Seq[BlockItem])
 sealed trait BlockItem
 
 sealed trait DeclarationSpecifier {
@@ -151,4 +152,4 @@ case class DDTypeQualifierList(v: Option[Seq[TypeQualifier]]) extends DDBuild
 case class DDTypeQualifierListAssignment(v: Option[Seq[TypeQualifier]], v2: Option[Expression]) extends DDBuild
 
 case class DirectDeclaratorOnly(v: Identifier) extends DirectDeclarator
-case class DirectDeclaratorParameterTypeList(v: Identifier, v2: ParameterTypeList) extends DirectDeclarator
+case class FunctionDeclaration(name: Identifier, params: ParameterTypeList) extends DirectDeclarator

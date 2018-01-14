@@ -46,6 +46,7 @@ class IndividualParserSpec extends FunSuite {
       case Parsed.Success(x, y) => assert (x == expected)
       case Parsed.Failure(x, y, z) =>
         //        println(s"Wanted:  ${expected}")
+//        dump("", p)
         println(s"Parse failure: ${p}")
         //        println(p)
         //        println(x)
@@ -64,32 +65,47 @@ class IndividualParserSpec extends FunSuite {
 
   def createParser() = new CParser
 
-  test("hexadecimalDigit") {
+//  test("hexadecimalDigit") {
+//    val p = createParser()
+//    good(p.hexadecimalDigit.parse("d"), HexDigit('d'))
+//    good(p.hexadecimalDigit.parse("0"), HexDigit('0'))
+//    bad(p.hexadecimalDigit.parse("g"))
+//  }
+//
+//  test("hexQuad") {
+//    val p = createParser()
+//    good(p.hexQuad.parse("d01d"), HexQuad(HexDigit('d'),HexDigit('0'),HexDigit('1'),HexDigit('d')))
+//    bad(p.hexQuad.parse("g"))
+//  }
+
+
+  test("return 0") {
     val p = createParser()
-    good(p.hexadecimalDigit.parse("d"), HexDigit('d'))
-    good(p.hexadecimalDigit.parse("0"), HexDigit('0'))
-    bad(p.hexadecimalDigit.parse("g"))
+    good(p.statement.parse("return 0;"), Return(Some(IntConstant(0))))
   }
 
-  test("hexQuad") {
+  test("0") {
     val p = createParser()
-    good(p.hexQuad.parse("d01d"), HexQuad(HexDigit('d'),HexDigit('0'),HexDigit('1'),HexDigit('d')))
-    bad(p.hexQuad.parse("g"))
+    good(p.octalConstant.parse("0"), IntConstant(0))
+    good(p.integerConstant.parse("0"), IntConstant(0))
+    good(p.constant.parse("0"), IntConstant(0))
+    good(p.primaryExpression.parse("0"), IntConstant(0))
+    good(p.expression.parse("0"), IntConstant(0))
   }
 
-  test("nonDigit") {
-    val p = createParser()
-    good(p.nondigit.parse("A"), Nondigit('A'))
-    good(p.nondigit.parse("a"), Nondigit('a'))
-    bad(p.nondigit.parse("0"))
-  }
-
-  test("identifierNondigit") {
-    val p = createParser()
-    good(p.identifierNondigit.parse("A"), IdentifierNondigit1(Nondigit('A')))
-    good(p.identifierNondigit.parse("a"), IdentifierNondigit1(Nondigit('a')))
-    bad(p.identifierNondigit.parse("0"))
-  }
+  //  test("nonDigit") {
+//    val p = createParser()
+//    good(p.nondigit.parse("A"), Nondigit('A'))
+//    good(p.nondigit.parse("a"), Nondigit('a'))
+//    bad(p.nondigit.parse("0"))
+//  }
+//
+//  test("identifierNondigit") {
+//    val p = createParser()
+//    good(p.identifierNondigit.parse("A"), IdentifierNondigit1(Nondigit('A')))
+//    good(p.identifierNondigit.parse("a"), IdentifierNondigit1(Nondigit('a')))
+//    bad(p.identifierNondigit.parse("0"))
+//  }
 
   test("identifier") {
     val p = createParser()
@@ -344,7 +360,7 @@ class IndividualParserSpec extends FunSuite {
         |}
       """.stripMargin
     val p = createParser()
-    good((p.declarationSpecifiers ~ End).parse("int"), DeclarationSpecifiers(Seq(TypeSpecifier("int"))))
+    //    good((p.declarationSpecifiers ~ End).parse("int"), DeclarationSpecifiers(Seq(TypeSpecifier("int"))))
     //    good((p.declarator ~ End).parse("main"), Declarator("main"))
     println((p.functionDefinition ~ End).parse(raw))
     //    dump(raw, (p.functionDefinition ~ End).parse(raw, 0, (a,index,continuation) => {
@@ -359,12 +375,12 @@ class IndividualParserSpec extends FunSuite {
   test("parameterTypeList") {
     val p = createParser()
     good((p.parameterTypeList ~ End).parse("int argc"),
-          ParameterTypeList(
-            Seq(ParameterDeclarationDeclarator(
-              DeclarationSpecifiers(Seq(TypeSpecifier("int"))),
-              Declarator(None, DirectDeclaratorOnly(Identifier("argc"))))),
-            false
-          )
+      ParameterTypeList(
+        Seq(ParameterDeclarationDeclarator(
+          DeclarationSpecifiers(Seq(TypeSpecifier("int"))),
+          Declarator(None, DirectDeclaratorOnly(Identifier("argc"))))),
+        false
+      )
     )
   }
 
@@ -388,28 +404,30 @@ class IndividualParserSpec extends FunSuite {
 
   test("declarator") {
     val p = createParser()
-//    good((p.directDeclaratorHelper ~ End).parse("(int argc)"), Declarator("main"))
+    //    good((p.directDeclaratorHelper ~ End).parse("(int argc)"), Declarator("main"))
     val raw = "main(int argc)"
-    dump(raw, (p.declarator ~ End).parse(raw, 0, (a,index,continuation) => {
-      continuation() match {
-        case Parsed.Success(x, y) =>
-          if (x.toString != "()") {
-            println(s"MATCH $index to $y on $a $x")
-          }
-        case _ =>
-      }
-    })
-    )
+//    dump(raw, (p.declarator ~ End).parse(raw, 0, (a,index,continuation) => {
+//      continuation() match {
+//        case Parsed.Success(x, y) =>
+//          if (x.toString != "()") {
+//            println(s"MATCH $index to $y on $a $x")
+//          }
+//        case _ =>
+//      }
+//    })
+//    )
 
-    //      good((p.declarator ~ End).parse("main(int argc)"),
-    //      DirectDeclaratorParameterTypeList(Identifier("main"),
-    //        ParameterTypeList(
-    //          Seq(ParameterDeclarationDeclarator(
-    //            DeclarationSpecifiers(Seq(TypeSpecifier("int"))),
-    //            Declarator(None, DirectDeclaratorOnly(Identifier("argc"))))),
-    //          false
-    //        )
-    //      )
-    //    )
+    good((p.declarator ~ End).parse(raw),
+      Declarator(None,
+      FunctionDeclaration(Identifier("main"),
+        ParameterTypeList(
+          List(ParameterDeclarationDeclarator(
+            DeclarationSpecifiers(List(TypeSpecifier("int"))),
+            Declarator(None, DirectDeclaratorOnly(Identifier("argc"))))),
+          false
+        )
+      )
+      )
+    )
   }
 }
