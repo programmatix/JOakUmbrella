@@ -27,4 +27,11 @@ class CGeneratorSpec extends FunSuite {
     assert(out(0) == "hello")
     assert(out(1) == "++")
   }
+
+  test("hello[world]++") {
+    val in = PostfixExpressionPlusPlus(PostfixExpressionIndex(Identifier("hello"), Identifier("world")))
+    val g = new CGenerator()
+    val out = g.generate(in)
+    assert(out == Seq("hello", "[", "world", "]", "++"))
+  }
 }

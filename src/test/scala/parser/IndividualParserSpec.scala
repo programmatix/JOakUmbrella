@@ -2,91 +2,19 @@ package parser
 
 import fastparse.core.Parsed
 import org.scalatest.FunSuite
+import fastparse.all._
 
-class Stage1Spec extends FunSuite {
-  //  def createParser() = new CParser
-  //  def parse(parser: CParser, raw: String): parser.ParseResult[Program] = {
-  //    val x = parser.parse(parser.program, raw)
-  //    x
-  //  }
-  //
-  //  def checkOutput(p: Program, expected: String): Boolean = {
-  //    val x = p.toString
-  //    if (x !== expected) {
-  //      println(x)
-  //      println(expected)
-  //    }
-  //    x === expected
-  //  }
-  //
-  //  def checkOutput(actual: String, expected: String): Boolean = {
-  //    val actualStrip = actual.replace("$\\w+", "").replaceAll("  ", " ").replace("\r\n", "\n").stripMargin.trim
-  //    val expectedStrip = expected.replace("$\\w+", "").replaceAll("  ", " ").replace("\r\n", "\n").stripMargin.trim
-  //    if (actualStrip !== expectedStrip) {
-  //      println(actualStrip)
-  //      println(expectedStrip)
-  //    }
-  //    assert (actualStrip === expectedStrip)
-  //    actualStrip === expectedStrip
-  //  }
-  //
-  //  test("multi_digit.c") {
-  //    val raw =
-  //      """int main() {
-  //        |    return 100;
-  //        |}""".stripMargin
-  //    val parser = createParser()
-  //    parse(parser, raw) match {
-  //      case parser.Success(m,_) =>
-  //        assert(m.f.identifier == "main")
-  //        assert(m.f.statement.exp.intLiteral == 100)
-  //        assert(checkOutput(m, """ .globl _foo
-  //                               |_foo:
-  //                               | movl    $100, %eax
-  //                               | ret
-  //                               |""".stripMargin))
-  //      case parser.Failure(msg,_) =>
-  //        println("FAILURE: " + msg)
-  //        assert(false)
-  //      case parser.Error(msg,_) =>
-  //        println("ERROR: " + msg)
-  //        assert(false)
-  //    }
-  //  }
+// For testing small parts of the parser
+class IndividualParserSpec extends FunSuite {
 
-  //  test("function") {
-  //    val f = Function("foo", Statement(Exp(200)))
-  //    assert(checkOutput(f.toString, """ .globl _foo
-  //                            |_foo:
-  //                            | movl    $200, %eax
-  //                            | ret
-  //                            |""".stripMargin))
-  //  }
-  //
-  //  test("simple") {
-  //    val raw = """hello0123""".stripMargin
-  //    val c = new SimpleCParse
-  //    println(c.parse(c.identifier, raw))
-  //  }
-  //
-  //  test("fastparse") {
-  //    import fastparse.all._
-  //    val parseA = P( "a" )
-  //
-  //    val Parsed.Success(value, successIndex) = parseA.parse("a")
-  //    assert(value == (), successIndex == 1)
-  //
-  //    val failure = parseA.parse("b").asInstanceOf[Parsed.Failure]
-  //    assert(failure.lastParser == ("a": P0))
-  //      assert(failure.index == 0)
-  //      assert(failure.extra.traced.trace == """parseA:1:1 / "a":1:1 ..."b"""")
-  //
-  //  }
 
   def good[T, Elem, Repr](p: Parsed[T, Elem, Repr], expected: T): Unit = {
     p match {
       case Parsed.Success(x, y) => assert (x == expected)
       case Parsed.Failure(x, y, z) =>
+        println(x)
+        println(y)
+        println(z)
         assert (false)
     }
   }
@@ -264,44 +192,96 @@ class Stage1Spec extends FunSuite {
   test("postfix++") {
     import fastparse.all._
     val parser = createParser()
-    good((parser.postfixExpressionSimple ~ End).parse("hello++"), PostfixExpressionPlusPlus(Identifier("hello")))
+    good((parser.postfixExpression ~ End).parse("hello++"), PostfixExpressionPlusPlus(Identifier("hello")))
   }
 
   test("postfixExpression ++ --") {
     import fastparse.all._
     val parser = createParser()
-    good((parser.postfixExpressionSimple ~ End).parse("hello++"), PostfixExpressionPlusPlus(Identifier("hello")))
-    good((parser.postfixExpressionSimple ~ End).parse("hello++--"), PostfixExpressionMinusMinus(PostfixExpressionPlusPlus(Identifier("hello"))))
-    good((parser.postfixExpressionSimple ~ End).parse("hello++--++"), PostfixExpressionPlusPlus(PostfixExpressionMinusMinus(PostfixExpressionPlusPlus(Identifier("hello")))))
+    good((parser.postfixExpression ~ End).parse("hello++"), PostfixExpressionPlusPlus(Identifier("hello")))
+    good((parser.postfixExpression ~ End).parse("hello++--"), PostfixExpressionMinusMinus(PostfixExpressionPlusPlus(Identifier("hello"))))
+    good((parser.postfixExpression ~ End).parse("hello++--++"), PostfixExpressionPlusPlus(PostfixExpressionMinusMinus(PostfixExpressionPlusPlus(Identifier("hello")))))
   }
 
-  test("postfixExpression ++ --") {
+  // Broken until expression fully left-recursive
+  ignore("postfixExpression []") {
     import fastparse.all._
     val parser = createParser()
-    good((parser.postfixExpressionSimple ~ End).parse("hello++"), PostfixExpressionPlusPlus(Identifier("hello")))
-    good((parser.postfixExpressionSimple ~ End).parse("hello++--"), PostfixExpressionMinusMinus(PostfixExpressionPlusPlus(Identifier("hello"))))
-    good((parser.postfixExpressionSimple ~ End).parse("hello++--++"), PostfixExpressionPlusPlus(PostfixExpressionMinusMinus(PostfixExpressionPlusPlus(Identifier("hello")))))
+    good((parser.postfixExpression ~ End).parse("hello[1]"), PostfixExpressionIndex(Identifier("hello"), IntConstant(1)))
+    good((parser.postfixExpression ~ End).parse("hello[world]"), PostfixExpressionIndex(Identifier("hello"), Identifier("world")))
+    good((parser.postfixExpression ~ End).parse("hello[world]++"), PostfixExpressionPlusPlus(PostfixExpressionIndex(Identifier("hello"), Identifier("world"))))
   }
 
-
-  test("?2") {
-    import fastparse.all._
+  test("postfixExpression .") {
     val parser = createParser()
-    println((parser.postfixExpressionSimple ~ End).parse("hello++"))
+    good((parser.postfixExpression ~ End).parse("hello.world"), PostfixExpressionDot(Identifier("hello"), Identifier("world")))
+    good((parser.postfixExpression ~ End).parse("hello.world.again"), PostfixExpressionDot(PostfixExpressionDot(Identifier("hello"), Identifier("world")), Identifier("again")))
+  }
 
-    /*
-      hello[i]++
-      (((hello)[i])++)
-      1. expr only, no operand, param=none
-      2. expr=StringConstant(hello) op=[] param=StringConstant(i)
-      3. expr=all that op=++ param=none
+  test("unaryExpression ++") {
+    val parser = createParser()
+    good((parser.unaryExpression ~ End).parse("++hello"), UnaryExpressionPlusPlus(Identifier("hello")))
+    good((parser.unaryExpression ~ End).parse("--hello"), UnaryExpressionMinusMinus(Identifier("hello")))
+    good((parser.unaryExpression ~ End).parse("++hello++"), UnaryExpressionPlusPlus(PostfixExpressionPlusPlus(Identifier("hello"))))
+//    good((parser.postfixExpression ~ End).parse("hello.world.again"), PostfixExpressionDot(PostfixExpressionDot(Identifier("hello"), Identifier("world")), Identifier("again")))
+  }
 
-      hello[i]++(y,b)
+  test("typeName") {
+    val parser = createParser()
+    good((parser.typeName ~ End).parse("int"), TypeName("int"))
+  }
 
-    x = Op("hello[i]", "++", -)
-    Op(x, "()", "y,b")
+  test("cast") {
+    val parser = createParser()
+    good((parser.castExpression ~ End).parse("(int)hello"), CastExpression(TypeName("int"), Identifier("hello")))
+  }
 
-     */
+  test("*") {
+    val parser = createParser()
+    good((parser.multiplicativeExpression ~ End).parse("hello*world"), ExpressionMultiply(Identifier("hello"), Identifier("world")))
+    good((parser.multiplicativeExpression ~ End).parse("hello*world*3"), ExpressionMultiply(Identifier("hello"), ExpressionMultiply(Identifier("world"),IntConstant(3))))
+    good((parser.multiplicativeExpression ~ End).parse("hello*world*3++"), ExpressionMultiply(Identifier("hello"), ExpressionMultiply(Identifier("world"),PostfixExpressionPlusPlus(IntConstant(3)))))
+    good((parser.multiplicativeExpression ~ End).parse("hello*world*(3++)"), ExpressionMultiply(Identifier("hello"), ExpressionMultiply(Identifier("world"),PostfixExpressionPlusPlus(IntConstant(3)))))
+  }
+
+  test("=") {
+    val parser = createParser()
+    good((parser.assignmentExpression ~ End).parse("hello=world"), ExpressionAssignment(Identifier("hello"), Identifier("world")))
+    good((parser.assignmentExpression ~ End).parse("hello*=world"), ExpressionAssignment(Identifier("hello"), ExpressionMultiply(Identifier("hello"), Identifier("world"))))
+  }
+
+  test("top level expression") {
+    val parser = createParser()
+    good((parser.expression ~ End).parse("hello=world"), ExpressionAssignment(Identifier("hello"), Identifier("world")))
+    good((parser.expression ~ End).parse("hello*=world"), ExpressionAssignment(Identifier("hello"), ExpressionMultiply(Identifier("hello"), Identifier("world"))))
+    good((parser.expression ~ End).parse("hello*world*(3++)"), ExpressionMultiply(Identifier("hello"), ExpressionMultiply(Identifier("world"),PostfixExpressionPlusPlus(IntConstant(3)))))
+    good((parser.expression ~ End).parse("++hello++"), UnaryExpressionPlusPlus(PostfixExpressionPlusPlus(Identifier("hello"))))
+  }
+
+  test("top level statement") {
+    val parser = createParser()
+    good((parser.statement ~ End).parse("hello=world;"), ExpressionStatement(ExpressionAssignment(Identifier("hello"), Identifier("world"))))
+//    good((parser.statement ~ End).parse("hello*=world;"), ExpressionStatement(ExpressionAssignment(Identifier("hello"), ExpressionMultiply(Identifier("hello"), Identifier("world")))))
+//    good((parser.statement ~ End).parse("hello*world*(3++);"), ExpressionStatement(ExpressionMultiply(Identifier("hello"), ExpressionMultiply(Identifier("world"),PostfixExpressionPlusPlus(IntConstant(3))))))
+//    good((parser.statement ~ End).parse("++hello++;"), ExpressionStatement(UnaryExpressionPlusPlus(PostfixExpressionPlusPlus(Identifier("hello")))))
+  }
+
+  test("expressionStatement") {
+    val parser = createParser()
+    val x = ExpressionStatement(ExpressionAssignment(Identifier("hello"), Identifier("world")))
+    good((parser.expressionStatement ~ End).parse("hello=world;"), x)
+    good((parser.expressionStatement ~ End).parse(";"), ExpressionEmptyStatement())
+  }
+
+  test("if") {
+    val parser = createParser()
+    good((parser.selectionStatement ~ End).parse("if(hello==world)hello=1;"), SelectionIf(ExpressionEquals(Identifier("hello"), Identifier("world")), ExpressionStatement(ExpressionAssignment(Identifier("hello"), IntConstant(1)))))
+  }
+
+  test("whitespace") {
+    val parser = createParser()
+    good((parser.selectionStatement ~ End).parse("if(hello==world)hello=1;"), SelectionIf(ExpressionEquals(Identifier("hello"), Identifier("world")), ExpressionStatement(ExpressionAssignment(Identifier("hello"), IntConstant(1)))))
+    good((parser.selectionStatement ~ End).parse("if(hello==world) hello=1;"), SelectionIf(ExpressionEquals(Identifier("hello"), Identifier("world")), ExpressionStatement(ExpressionAssignment(Identifier("hello"), IntConstant(1)))))
   }
 
 }

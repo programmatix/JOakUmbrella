@@ -1,5 +1,7 @@
 package parser
 
+import fastparse.WhitespaceApi
+
 
 //case class Exp(intLiteral: Int) {
 //  override def toString = intLiteral.toString
@@ -80,10 +82,6 @@ case class Keyword(v: String) extends Token
 case class Punctuator(v: String) extends Token
 case class StringLiteral(v: String) extends Token with Expression
 case class HeaderName(v: String) extends Token
-sealed trait JumpStatement
-case class Goto(v: Identifier) extends JumpStatement
-case class Continue() extends JumpStatement
-case class Break() extends JumpStatement
 case class GenericSelection() extends Expression
 case class PostfixExpressionIndex(v1: Expression, v2: Expression) extends Expression
 case class PostfixExpressionDot(v1: Expression, v2: Expression) extends Expression
@@ -142,33 +140,51 @@ case class ExpressionLogicalAnd(v1: Expression, v2: Expression) extends Expressi
 case class ExpressionLogicalOr(v1: Expression, v2: Expression) extends Expression // ||
 case class ExpressionConditional(v1: Expression, v2: Expression, v3: Expression) extends Expression // ?:
 case class ExpressionComma(v1: Expression, v2: Expression) extends Expression // ,
-//sealed trait Expression extends PrimaryExpression
-//case class Return(exp: Option[Expression]) extends JumpStatement
+case class ExpressionAssignment(v1: Expression, v2: Expression) extends Expression // ,
 
-//class SimpleCParse extends RegexParsers with PackratParsers {
-//  //A.1.3 Identifiers
-//  lazy val identifier: PackratParser[Identifier] = identifier ~ identifierNondigit ^^ { case v ~ v2 => Identifier2(v, v2) } |
-//    identifier ~ digit ^^ { case v ~ v2 => Identifier3(v, v2) }
-//  //    identifierNondigit ^^ (v => Identifier1(v))
-//
-//  def identifierNondigit = nondigit ^^ (v => IdentifierNondigit1(v)) |
-//    universalCharacterName ^^ (v => IdentifierNondigit2(v))
-//
-//  // |other implementationDefined characters
-//  def nondigit = """[a-zA-Z_]""".r ^^ (v => Nondigit(v.charAt(0)))
-//
-//  def digit = """[0-9]""".r ^^ (v => Digit(v.charAt(0).toChar))
-//
-//  def universalCharacterName = "\\u" ~ hexQuad ^^ { case i1 ~ v => UniversalCharacterName1(v) } | "\\U" ~ hexQuad ~ hexQuad ^^ { case i1 ~ v ~ v2 => UniversalCharacterName2(v, v2) }
-//  def hexQuad = hexadecimalDigit ~ hexadecimalDigit ~ hexadecimalDigit ~ hexadecimalDigit ^^ { case v1 ~ v2 ~ v3 ~ v4 => HexQuad(v1, v2, v3, v4) }
-//  def hexadecimalDigit =  """[0-9a-fA-F]""".r ^^ (v => HexDigit(v.charAt(0)))
-//
-//}
+sealed trait Statement
+sealed trait JumpStatement extends Statement
+case class Goto(v: Identifier) extends JumpStatement
+case class Continue() extends JumpStatement
+case class Break() extends JumpStatement
+case class ExpressionStatement(expression: Expression) extends Statement
+case class ExpressionEmptyStatement() extends Statement
+sealed trait SelectionStatement extends Statement
+case class SelectionIf(v1: Expression, v2: Statement) extends SelectionStatement
+case class SelectionIfElse(v1: Expression, v2: Statement, v3: Statement) extends SelectionStatement
+case class SelectionSwitch(v1: Expression, v2: Statement) extends SelectionStatement
+
+sealed trait IterationStatement extends Statement
+case class IterationWhile(v1: Expression, v2: Statement) extends IterationStatement
+case class IterationDoWhile(v1: Expression, v2: Statement) extends IterationStatement
+case class IterationFor1(v1: Option[Expression], v2: Option[Expression], v3: Option[Expression], v4: Statement) extends IterationStatement
+case class IterationFor2(v1: Expression, v2: Statement) extends IterationStatement
+
+sealed trait LabelledStatement extends Statement
+case class LabelledLabel(v1: Identifier, v2: Statement) extends LabelledStatement
+case class LabelledCase(v1: Expression, v2: Statement) extends LabelledStatement
+case class LabelledDefault(v2: Statement) extends LabelledStatement
+
+// Not completely sure what these are yet
+case class Declaration(v: String)
+case class StatementDeclaration(v: Declaration) extends Statement
+case class CompountStatement(v: Option[BlockItemList]) extends Statement
+case class BlockItemList(v: Seq[BlockItem])
+case class BlockItem(v: String)
+
+
 
 // https://port70.net/~nsz/c/c11/n1570.html#A
 // Removed left recursion
 class SimpleCFastParse {
-  import fastparse.all._
+
+  // Ignore whitespace
+  val White = WhitespaceApi.Wrapper{
+    import fastparse.all._
+    NoTrace(" ".rep)
+  }
+  import White._
+  import fastparse.noApi._
 
   private[parser] def digit = P(CharIn('0' to '9')).!.map(v => Digit(v.charAt(0)))
 
@@ -193,7 +209,7 @@ class SimpleCFastParse {
     P("_Imaginary") | P("_Noreturn") | P("_Static_assert") | P("_Thread_local")).!.map(v => Keyword(v))
 
 
-  private[parser]  lazy val constant: Parser[Constant] = P(integerConstant | floatingConstant).log()
+  private[parser]  lazy val constant: Parser[Constant] = P(integerConstant | floatingConstant)
   private[parser]  lazy val integerConstant: Parser[IntConstant] =
     P(decimalConstant ~ integerSuffix.? | octalConstant ~ integerSuffix.? | hexadecimalConstant ~ integerSuffix.?)
   private[parser]  lazy val decimalConstant =
@@ -284,7 +300,7 @@ class SimpleCFastParse {
   //  ppNumber .
 
   //  private[parser] lazy val primaryExpression: Parser[Expression] = P(identifier | constant | stringLiteral | P(P("(") ~ expression ~ P(")")) | genericSelection)
-  private[parser] lazy val primaryExpression: Parser[Expression] = P(identifier | constant | stringLiteral | P(P("(") ~ expression ~ P(")"))).log()
+  private[parser] lazy val primaryExpression: Parser[Expression] = P(identifier | constant | stringLiteral | P(P("(") ~ expression ~ P(")")))
 
   // Never seen this
   //  private[parser] lazy val genericSelection: Parser[GenericSelection] = P("_Generic") ~ P("(") ~ assignmentExpression ~ P(",") ~ genericAssocList ~ P(")")
@@ -293,7 +309,7 @@ class SimpleCFastParse {
   //    P(P("default") ~ P(":") ~ assignmentExpression)
 
   private[parser] lazy val postfixExpression: Parser[Expression] =
-    P(primaryExpression.log() ~ postfixExpressionR.log()).map(v =>
+    P(primaryExpression ~ postfixExpressionR).map(v =>
       postfixRecurse(v))
 
   private def postfixRecurse(v: (Expression, PostfixRight2)): Expression = {
@@ -330,7 +346,7 @@ class SimpleCFastParse {
       P(P("->") ~ identifier ~ postfixExpressionR).map(v => PostfixRight2(PostfixRightArrow(v._1), v._2)) |
       P(P("++") ~ postfixExpressionR).map(v => PostfixRight2(PostfixRightPlusPlus(), v)) |
       P(P("--") ~ postfixExpressionR).map(v => PostfixRight2(PostfixRightMinusMinus(), v)) |
-      P("").log().map(v => PostfixRight2(Empty(), null))
+      P("").map(v => PostfixRight2(Empty(), null))
 
   // Can't figure this one out
   // P(P("(") ~ typeName ~ P(")") ~ P("{") ~ initializerList ~ P(",").? ~ P("}"))
@@ -349,13 +365,13 @@ class SimpleCFastParse {
       P(P("sizeof") ~ unaryExpression).map(v => UnaryExpressionSizeOf(v)) |
       P(P("sizeof") ~ P("(") ~ typeName ~ P(")")).map(v => UnaryExpressionSizeOfType(v)) |
       P(P("_Alignof") ~ P("(") ~ typeName ~ P(")")).map(v => UnaryExpressionAlignOf(v)) |
-      postfixExpression.log()
+      postfixExpression
 
   private[parser] lazy val unaryOperator = CharIn("&*+-~!")
 
   private[parser] lazy val castExpression: Parser[Expression] =
     P(P("(") ~ typeName ~ P(")") ~ castExpression).map(v => CastExpression(v._1, v._2)) |
-    unaryExpression.log()
+    unaryExpression
 
   private[parser] lazy val multiplicativeExpression: Parser[Expression] =
     P(castExpression ~ multiplicativeExpressionHelper).map(v => binary(v._1,v._2))
@@ -371,7 +387,37 @@ class SimpleCFastParse {
       case "*" => ExpressionMultiply(left, right.next)
       case "/" => ExpressionDivision(left, right.next)
       case "%" => ExpressionMod(left, right.next)
-      case _ => left
+      case "+" => ExpressionAdd(left, right.next)
+      case "-" => ExpressionMinus(left, right.next)
+      case "<<" => ExpressionLeftShift(left, right.next)
+      case ">>" => ExpressionRightShift(left, right.next)
+      case "<" => ExpressionLessThan(left, right.next)
+      case ">" => ExpressionGreaterThan(left, right.next)
+      case "<=" => ExpressionLessThanOrEqual(left, right.next)
+      case ">=" => ExpressionGreaterThanOrEqual(left, right.next)
+      case "==" => ExpressionEquals(left, right.next)
+      case "!=" => ExpressionNotEquals(left, right.next)
+      case "&" => ExpressionAnd(left, right.next)
+      case "^" => ExpressionXOr(left, right.next)
+      case "|" => ExpressionInclusiveOr(left, right.next)
+      case "&&" => ExpressionLogicalAnd(left, right.next)
+      case "||" => ExpressionLogicalOr(left, right.next)
+      case "=" => ExpressionAssignment(left, right.next)
+      case "*=" => ExpressionAssignment(left, ExpressionMultiply(left, right.next))
+      case "/=" => ExpressionAssignment(left, ExpressionDivision(left, right.next))
+      case "%=" => ExpressionAssignment(left, ExpressionMod(left, right.next))
+      case "+=" => ExpressionAssignment(left, ExpressionAdd(left, right.next))
+      case "-=" => ExpressionAssignment(left, ExpressionMinus(left, right.next))
+      case "<<=" => ExpressionAssignment(left, ExpressionLeftShift(left, right.next))
+      case ">>=" => ExpressionAssignment(left, ExpressionRightShift(left, right.next))
+      case "&=" => ExpressionAssignment(left, ExpressionAnd(left, right.next))
+      case "^=" => ExpressionAssignment(left, ExpressionXOr(left, right.next))
+      case "|=" => ExpressionAssignment(left, ExpressionInclusiveOr(left, right.next))
+      case "," => ExpressionComma(left, right.next)
+      case "" | " " => left
+      case _ =>
+        assert(false)
+        left
     }
   }
 
@@ -382,15 +428,15 @@ class SimpleCFastParse {
     }
   }
 
-  private def binary2(left: Expression, right: BinaryOpBuildWrap2): Expression = {
-    val exp = binary2(left, right.next)
-    right.op match {
-      case "*" => ExpressionMultiply(left, exp)
-      case "/" => ExpressionDivision(left, exp)
-      case "%" => ExpressionMod(left, exp)
-      case _ => left
-    }
-  }
+//  private def binary2(left: Expression, right: BinaryOpBuildWrap2): Expression = {
+//    val exp = binary2(left, right.next)
+//    right.op match {
+//      case "*" => ExpressionMultiply(left, exp)
+//      case "/" => ExpressionDivision(left, exp)
+//      case "%" => ExpressionMod(left, exp)
+//      case _ => left
+//    }
+//  }
 
   private[parser] lazy val additiveExpression: Parser[Expression] =
     (multiplicativeExpression ~ additiveExpressionHelper).map(v => binary(v._1, v._2))
@@ -463,18 +509,18 @@ class SimpleCFastParse {
   private[parser] lazy val assignmentExpressionHelper: Parser[BinaryOpBuildWrap] =
     P(assignmentOperator.! ~ assignmentExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
     P("").map(v => BinaryOpBuildWrap(" ", null))
-  private[parser] lazy val assignmentOperator = P("=") | P("*=") | P("/=") | P("%=") | P("+=") | P("-=") | P("<<=") | P(">>=:") | P("&=") | P("^=") | P("|=")
+  private[parser] lazy val assignmentOperator = P("=") | P("*=") | P("/=") | P("%=") | P("+=") | P("-=") | P("<<=") | P(">>=") | P("&=") | P("^=") | P("|=")
 
   private[parser] lazy val expression: Parser[Expression] =
     (assignmentExpression ~ expressionHelper).map(v => binary(v._1, v._2))
   private[parser] lazy val expressionHelper: Parser[BinaryOpBuildWrap] =
-    P(P(",").! ~ assignmentExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+      P(P(",").! ~ assignmentExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
     P("").map(v => BinaryOpBuildWrap(" ", null))
 
   private[parser] lazy val constantExpression: Parser[Expression] = conditionalExpression
 
-  private[parser] lazy val declaration = declarationSpecifiers ~ initDeclaratorList.? ~ P(";") |
-    static_assertDeclaration
+  private[parser] lazy val declaration: Parser[Declaration] = P(declarationSpecifiers ~ initDeclaratorList.? ~ P(";") |
+    static_assertDeclaration).!.map(v => Declaration(v))
   private[parser] lazy val declarationSpecifiers: Parser[Any] = storageClassSpecifier ~ declarationSpecifiers.? |
     P(typeSpecifier ~ declarationSpecifiers.?) |
     P(typeQualifier ~ declarationSpecifiers.?) |
@@ -557,27 +603,35 @@ class SimpleCFastParse {
     P(P(".") ~ identifier)
   private[parser] lazy val static_assertDeclaration = P("_Static_assert") ~ P("(") ~ constantExpression ~ P(",") ~ stringLiteral ~ P(")") ~ P(";")
 
-  private[parser] lazy val statement = labeledStatement |
-    compoundStatement |
+//  private[parser] lazy val statement2: Parser[Statement] = labeledStatement |
+//    //    compoundStatement |
+//    expressionStatement |
+//    selectionStatement |
+//    iterationStatement |
+//    jumpStatement
+
+  private[parser] lazy val statement: Parser[Statement] = labeledStatement |
+//    compoundStatement |
     expressionStatement |
     selectionStatement |
     iterationStatement |
     jumpStatement
-  private[parser] lazy val labeledStatement: Parser[Any] = identifier ~ P(":") ~ statement |
-    P(P("case") ~ constantExpression ~ P(":") ~ statement) |
-    P(P("default") ~ P(":") ~ statement)
-  private[parser] lazy val compoundStatement = P("{") ~ blockItemList.? ~ P("}")
-  private[parser] lazy val blockItemList: Parser[Any] = blockItem |
-    P(blockItemList ~ blockItem)
-  private[parser] lazy val blockItem = declaration | statement
-  private[parser] lazy val expressionStatement = expression.? ~ P(";")
-  private[parser] lazy val selectionStatement: Parser[Any] = P(P("if") ~ P("(") ~ expression ~ P(")") ~ statement) |
-    P(P("if") ~ P("(") ~ expression ~ P(")") ~ statement ~ P("else") ~ statement) |
-    P(P("switch") ~ P("(") ~ expression ~ P(")") ~ statement)
-  private[parser] lazy val iterationStatement: Parser[Any] = P(P("while") ~ P("(") ~ expression ~ P(")") ~ statement) |
-    P(P("do") ~ statement ~ P("while") ~ P("(") ~ expression ~ P(")") ~ P(";")) |
-    P(P("for") ~ P("(") ~ expression.? ~ P(";") ~ expression.? ~ P(";") ~ expression.? ~ P(")") ~ statement) |
-    P(P("for") ~ P("(") ~ declaration ~ expression.? ~ P(";") ~ expression.? ~ P(")") ~ statement)
+  private[parser] lazy val labeledStatement: Parser[LabelledStatement] = (identifier ~ P(":") ~ statement).map(v => LabelledLabel(v._1, v._2))  |
+    P(P("case") ~ constantExpression ~ P(":") ~ statement).map(v => LabelledCase(v._1, v._2)) |
+    P(P("default") ~ P(":") ~ statement).map(v => LabelledDefault(v))
+  private[parser] lazy val compoundStatement: Parser[CompountStatement] = P("{") ~ blockItemList.?.map(v => CompountStatement(v)) ~ P("}")
+  private[parser] lazy val blockItemList: Parser[BlockItemList] = blockItem.rep(1).map(v => BlockItemList(v))
+  private[parser] lazy val blockItem: Parser[BlockItem] = (declaration | statement).!.map(v => BlockItem(v))
+  private[parser] lazy val expressionStatement: Parser[Statement] = (expression.? ~ P(";")).map(v => if (v.isDefined) ExpressionStatement(v.get) else ExpressionEmptyStatement())
+  private[parser] lazy val selectionStatement: Parser[SelectionStatement] = P(P("if") ~ P("(") ~ expression ~ P(")") ~ statement).map(v => SelectionIf(v._1, v._2))
+  // TODO
+//    P(P("if") ~ P("(") ~ expression ~ P(")") ~ statement ~ P("else") ~ statement).map(v => SelectionIfElse(v._1, v._2, v._3)) |
+//    P(P("switch") ~ P("(") ~ expression ~ P(")") ~ statement).map(v => SelectionSwitch(v._1, v._2))
+  private[parser] lazy val iterationStatement: Parser[IterationStatement] = P(P("while") ~ P("(") ~ expression ~ P(")") ~ statement).map(v => IterationWhile(v._1, v._2)) |
+    P(P("do") ~ statement ~ P("while") ~ P("(") ~ expression ~ P(")") ~ P(";")).map(v => IterationDoWhile(v._2, v._1)) |
+    P(P("for") ~ P("(") ~ expression.? ~ P(";") ~ expression.? ~ P(";") ~ expression.? ~ P(")") ~ statement).map(v => IterationFor1(v._1, v._2, v._3, v._4))
+  // TODO when declaration read
+//    P(P("for") ~ P("(") ~ declaration ~ expression.? ~ P(";") ~ expression.? ~ P(")") ~ statement).map(v => IterationFor2(v._1, v._2, v._3))
   private[parser] lazy val jumpStatement: Parser[JumpStatement] = P(P("goto") ~ identifier ~ P(";")).map(v => Goto(v)) |
     P(P("continue") ~ P(";")).map(v => Continue()) |
     P(P("break") ~ P(";")).map(v => Break()) |
