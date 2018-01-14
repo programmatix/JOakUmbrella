@@ -45,7 +45,7 @@ case class PostfixRightMinusMinus() extends PostfixRight
 case class PostfixRightArrow(v1: Expression) extends PostfixRight
 case class PostfixRightArgs(v2: Option[ArgumentExpressionList]) extends PostfixRight
 case class PostfixRight2(op: PostfixRight, next: PostfixRight2)
-case class Empty() extends PostfixRight with MultiplicativeBuild
+case class Empty() extends PostfixRight with MultiplicativeBuild with DDBuild
 
 sealed trait MultiplicativeBuild
 //case class MultiplicativeBuildMultiply() extends MultiplicativeBuild
@@ -119,9 +119,11 @@ case class CompoundStatement(v: Option[BlockItemList]) extends Statement
 case class BlockItemList(v: Seq[BlockItem])
 sealed trait BlockItem
 
-sealed trait DeclarationSpecifier
+sealed trait DeclarationSpecifier {
+  val v: String
+}
 case class DeclarationSpecifiers(v: Seq[DeclarationSpecifier])
-case class Declarator(v: String)
+case class Declarator(pointer: Option[String], v: DirectDeclarator)
 case class StorageClassSpecifier(v: String) extends DeclarationSpecifier
 case class TypeSpecifier(v: String) extends DeclarationSpecifier
 case class TypeQualifier(v: String) extends DeclarationSpecifier
@@ -132,3 +134,21 @@ case class TranslationUnit(v: Seq[ExternalDeclaration])
 sealed trait ExternalDeclaration
 case class FunctionDefinition(spec: DeclarationSpecifiers, dec: Declarator, decs: Option[DeclarationList], v: CompoundStatement) extends ExternalDeclaration
 case class DeclarationList(v: Seq[Declaration])
+
+case class ParameterTypeList(v: Seq[ParameterDeclaration], ellipses: Boolean)
+//case class ParameterList(v: Seq[ParameterDeclaration])
+sealed trait ParameterDeclaration
+case class ParameterDeclarationDeclarator(v: DeclarationSpecifiers, v2: Declarator) extends ParameterDeclaration
+//case class ParameterDeclarationAbstractDeclarator(v: DeclarationSpecifiers, v2: Option[AbstractDeclarator]) extends ParameterDeclaration
+
+sealed trait DirectDeclarator
+sealed trait DDBuild
+case class DDBuild2(me: DDBuild, next: DDBuild2)
+case class DDBracketed(declarator: Declarator) extends DirectDeclarator
+case class DDParameterTypeList(v: ParameterTypeList) extends DDBuild
+case class DDIdentifierList(v: Option[Seq[Identifier]]) extends DDBuild
+case class DDTypeQualifierList(v: Option[Seq[TypeQualifier]]) extends DDBuild
+case class DDTypeQualifierListAssignment(v: Option[Seq[TypeQualifier]], v2: Option[Expression]) extends DDBuild
+
+case class DirectDeclaratorOnly(v: Identifier) extends DirectDeclarator
+case class DirectDeclaratorParameterTypeList(v: Identifier, v2: ParameterTypeList) extends DirectDeclarator

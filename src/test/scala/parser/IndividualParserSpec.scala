@@ -1,21 +1,41 @@
 package parser
 
+import fastparse.all._
 import fastparse.core.Parsed
 import org.scalatest.FunSuite
-import fastparse.all._
 
 // For testing small parts of the parser
 class IndividualParserSpec extends FunSuite {
 
-  def dump[T, Elem, Repr](p: Parsed[T, Elem, Repr]): Unit = {
+  /*
+
+   Expression Statement------
+               Identifier-
+   Identifier  IntConstant
+   return      0            ;
+   */
+
+  def dump[T, Elem, Repr](raw: String, p: Parsed[T, Elem, Repr]): Unit = {
     p match {
       case Parsed.Success(x, y) =>
         println(p)
       case Parsed.Failure(x, y, z) =>
-        println(p)
-        println(x)
-        println(y)
-        println(z)
+        //        println(p)
+        //        println(x)
+        //        println(y)
+        //        println(z)
+        val traced = z.traced
+        //        println(traced)
+
+        for (i <- Range(0, traced.fullStack.size)) {
+          val stack = traced.fullStack(i)
+          //          val input = z.input.asInstanceOf[utils.IndexedParserInput].data.toString.substring(stack.index, stack.index + 20)
+          val input = raw.substring(stack.index, Math.min(stack.index + 20, raw.length - 1)).replace("\r\n", """\r\n""")
+          println(s"$i '$input' $stack")
+        }
+
+        println(s"All parsers tried at failure: ${traced.traceParsers.mkString(", ")}")
+
         assert (false)
     }
   }
@@ -25,10 +45,12 @@ class IndividualParserSpec extends FunSuite {
     p match {
       case Parsed.Success(x, y) => assert (x == expected)
       case Parsed.Failure(x, y, z) =>
-        println(p)
-        println(x)
-        println(y)
-        println(z)
+        //        println(s"Wanted:  ${expected}")
+        println(s"Parse failure: ${p}")
+        //        println(p)
+        //        println(x)
+        //        println(y)
+        //        println(z)
         assert (false)
     }
   }
@@ -121,9 +143,9 @@ class IndividualParserSpec extends FunSuite {
   test("jumpStatement") {
     val p = createParser()
     good(p.jumpStatement.parse("""continue;"""), Continue())
-//    good(p.jumpStatement.parse("""goto hello;"""), Goto(Identifier("hello")))
+    //    good(p.jumpStatement.parse("""goto hello;"""), Goto(Identifier("hello")))
     good(p.jumpStatement.parse("""break;"""), Break())
-//    good(p.jumpStatement.parse("""return;"""), Break())
+    //    good(p.jumpStatement.parse("""return;"""), Break())
   }
 
   test("primaryExpression") {
@@ -236,7 +258,7 @@ class IndividualParserSpec extends FunSuite {
     good((parser.unaryExpression ~ End).parse("++hello"), UnaryExpressionPlusPlus(Identifier("hello")))
     good((parser.unaryExpression ~ End).parse("--hello"), UnaryExpressionMinusMinus(Identifier("hello")))
     good((parser.unaryExpression ~ End).parse("++hello++"), UnaryExpressionPlusPlus(PostfixExpressionPlusPlus(Identifier("hello"))))
-//    good((parser.postfixExpression ~ End).parse("hello.world.again"), PostfixExpressionDot(PostfixExpressionDot(Identifier("hello"), Identifier("world")), Identifier("again")))
+    //    good((parser.postfixExpression ~ End).parse("hello.world.again"), PostfixExpressionDot(PostfixExpressionDot(Identifier("hello"), Identifier("world")), Identifier("again")))
   }
 
   test("typeName") {
@@ -300,7 +322,11 @@ class IndividualParserSpec extends FunSuite {
   test("function nowhitespace") {
     val raw = """int main(int argc){return 0;}"""
     val p = createParser()
-    dump((p.functionDefinition ~ End).parse(raw))
+    //    dump((p.functionDefinition ~ End).parse(raw))
+
+
+    //    val parsed = (p.functionDefinition ~ End).parseRec(new ParseCtx(utils.IndexedParserInput[Char,String](raw), 0, -1, p, 0, null, false, false, false), 0)
+    //    1==1
     //    good(p.top.parse(raw), HexDigit('d'))
   }
 
@@ -318,7 +344,72 @@ class IndividualParserSpec extends FunSuite {
         |}
       """.stripMargin
     val p = createParser()
+    good((p.declarationSpecifiers ~ End).parse("int"), DeclarationSpecifiers(Seq(TypeSpecifier("int"))))
+    //    good((p.declarator ~ End).parse("main"), Declarator("main"))
     println((p.functionDefinition ~ End).parse(raw))
-    //    good(p.top.parse(raw), HexDigit('d'))
+    //    dump(raw, (p.functionDefinition ~ End).parse(raw, 0, (a,index,continuation) => {
+    //      continuation() match {
+    //        case Parsed.Success(x, y) =>
+    //          println(s"$index to $y = $x")
+    //        case _ =>
+    //      }
+    //    }))
+  }
+
+  test("parameterTypeList") {
+    val p = createParser()
+    good((p.parameterTypeList ~ End).parse("int argc"),
+          ParameterTypeList(
+            Seq(ParameterDeclarationDeclarator(
+              DeclarationSpecifiers(Seq(TypeSpecifier("int"))),
+              Declarator(None, DirectDeclaratorOnly(Identifier("argc"))))),
+            false
+          )
+    )
+  }
+
+  test("directDeclaratorHelper") {
+    val p = createParser()
+    val parsed = (p.directDeclaratorHelper ~ End).parse("(int argc)")
+    good(parsed,
+      DDBuild2(
+        DDParameterTypeList(
+          ParameterTypeList(
+            List(ParameterDeclarationDeclarator(
+              DeclarationSpecifiers(List(TypeSpecifier("int"))),
+              Declarator(None, DirectDeclaratorOnly(Identifier("argc"))))),
+            false
+          )
+        ),
+        DDBuild2(Empty(),null)
+      )
+    )
+  }
+
+  test("declarator") {
+    val p = createParser()
+//    good((p.directDeclaratorHelper ~ End).parse("(int argc)"), Declarator("main"))
+    val raw = "main(int argc)"
+    dump(raw, (p.declarator ~ End).parse(raw, 0, (a,index,continuation) => {
+      continuation() match {
+        case Parsed.Success(x, y) =>
+          if (x.toString != "()") {
+            println(s"MATCH $index to $y on $a $x")
+          }
+        case _ =>
+      }
+    })
+    )
+
+    //      good((p.declarator ~ End).parse("main(int argc)"),
+    //      DirectDeclaratorParameterTypeList(Identifier("main"),
+    //        ParameterTypeList(
+    //          Seq(ParameterDeclarationDeclarator(
+    //            DeclarationSpecifiers(Seq(TypeSpecifier("int"))),
+    //            Declarator(None, DirectDeclaratorOnly(Identifier("argc"))))),
+    //          false
+    //        )
+    //      )
+    //    )
   }
 }
