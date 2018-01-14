@@ -2,13 +2,20 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8c380d3c-8a8a-48f9-96e6-4cef3e72dcc2" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/project/plugins.sbt" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/Main.scala" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/parser/CTokens.scala" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/sbt__org_scala_js_scalajs_library_2_12_0_6_21_jar.xml" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/sbt__org_scala_js_scalajs_test_interface_2_12_0_6_21_jar.xml" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/project/build.properties" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/src/main/web/index.html" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/src/test/scala/parser/BigParserSpec.scala" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/ccompiler-build.iml" afterPath="$PROJECT_DIR$/.idea/modules/ccompiler-build.iml" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/ccompiler.iml" afterPath="$PROJECT_DIR$/.idea/modules/ccompiler.iml" />
+      <change beforePath="$PROJECT_DIR$/.idea/scala_compiler.xml" afterPath="$PROJECT_DIR$/.idea/scala_compiler.xml" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/build.sbt" afterPath="$PROJECT_DIR$/build.sbt" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/parser/parser.scala" afterPath="$PROJECT_DIR$/src/main/scala/parser/CParser.scala" />
-      <change beforePath="$PROJECT_DIR$/src/test/scala/parser/CGeneratorSpec.scala" afterPath="$PROJECT_DIR$/src/test/scala/parser/CGeneratorSpec.scala" />
+      <change beforePath="$PROJECT_DIR$/project/plugins.sbt" afterPath="$PROJECT_DIR$/project/plugins.sbt" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/Main.scala" afterPath="$PROJECT_DIR$/src/main/scala/Main.scala" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/parser/CParser.scala" afterPath="$PROJECT_DIR$/src/main/scala/parser/CParser.scala" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/parser/CTokens.scala" afterPath="$PROJECT_DIR$/src/main/scala/parser/CTokens.scala" />
       <change beforePath="$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala" afterPath="$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
@@ -45,7 +52,7 @@
     </system>
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.62972456">
+    <splitter split-orientation="horizontal" split-proportion="0.57196164">
       <split-first>
         <splitter split-orientation="vertical" split-proportion="0.680916">
           <split-first>
@@ -53,20 +60,20 @@
               <file leaf-file-name="CParser.scala" pinned="false" current-in-tab="true">
                 <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CParser.scala">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="136">
-                      <caret line="8" column="8" lean-forward="false" selection-start-line="8" selection-start-column="8" selection-end-line="8" selection-end-column="8" />
+                    <state relative-caret-position="151">
+                      <caret line="447" column="55" lean-forward="false" selection-start-line="447" selection-start-column="55" selection-end-line="447" selection-end-column="55" />
                       <folding>
-                        <element signature="e#253#267#0" expanded="true" />
+                        <element signature="e#363#377#0" expanded="true" />
                       </folding>
                     </state>
                   </provider>
                 </entry>
               </file>
-              <file leaf-file-name="CTokens.scala" pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CTokens.scala">
+              <file leaf-file-name="Api.class" pinned="false" current-in-tab="false">
+                <entry file="jar://$USER_HOME$/.ivy2/cache/com.lihaoyi/fastparse_2.12/jars/fastparse_2.12-1.0.0.jar!/fastparse/Api.class">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="0">
-                      <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+                    <state relative-caret-position="123">
+                      <caret line="48" column="6" lean-forward="false" selection-start-line="48" selection-start-column="6" selection-end-line="48" selection-end-column="6" />
                       <folding />
                     </state>
                   </provider>
@@ -75,8 +82,8 @@
               <file leaf-file-name="build.sbt" pinned="false" current-in-tab="false">
                 <entry file="file://$PROJECT_DIR$/build.sbt">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="153">
-                      <caret line="9" column="0" lean-forward="true" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+                    <state relative-caret-position="323">
+                      <caret line="19" column="0" lean-forward="false" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
                       <folding />
                     </state>
                   </provider>
@@ -85,8 +92,8 @@
               <file leaf-file-name="build.properties" pinned="false" current-in-tab="false">
                 <entry file="file://$PROJECT_DIR$/project/build.properties">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="0">
-                      <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+                    <state relative-caret-position="17">
+                      <caret line="1" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
                       <folding />
                     </state>
                   </provider>
@@ -95,8 +102,20 @@
               <file leaf-file-name="Main.scala" pinned="false" current-in-tab="false">
                 <entry file="file://$PROJECT_DIR$/src/main/scala/Main.scala">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="153">
-                      <caret line="9" column="16" lean-forward="false" selection-start-line="9" selection-start-column="16" selection-end-line="9" selection-end-column="16" />
+                    <state relative-caret-position="102">
+                      <caret line="6" column="10" lean-forward="false" selection-start-line="6" selection-start-column="10" selection-end-line="6" selection-end-column="10" />
+                      <folding>
+                        <marker date="1515919048105" expanded="true" signature="174:181" ph="{...}" />
+                      </folding>
+                    </state>
+                  </provider>
+                </entry>
+              </file>
+              <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
+                <entry file="file://$PROJECT_DIR$/src/main/web/index.html">
+                  <provider selected="true" editor-type-id="text-editor">
+                    <state relative-caret-position="88">
+                      <caret line="10" column="31" lean-forward="true" selection-start-line="10" selection-start-column="31" selection-end-line="10" selection-end-column="31" />
                       <folding />
                     </state>
                   </provider>
@@ -105,8 +124,8 @@
               <file leaf-file-name="plugins.sbt" pinned="false" current-in-tab="false">
                 <entry file="file://$PROJECT_DIR$/project/plugins.sbt">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="17">
-                      <caret line="1" column="2" lean-forward="false" selection-start-line="1" selection-start-column="2" selection-end-line="1" selection-end-column="2" />
+                    <state relative-caret-position="51">
+                      <caret line="3" column="0" lean-forward="false" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
                       <folding />
                     </state>
                   </provider>
@@ -142,27 +161,27 @@
                   </provider>
                 </entry>
               </file>
-              <file leaf-file-name="CGrammar.scala" pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CGrammar.scala">
+            </leaf>
+          </split-first>
+          <split-second>
+            <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+              <file leaf-file-name="CTokens.scala" pinned="false" current-in-tab="true">
+                <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CTokens.scala">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="2159">
-                      <caret line="127" column="34" lean-forward="false" selection-start-line="127" selection-start-column="34" selection-end-line="127" selection-end-column="34" />
+                    <state relative-caret-position="66">
+                      <caret line="91" column="40" lean-forward="false" selection-start-line="91" selection-start-column="40" selection-end-line="91" selection-end-column="40" />
                       <folding />
                     </state>
                   </provider>
                 </entry>
               </file>
-            </leaf>
-          </split-first>
-          <split-second>
-            <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-              <file leaf-file-name="CParser.scala" pinned="false" current-in-tab="true">
+              <file leaf-file-name="CParser.scala" pinned="false" current-in-tab="false">
                 <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CParser.scala">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="-1899">
-                      <caret line="5" column="0" lean-forward="false" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
+                    <state relative-caret-position="90">
+                      <caret line="125" column="15" lean-forward="false" selection-start-line="125" selection-start-column="15" selection-end-line="125" selection-end-column="15" />
                       <folding>
-                        <element signature="e#253#267#0" expanded="true" />
+                        <element signature="e#363#377#0" expanded="true" />
                       </folding>
                     </state>
                   </provider>
@@ -194,21 +213,23 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="Runner.class" pinned="false" current-in-tab="false">
-            <entry file="jar://$USER_HOME$/.ivy2/cache/org.scalatest/scalatest_2.12/bundles/scalatest_2.12-3.0.4.jar!/org/scalatest/tools/Runner.class">
+          <file leaf-file-name="IndividualParserSpec.scala" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="255">
-                  <caret line="15" column="0" lean-forward="false" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
-                  <folding />
+                <state relative-caret-position="371">
+                  <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+                  <folding>
+                    <element signature="e#16#44#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="IndividualParserSpec.scala" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala">
+          <file leaf-file-name="BigParserSpec.scala" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/src/test/scala/parser/BigParserSpec.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="218">
-                  <caret line="29" column="6" lean-forward="false" selection-start-line="29" selection-start-column="6" selection-end-line="29" selection-end-column="6" />
+                <state relative-caret-position="577">
+                  <caret line="39" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
                   <folding>
                     <element signature="e#16#44#0" expanded="true" />
                   </folding>
@@ -287,9 +308,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find />
-      <find>characterConstant</find>
-      <find>punct</find>
       <find>decimalFloatingConstant</find>
       <find>floatingConstant</find>
       <find>r</find>
@@ -317,6 +335,9 @@
       <find>jumpsta</find>
       <find>.log()</find>
       <find>statement</find>
+      <find>token</find>
+      <find>blockitem</find>
+      <find>CompountStatement</find>
     </findStrings>
     <replaceStrings>
       <replace>&quot;</replace>
@@ -357,12 +378,16 @@
         <option value="$PROJECT_DIR$/src/test/scala/parser/CGeneratorSpec.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/parser/CGenerator.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/parser/Stage1Spec.scala" />
-        <option value="$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala" />
-        <option value="$PROJECT_DIR$/project/plugins.sbt" />
-        <option value="$PROJECT_DIR$/build.sbt" />
-        <option value="$PROJECT_DIR$/src/main/scala/Main.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/parser/CTokens.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/parser/parser.scala" />
+        <option value="$PROJECT_DIR$/src/test/scala/parser/BigParserSpec.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/parser/CTokens.scala" />
+        <option value="$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala" />
+        <option value="$PROJECT_DIR$/project/build.properties" />
+        <option value="$PROJECT_DIR$/project/plugins.sbt" />
+        <option value="$PROJECT_DIR$/src/main/scala/Main.scala" />
+        <option value="$PROJECT_DIR$/build.sbt" />
+        <option value="$PROJECT_DIR$/src/main/web/index.html" />
+        <option value="$PROJECT_DIR$/src/main/scala/parser/CParser.scala" />
       </list>
     </option>
   </component>
@@ -379,8 +404,8 @@
   <component name="ProjectFrameBounds" extendedState="6" fullScreen="true">
     <option name="x" value="-8" />
     <option name="y" value="-8" />
-    <option name="width" value="1936" />
-    <option name="height" value="1066" />
+    <option name="width" value="1932" />
+    <option name="height" value="1092" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -428,15 +453,18 @@
               <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="scala" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
               <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="scala" type="462c0819:PsiDirectoryNode" />
-              <item name="parser" type="462c0819:PsiDirectoryNode" />
+              <item name="target" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
+              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
+              <item name="target" type="462c0819:PsiDirectoryNode" />
+              <item name="scala-2.12" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -522,6 +550,22 @@
       <option name="HOST" value="localhost" />
       <option name="PORT" value="5005" />
     </configuration>
+    <configuration name="BigParserSpec.function" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="ccompiler" />
+      <setting name="path" value="parser.BigParserSpec" />
+      <setting name="vmparams" value="" />
+      <setting name="params" value="" />
+      <setting name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <setting name="searchForTest" value="Across module dependencies" />
+      <setting name="showProgressMessages" value="true" />
+      <setting name="useSbt" value="false" />
+      <setting name="useUiWithSbt" value="false" />
+      <envs />
+      <setting name="testKind" value="Test name" />
+      <setting name="path" value="parser.BigParserSpec" />
+      <setting name="testName" value="function" />
+    </configuration>
     <configuration name="IndividualParserSpec" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
       <module name="ccompiler" />
@@ -537,7 +581,7 @@
       <setting name="testKind" value="Class" />
       <setting name="path" value="parser.IndividualParserSpec" />
     </configuration>
-    <configuration name="IndividualParserSpec.if" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
+    <configuration name="IndividualParserSpec.function nowhitespace" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
       <module name="ccompiler" />
       <setting name="path" value="parser.IndividualParserSpec" />
@@ -551,9 +595,9 @@
       <envs />
       <setting name="testKind" value="Test name" />
       <setting name="path" value="parser.IndividualParserSpec" />
-      <setting name="testName" value="if" />
+      <setting name="testName" value="function nowhitespace" />
     </configuration>
-    <configuration name="IndividualParserSpec.top level statement" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
+    <configuration name="IndividualParserSpec.function" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
       <module name="ccompiler" />
       <setting name="path" value="parser.IndividualParserSpec" />
@@ -567,7 +611,23 @@
       <envs />
       <setting name="testKind" value="Test name" />
       <setting name="path" value="parser.IndividualParserSpec" />
-      <setting name="testName" value="top level statement" />
+      <setting name="testName" value="function" />
+    </configuration>
+    <configuration name="IndividualParserSpec.whitespace" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="ccompiler" />
+      <setting name="path" value="parser.IndividualParserSpec" />
+      <setting name="vmparams" value="" />
+      <setting name="params" value="" />
+      <setting name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <setting name="searchForTest" value="Across module dependencies" />
+      <setting name="showProgressMessages" value="true" />
+      <setting name="useSbt" value="false" />
+      <setting name="useUiWithSbt" value="false" />
+      <envs />
+      <setting name="testKind" value="Test name" />
+      <setting name="path" value="parser.IndividualParserSpec" />
+      <setting name="testName" value="whitespace" />
     </configuration>
     <configuration name="Stage1Spec" type="ScalaTestRunConfiguration" factoryName="ScalaTest" singleton="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
@@ -583,38 +643,6 @@
       <envs />
       <setting name="testKind" value="Class" />
       <setting name="path" value="parser.Stage1Spec" />
-    </configuration>
-    <configuration name="Stage1Spec.*" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
-      <module name="ccompiler" />
-      <setting name="path" value="parser.Stage1Spec" />
-      <setting name="vmparams" value="" />
-      <setting name="params" value="" />
-      <setting name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <setting name="searchForTest" value="Across module dependencies" />
-      <setting name="showProgressMessages" value="true" />
-      <setting name="useSbt" value="false" />
-      <setting name="useUiWithSbt" value="false" />
-      <envs />
-      <setting name="testKind" value="Test name" />
-      <setting name="path" value="parser.Stage1Spec" />
-      <setting name="testName" value="*" />
-    </configuration>
-    <configuration name="Stage1Spec.postfix++" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
-      <module name="ccompiler" />
-      <setting name="path" value="parser.Stage1Spec" />
-      <setting name="vmparams" value="" />
-      <setting name="params" value="" />
-      <setting name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <setting name="searchForTest" value="Across module dependencies" />
-      <setting name="showProgressMessages" value="true" />
-      <setting name="useSbt" value="false" />
-      <setting name="useUiWithSbt" value="false" />
-      <envs />
-      <setting name="testKind" value="Test name" />
-      <setting name="path" value="parser.Stage1Spec" />
-      <setting name="testName" value="postfix++" />
     </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
@@ -651,24 +679,24 @@
     </configuration>
     <list size="6">
       <item index="0" class="java.lang.String" itemvalue="ScalaTest.Stage1Spec" />
-      <item index="1" class="java.lang.String" itemvalue="ScalaTest.Stage1Spec.*" />
-      <item index="2" class="java.lang.String" itemvalue="ScalaTest.Stage1Spec.postfix++" />
-      <item index="3" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec" />
-      <item index="4" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.if" />
-      <item index="5" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.top level statement" />
+      <item index="1" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec" />
+      <item index="2" class="java.lang.String" itemvalue="ScalaTest.BigParserSpec.function" />
+      <item index="3" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.function" />
+      <item index="4" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.whitespace" />
+      <item index="5" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.function nowhitespace" />
     </list>
     <recent_temporary>
       <list size="5">
         <item index="0" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec" />
-        <item index="1" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.top level statement" />
-        <item index="2" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.if" />
-        <item index="3" class="java.lang.String" itemvalue="ScalaTest.Stage1Spec.*" />
-        <item index="4" class="java.lang.String" itemvalue="ScalaTest.Stage1Spec.postfix++" />
+        <item index="1" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.function nowhitespace" />
+        <item index="2" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.function" />
+        <item index="3" class="java.lang.String" itemvalue="ScalaTest.IndividualParserSpec.whitespace" />
+        <item index="4" class="java.lang.String" itemvalue="ScalaTest.BigParserSpec.function" />
       </list>
     </recent_temporary>
   </component>
   <component name="SbtLocalSettings">
-    <option name="lastUpdateTimestamp" value="1515913951477" />
+    <option name="lastUpdateTimestamp" value="1515916432231" />
     <option name="availableProjects">
       <map>
         <entry>
@@ -723,7 +751,7 @@
       <workItem from="1515728435989" duration="11862000" />
       <workItem from="1515740535365" duration="25323000" />
       <workItem from="1515833950040" duration="11492000" />
-      <workItem from="1515898636039" duration="5619000" />
+      <workItem from="1515898636039" duration="10272000" />
     </task>
     <task id="LOCAL-00001" summary="More statements working">
       <created>1515914550331</created>
@@ -732,46 +760,54 @@
       <option name="project" value="LOCAL" />
       <updated>1515914550331</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Tidyup">
+      <created>1515914856025</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1515914856025</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="IndividualParserSpec - 2018.01.14 at 14h 17m 49s.xml">
+    <history-entry file="IndividualParserSpec - 2018.01.14 at 15h 39m 33s.xml">
       <configuration name="IndividualParserSpec" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec - 2018.01.14 at 14h 19m 42s.xml">
-      <configuration name="IndividualParserSpec" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec_function_nowhitespace - 2018.01.14 at 15h 10m 46s.xml">
+      <configuration name="IndividualParserSpec.function nowhitespace" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec - 2018.01.14 at 14h 20m 24s.xml">
-      <configuration name="IndividualParserSpec" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec_function_nowhitespace - 2018.01.14 at 15h 13m 35s.xml">
+      <configuration name="IndividualParserSpec.function nowhitespace" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec - 2018.01.14 at 14h 20m 34s.xml">
-      <configuration name="IndividualParserSpec" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec_function_nowhitespace - 2018.01.14 at 15h 23m 44s.xml">
+      <configuration name="IndividualParserSpec.function nowhitespace" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec_top_level_statement - 2018.01.14 at 14h 12m 23s.xml">
-      <configuration name="IndividualParserSpec.top level statement" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec_function_nowhitespace - 2018.01.14 at 15h 24m 37s.xml">
+      <configuration name="IndividualParserSpec.function nowhitespace" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec_top_level_statement - 2018.01.14 at 14h 14m 07s.xml">
-      <configuration name="IndividualParserSpec.top level statement" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec_function_nowhitespace - 2018.01.14 at 15h 25m 19s.xml">
+      <configuration name="IndividualParserSpec.function nowhitespace" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec_top_level_statement - 2018.01.14 at 14h 15m 59s.xml">
-      <configuration name="IndividualParserSpec.top level statement" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec_function_nowhitespace - 2018.01.14 at 15h 26m 55s.xml">
+      <configuration name="IndividualParserSpec.function nowhitespace" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec_top_level_statement - 2018.01.14 at 14h 16m 12s.xml">
-      <configuration name="IndividualParserSpec.top level statement" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec_function_nowhitespace - 2018.01.14 at 15h 27m 43s.xml">
+      <configuration name="IndividualParserSpec.function nowhitespace" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec_top_level_statement - 2018.01.14 at 14h 17m 01s.xml">
-      <configuration name="IndividualParserSpec.top level statement" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec_function_nowhitespace - 2018.01.14 at 15h 28m 30s.xml">
+      <configuration name="IndividualParserSpec.function nowhitespace" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
-    <history-entry file="IndividualParserSpec_top_level_statement - 2018.01.14 at 14h 17m 28s.xml">
-      <configuration name="IndividualParserSpec.top level statement" configurationId="ScalaTestRunConfiguration" />
+    <history-entry file="IndividualParserSpec_function_nowhitespace - 2018.01.14 at 15h 39m 19s.xml">
+      <configuration name="IndividualParserSpec.function nowhitespace" configurationId="ScalaTestRunConfiguration" />
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="57457000" />
+    <option name="totallyTimeSpent" value="62110000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1920" height="1080" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -787,7 +823,7 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16791044" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16791044" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="sbt-shell-toolwindow" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Build" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -796,7 +832,7 @@
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.28296146" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3356998" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="SBT" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30439562" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.09434968" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -817,7 +853,8 @@
       <path value="$PROJECT_DIR$" />
     </ignored-roots>
     <MESSAGE value="More statements working" />
-    <option name="LAST_COMMIT_MESSAGE" value="More statements working" />
+    <MESSAGE value="Tidyup" />
+    <option name="LAST_COMMIT_MESSAGE" value="Tidyup" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -830,14 +867,25 @@
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="23" />
+      <option name="time" value="29" />
     </breakpoint-manager>
     <watches-manager />
   </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>p.</expression-string>
+        <language-id>Scala</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>p.index</expression-string>
+        <language-id>Scala</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+  </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/test/scala/samples/return_2.c" />
-    <entry file="file://$PROJECT_DIR$/src/test/scala/write_a_c_compiler/stage_1/valid/return_0.c" />
-    <entry file="file://$PROJECT_DIR$/src/test/scala/write_a_c_compiler/stage_1/valid/multi_digit.c" />
     <entry file="jar://$USER_HOME$/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.12/bundles/scala-parser-combinators_2.12-1.0.6.jar!/scala/util/parsing/combinator/Parsers.class">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="228">
@@ -1125,14 +1173,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://$USER_HOME$/.ivy2/cache/org.scalatest/scalatest_2.12/bundles/scalatest_2.12-3.0.4.jar!/org/scalatest/tools/SuiteRunner.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/.ivy2/cache/com.lihaoyi/fastparse_2.12/jars/fastparse_2.12-1.0.0.jar!/fastparse/WhitespaceApi.class">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="336">
@@ -1141,62 +1181,98 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/plugins.sbt">
+    <entry file="file://$PROJECT_DIR$/src/test/scala/parser/BigParserSpec.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="1" column="2" lean-forward="false" selection-start-line="1" selection-start-column="2" selection-end-line="1" selection-end-column="2" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/build.sbt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="9" column="0" lean-forward="true" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/build.properties">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/Main.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="9" column="16" lean-forward="false" selection-start-line="9" selection-start-column="16" selection-end-line="9" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="218">
-          <caret line="29" column="6" lean-forward="false" selection-start-line="29" selection-start-column="6" selection-end-line="29" selection-end-column="6" />
+        <state relative-caret-position="577">
+          <caret line="39" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
           <folding>
             <element signature="e#16#44#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="jar://$USER_HOME$/.ivy2/cache/org.scalatest/scalatest_2.12/bundles/scalatest_2.12-3.0.4.jar!/org/scalatest/tools/SuiteRunner.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.ivy2/cache/com.lihaoyi/fastparse_2.12/jars/fastparse_2.12-1.0.0.jar!/fastparse/Api.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="123">
+          <caret line="48" column="6" lean-forward="false" selection-start-line="48" selection-start-column="6" selection-end-line="48" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CTokens.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        <state relative-caret-position="66">
+          <caret line="91" column="40" lean-forward="false" selection-start-line="91" selection-start-column="40" selection-end-line="91" selection-end-column="40" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/build.properties">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="1" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/plugins.sbt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="51">
+          <caret line="3" column="0" lean-forward="false" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/Main.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="6" column="10" lean-forward="false" selection-start-line="6" selection-start-column="10" selection-end-line="6" selection-end-column="10" />
+          <folding>
+            <marker date="1515919048105" expanded="true" signature="174:181" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build.sbt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="19" column="0" lean-forward="false" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="371">
+          <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+          <folding>
+            <element signature="e#16#44#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/web/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="88">
+          <caret line="10" column="31" lean-forward="true" selection-start-line="10" selection-start-column="31" selection-end-line="10" selection-end-column="31" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CParser.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="8" column="8" lean-forward="false" selection-start-line="8" selection-start-column="8" selection-end-line="8" selection-end-column="8" />
+        <state relative-caret-position="151">
+          <caret line="447" column="55" lean-forward="false" selection-start-line="447" selection-start-column="55" selection-end-line="447" selection-end-column="55" />
           <folding>
-            <element signature="e#253#267#0" expanded="true" />
+            <element signature="e#363#377#0" expanded="true" />
           </folding>
         </state>
       </provider>

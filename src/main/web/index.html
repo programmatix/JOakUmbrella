@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>CCompiler Test</title>
+</head>
+<body>
+<!-- Include Scala.js compiled code -->
+<script type="text/javascript" src="../../../target/scala-2.12/ccompiler-fastopt.js"></script>
+
+<textarea id="input" rows="20">
+int main(int argc) {
+    return 0;
+}
+</textarea>
+<button id="parse" onclick="parse()">Parse</button>
+<textarea id="output"></textarea>
+
+<script>
+    var main = new Main();
+
+    function parse() {
+        var input = document.getElementById("input").value;
+        var output = main.parse(input);
+        document.getElementById("output").value = output;
+    }
+
+</script>
+</body>
+</html>

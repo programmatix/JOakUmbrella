@@ -7,6 +7,19 @@ import fastparse.all._
 // For testing small parts of the parser
 class IndividualParserSpec extends FunSuite {
 
+  def dump[T, Elem, Repr](p: Parsed[T, Elem, Repr]): Unit = {
+    p match {
+      case Parsed.Success(x, y) =>
+        println(p)
+      case Parsed.Failure(x, y, z) =>
+        println(p)
+        println(x)
+        println(y)
+        println(z)
+        assert (false)
+    }
+  }
+
 
   def good[T, Elem, Repr](p: Parsed[T, Elem, Repr], expected: T): Unit = {
     p match {
@@ -284,4 +297,28 @@ class IndividualParserSpec extends FunSuite {
     good((parser.selectionStatement ~ End).parse("if(hello==world) hello=1;"), SelectionIf(ExpressionEquals(Identifier("hello"), Identifier("world")), ExpressionStatement(ExpressionAssignment(Identifier("hello"), IntConstant(1)))))
   }
 
+  test("function nowhitespace") {
+    val raw = """int main(int argc){return 0;}"""
+    val p = createParser()
+    dump((p.functionDefinition ~ End).parse(raw))
+    //    good(p.top.parse(raw), HexDigit('d'))
+  }
+
+  test("function whitespace") {
+    val raw = """int main(int argc) { return 0; }"""
+    val p = createParser()
+    println((p.functionDefinition ~ End).parse(raw))
+    //    good(p.top.parse(raw), HexDigit('d'))
+  }
+
+  test("function newlines") {
+    val raw =
+      """int main(int argc) {
+        | return 0;
+        |}
+      """.stripMargin
+    val p = createParser()
+    println((p.functionDefinition ~ End).parse(raw))
+    //    good(p.top.parse(raw), HexDigit('d'))
+  }
 }

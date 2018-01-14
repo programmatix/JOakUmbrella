@@ -89,7 +89,7 @@ case class ExpressionConditional(v1: Expression, v2: Expression, v3: Expression)
 case class ExpressionComma(v1: Expression, v2: Expression) extends Expression // ,
 case class ExpressionAssignment(v1: Expression, v2: Expression) extends Expression // ,
 
-sealed trait Statement
+sealed trait Statement extends BlockItem
 sealed trait JumpStatement extends Statement
 case class Goto(v: Identifier) extends JumpStatement
 case class Continue() extends JumpStatement
@@ -113,8 +113,22 @@ case class LabelledCase(v1: Expression, v2: Statement) extends LabelledStatement
 case class LabelledDefault(v2: Statement) extends LabelledStatement
 
 // Not completely sure what these are yet
-case class Declaration(v: String)
+case class Declaration(v: String) extends ExternalDeclaration with BlockItem
 case class StatementDeclaration(v: Declaration) extends Statement
-case class CompountStatement(v: Option[BlockItemList]) extends Statement
+case class CompoundStatement(v: Option[BlockItemList]) extends Statement
 case class BlockItemList(v: Seq[BlockItem])
-case class BlockItem(v: String)
+sealed trait BlockItem
+
+sealed trait DeclarationSpecifier
+case class DeclarationSpecifiers(v: Seq[DeclarationSpecifier])
+case class Declarator(v: String)
+case class StorageClassSpecifier(v: String) extends DeclarationSpecifier
+case class TypeSpecifier(v: String) extends DeclarationSpecifier
+case class TypeQualifier(v: String) extends DeclarationSpecifier
+case class FunctionSpecifier(v: String) extends DeclarationSpecifier
+case class AlignmentSpecifier(v: String) extends DeclarationSpecifier
+
+case class TranslationUnit(v: Seq[ExternalDeclaration])
+sealed trait ExternalDeclaration
+case class FunctionDefinition(spec: DeclarationSpecifiers, dec: Declarator, decs: Option[DeclarationList], v: CompoundStatement) extends ExternalDeclaration
+case class DeclarationList(v: Seq[Declaration])
