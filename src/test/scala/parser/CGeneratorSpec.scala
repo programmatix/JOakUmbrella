@@ -19,7 +19,7 @@ class CGeneratorSpec extends FunSuite {
     }
   }
 
-  def createParser() = new SimpleCFastParse
+  def createParser() = new CParser
 
   test("hello++") {
     val g = new CGenerator()

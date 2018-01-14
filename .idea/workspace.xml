@@ -2,14 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8c380d3c-8a8a-48f9-96e6-4cef3e72dcc2" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/sbt__com_lihaoyi_fastparse_2_12_1_0_0_jar.xml" afterPath="$PROJECT_DIR$/.idea/libraries/sbt__com_lihaoyi_fastparse_2_12_1_0_0_jar.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/sbt__com_lihaoyi_fastparse_utils_2_12_1_0_0_jar.xml" afterPath="$PROJECT_DIR$/.idea/libraries/sbt__com_lihaoyi_fastparse_utils_2_12_1_0_0_jar.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/ccompiler-build.iml" afterPath="$PROJECT_DIR$/.idea/modules/ccompiler-build.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/ccompiler.iml" afterPath="$PROJECT_DIR$/.idea/modules/ccompiler.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/sbt.xml" afterPath="$PROJECT_DIR$/.idea/sbt.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/project/plugins.sbt" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/Main.scala" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/src/main/scala/parser/CTokens.scala" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/parser/parser.scala" afterPath="$PROJECT_DIR$/src/main/scala/parser/parser.scala" />
+      <change beforePath="$PROJECT_DIR$/build.sbt" afterPath="$PROJECT_DIR$/build.sbt" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/parser/parser.scala" afterPath="$PROJECT_DIR$/src/main/scala/parser/CParser.scala" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/parser/CGeneratorSpec.scala" afterPath="$PROJECT_DIR$/src/test/scala/parser/CGeneratorSpec.scala" />
       <change beforePath="$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala" afterPath="$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
@@ -46,28 +45,68 @@
     </system>
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.5575693">
+    <splitter split-orientation="horizontal" split-proportion="0.62972456">
       <split-first>
         <splitter split-orientation="vertical" split-proportion="0.680916">
           <split-first>
             <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-              <file leaf-file-name="parser.scala" pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/main/scala/parser/parser.scala">
+              <file leaf-file-name="CParser.scala" pinned="false" current-in-tab="true">
+                <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CParser.scala">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="279">
-                      <caret line="685" column="0" lean-forward="true" selection-start-line="685" selection-start-column="0" selection-end-line="685" selection-end-column="0" />
+                    <state relative-caret-position="136">
+                      <caret line="8" column="8" lean-forward="false" selection-start-line="8" selection-start-column="8" selection-end-line="8" selection-end-column="8" />
                       <folding>
-                        <element signature="e#9392#9406#0" expanded="true" />
+                        <element signature="e#253#267#0" expanded="true" />
                       </folding>
                     </state>
                   </provider>
                 </entry>
               </file>
-              <file leaf-file-name="build.sbt" pinned="false" current-in-tab="true">
+              <file leaf-file-name="CTokens.scala" pinned="false" current-in-tab="false">
+                <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CTokens.scala">
+                  <provider selected="true" editor-type-id="text-editor">
+                    <state relative-caret-position="0">
+                      <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+                      <folding />
+                    </state>
+                  </provider>
+                </entry>
+              </file>
+              <file leaf-file-name="build.sbt" pinned="false" current-in-tab="false">
                 <entry file="file://$PROJECT_DIR$/build.sbt">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="68">
-                      <caret line="4" column="23" lean-forward="false" selection-start-line="4" selection-start-column="23" selection-end-line="4" selection-end-column="23" />
+                    <state relative-caret-position="153">
+                      <caret line="9" column="0" lean-forward="true" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+                      <folding />
+                    </state>
+                  </provider>
+                </entry>
+              </file>
+              <file leaf-file-name="build.properties" pinned="false" current-in-tab="false">
+                <entry file="file://$PROJECT_DIR$/project/build.properties">
+                  <provider selected="true" editor-type-id="text-editor">
+                    <state relative-caret-position="0">
+                      <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+                      <folding />
+                    </state>
+                  </provider>
+                </entry>
+              </file>
+              <file leaf-file-name="Main.scala" pinned="false" current-in-tab="false">
+                <entry file="file://$PROJECT_DIR$/src/main/scala/Main.scala">
+                  <provider selected="true" editor-type-id="text-editor">
+                    <state relative-caret-position="153">
+                      <caret line="9" column="16" lean-forward="false" selection-start-line="9" selection-start-column="16" selection-end-line="9" selection-end-column="16" />
+                      <folding />
+                    </state>
+                  </provider>
+                </entry>
+              </file>
+              <file leaf-file-name="plugins.sbt" pinned="false" current-in-tab="false">
+                <entry file="file://$PROJECT_DIR$/project/plugins.sbt">
+                  <provider selected="true" editor-type-id="text-editor">
+                    <state relative-caret-position="17">
+                      <caret line="1" column="2" lean-forward="false" selection-start-line="1" selection-start-column="2" selection-end-line="1" selection-end-column="2" />
                       <folding />
                     </state>
                   </provider>
@@ -113,37 +152,17 @@
                   </provider>
                 </entry>
               </file>
-              <file leaf-file-name="ParserApi.scala" pinned="false" current-in-tab="false">
-                <entry file="jar://$USER_HOME$/.ideaLibSources/fastparse_2.12-1.0.0-sources.jar!/fastparse/core/ParserApi.scala">
-                  <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="255">
-                      <caret line="20" column="59" lean-forward="false" selection-start-line="20" selection-start-column="59" selection-end-line="20" selection-end-column="59" />
-                      <folding />
-                    </state>
-                  </provider>
-                </entry>
-              </file>
-              <file leaf-file-name="Integer.java" pinned="false" current-in-tab="false">
-                <entry file="jar://E:/dev/jdk1.8.0_77/src.zip!/java/lang/Integer.java">
-                  <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="9282">
-                      <caret line="579" column="0" lean-forward="false" selection-start-line="579" selection-start-column="0" selection-end-line="579" selection-end-column="0" />
-                      <folding />
-                    </state>
-                  </provider>
-                </entry>
-              </file>
             </leaf>
           </split-first>
           <split-second>
             <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-              <file leaf-file-name="parser.scala" pinned="false" current-in-tab="true">
-                <entry file="file://$PROJECT_DIR$/src/main/scala/parser/parser.scala">
+              <file leaf-file-name="CParser.scala" pinned="false" current-in-tab="true">
+                <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CParser.scala">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="73">
-                      <caret line="171" column="24" lean-forward="false" selection-start-line="171" selection-start-column="11" selection-end-line="171" selection-end-column="24" />
+                    <state relative-caret-position="-1899">
+                      <caret line="5" column="0" lean-forward="false" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
                       <folding>
-                        <element signature="e#9392#9406#0" expanded="true" />
+                        <element signature="e#253#267#0" expanded="true" />
                       </folding>
                     </state>
                   </provider>
@@ -188,8 +207,8 @@
           <file leaf-file-name="IndividualParserSpec.scala" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="320">
-                  <caret line="266" column="3" lean-forward="true" selection-start-line="266" selection-start-column="3" selection-end-line="266" selection-end-column="3" />
+                <state relative-caret-position="218">
+                  <caret line="29" column="6" lean-forward="false" selection-start-line="29" selection-start-column="6" selection-end-line="29" selection-end-column="6" />
                   <folding>
                     <element signature="e#16#44#0" expanded="true" />
                   </folding>
@@ -268,7 +287,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>DecimalConstant</find>
       <find />
       <find>characterConstant</find>
       <find>punct</find>
@@ -298,6 +316,7 @@
       <find>logicalor</find>
       <find>jumpsta</find>
       <find>.log()</find>
+      <find>statement</find>
     </findStrings>
     <replaceStrings>
       <replace>&quot;</replace>
@@ -330,7 +349,6 @@
         <option value="$PROJECT_DIR$/src/main/scala/parser.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/dump.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/CGrammar.scala" />
-        <option value="$PROJECT_DIR$/build.sbt" />
         <option value="$PROJECT_DIR$/src/test/scala/Stage1Spec.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/parser/Stage1Spec.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/CGrammar/CGrammar.scala" />
@@ -339,8 +357,12 @@
         <option value="$PROJECT_DIR$/src/test/scala/parser/CGeneratorSpec.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/parser/CGenerator.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/parser/Stage1Spec.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/parser/parser.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala" />
+        <option value="$PROJECT_DIR$/project/plugins.sbt" />
+        <option value="$PROJECT_DIR$/build.sbt" />
+        <option value="$PROJECT_DIR$/src/main/scala/Main.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/parser/CTokens.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/parser/parser.scala" />
       </list>
     </option>
   </component>
@@ -384,6 +406,11 @@
             <path>
               <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
               <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
+              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
+              <item name="project" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
@@ -696,8 +723,16 @@
       <workItem from="1515728435989" duration="11862000" />
       <workItem from="1515740535365" duration="25323000" />
       <workItem from="1515833950040" duration="11492000" />
-      <workItem from="1515898636039" duration="5309000" />
+      <workItem from="1515898636039" duration="5619000" />
     </task>
+    <task id="LOCAL-00001" summary="More statements working">
+      <created>1515914550331</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1515914550331</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -733,7 +768,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="57147000" />
+    <option name="totallyTimeSpent" value="57457000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1920" height="1080" extended-state="6" />
@@ -774,11 +809,15 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <option name="CHECK_NEW_TODO" value="false" />
     <ignored-roots>
       <path value="$PROJECT_DIR$/3ddemo" />
       <path value="$PROJECT_DIR$/MapReduceGame" />
       <path value="$PROJECT_DIR$" />
     </ignored-roots>
+    <MESSAGE value="More statements working" />
+    <option name="LAST_COMMIT_MESSAGE" value="More statements working" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -796,26 +835,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/build.sbt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="1" column="0" lean-forward="false" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/parser/parser.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="10183">
-          <caret line="599" column="17" lean-forward="false" selection-start-line="599" selection-start-column="17" selection-end-line="599" selection-end-column="17" />
-          <folding>
-            <element signature="e#9392#9406#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/scala/write_a_c_compiler/stage_1/valid/return_0.c" />
-    <entry file="file://$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala" />
     <entry file="file://$PROJECT_DIR$/src/test/scala/samples/return_2.c" />
     <entry file="file://$PROJECT_DIR$/src/test/scala/write_a_c_compiler/stage_1/valid/return_0.c" />
     <entry file="file://$PROJECT_DIR$/src/test/scala/write_a_c_compiler/stage_1/valid/multi_digit.c" />
@@ -1122,31 +1141,63 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/project/plugins.sbt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="1" column="2" lean-forward="false" selection-start-line="1" selection-start-column="2" selection-end-line="1" selection-end-column="2" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build.sbt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="9" column="0" lean-forward="true" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/build.properties">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/Main.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="9" column="16" lean-forward="false" selection-start-line="9" selection-start-column="16" selection-end-line="9" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="320">
-          <caret line="266" column="3" lean-forward="true" selection-start-line="266" selection-start-column="3" selection-end-line="266" selection-end-column="3" />
+        <state relative-caret-position="218">
+          <caret line="29" column="6" lean-forward="false" selection-start-line="29" selection-start-column="6" selection-end-line="29" selection-end-column="6" />
           <folding>
             <element signature="e#16#44#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/parser/parser.scala">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CTokens.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="279">
-          <caret line="685" column="0" lean-forward="true" selection-start-line="685" selection-start-column="0" selection-end-line="685" selection-end-column="0" />
-          <folding>
-            <element signature="e#9392#9406#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/build.sbt">
+    <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CParser.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="4" column="23" lean-forward="false" selection-start-line="4" selection-start-column="23" selection-end-line="4" selection-end-column="23" />
-          <folding />
+        <state relative-caret-position="136">
+          <caret line="8" column="8" lean-forward="false" selection-start-line="8" selection-start-column="8" selection-end-line="8" selection-end-column="8" />
+          <folding>
+            <element signature="e#253#267#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

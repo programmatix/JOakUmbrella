@@ -27,7 +27,7 @@ class IndividualParserSpec extends FunSuite {
     }
   }
 
-  def createParser() = new SimpleCFastParse
+  def createParser() = new CParser
 
   test("hexadecimalDigit") {
     val p = createParser()
