@@ -155,6 +155,7 @@ class CGenerator {
       case v: ExpressionAssignment => out ++= generate(v.v1) ++ Seq("=") ++ generate(v.v2)
       case v: IntConstant => out += v.v.toString
       case v: FloatConstant => out += v.v.toString
+      case v: StringLiteral => out ++= Seq("\"", v.v, "\"")
       case v: Identifier => out += v.v
       case v: PostfixExpressionIndex =>
         out ++= generate(v.v1)

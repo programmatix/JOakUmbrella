@@ -36,8 +36,9 @@ case class PostfixExpressionPlusPlus(v1: Expression) extends Expression
 case class PostfixExpressionMinusMinus(v1: Expression) extends Expression
 case class PostfixExpressionArrow(v1: Expression, v2: Expression) extends Expression
 case class PostfixExpressionArgs(v1: Expression, v2: Option[ArgumentExpressionList]) extends Expression
+case class PostfixExpressionSimple(v1: Expression) extends Expression
 case class PostfixLeft(v: Expression)
-sealed trait PostfixRight extends Expression
+sealed trait PostfixRight
 case class PostfixRightIndex(v1: Expression) extends PostfixRight
 case class PostfixRightDot(v1: Expression) extends PostfixRight
 case class PostfixRightPlusPlus() extends PostfixRight

@@ -171,7 +171,7 @@ class CParser {
       case x: PostfixRightMinusMinus => PostfixExpressionMinusMinus(left)
       case x: PostfixRightArrow => PostfixExpressionArrow(left, x.v1)
       case x: PostfixRightArgs => PostfixExpressionArgs(left, x.v2)
-      case x: Empty => x
+      case x: Empty => PostfixExpressionSimple(left)
     }
     exp
   }
