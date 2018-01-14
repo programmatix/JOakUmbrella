@@ -12,6 +12,7 @@ class IndividualParserSpec extends FunSuite {
     p match {
       case Parsed.Success(x, y) => assert (x == expected)
       case Parsed.Failure(x, y, z) =>
+        println(p)
         println(x)
         println(y)
         println(z)
@@ -203,8 +204,7 @@ class IndividualParserSpec extends FunSuite {
     good((parser.postfixExpression ~ End).parse("hello++--++"), PostfixExpressionPlusPlus(PostfixExpressionMinusMinus(PostfixExpressionPlusPlus(Identifier("hello")))))
   }
 
-  // Broken until expression fully left-recursive
-  ignore("postfixExpression []") {
+  test("postfixExpression []") {
     import fastparse.all._
     val parser = createParser()
     good((parser.postfixExpression ~ End).parse("hello[1]"), PostfixExpressionIndex(Identifier("hello"), IntConstant(1)))
@@ -261,9 +261,9 @@ class IndividualParserSpec extends FunSuite {
   test("top level statement") {
     val parser = createParser()
     good((parser.statement ~ End).parse("hello=world;"), ExpressionStatement(ExpressionAssignment(Identifier("hello"), Identifier("world"))))
-//    good((parser.statement ~ End).parse("hello*=world;"), ExpressionStatement(ExpressionAssignment(Identifier("hello"), ExpressionMultiply(Identifier("hello"), Identifier("world")))))
-//    good((parser.statement ~ End).parse("hello*world*(3++);"), ExpressionStatement(ExpressionMultiply(Identifier("hello"), ExpressionMultiply(Identifier("world"),PostfixExpressionPlusPlus(IntConstant(3))))))
-//    good((parser.statement ~ End).parse("++hello++;"), ExpressionStatement(UnaryExpressionPlusPlus(PostfixExpressionPlusPlus(Identifier("hello")))))
+    good((parser.statement ~ End).parse("hello*=world;"), ExpressionStatement(ExpressionAssignment(Identifier("hello"), ExpressionMultiply(Identifier("hello"), Identifier("world")))))
+    good((parser.statement ~ End).parse("hello*world*(3++);"), ExpressionStatement(ExpressionMultiply(Identifier("hello"), ExpressionMultiply(Identifier("world"),PostfixExpressionPlusPlus(IntConstant(3))))))
+    good((parser.statement ~ End).parse("++hello++;"), ExpressionStatement(UnaryExpressionPlusPlus(PostfixExpressionPlusPlus(Identifier("hello")))))
   }
 
   test("expressionStatement") {

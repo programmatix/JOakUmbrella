@@ -603,36 +603,29 @@ class SimpleCFastParse {
     P(P(".") ~ identifier)
   private[parser] lazy val static_assertDeclaration = P("_Static_assert") ~ P("(") ~ constantExpression ~ P(",") ~ stringLiteral ~ P(")") ~ P(";")
 
-//  private[parser] lazy val statement2: Parser[Statement] = labeledStatement |
-//    //    compoundStatement |
-//    expressionStatement |
-//    selectionStatement |
-//    iterationStatement |
-//    jumpStatement
-
-  private[parser] lazy val statement: Parser[Statement] = labeledStatement |
-//    compoundStatement |
-    expressionStatement |
-    selectionStatement |
-    iterationStatement |
-    jumpStatement
-  private[parser] lazy val labeledStatement: Parser[LabelledStatement] = (identifier ~ P(":") ~ statement).map(v => LabelledLabel(v._1, v._2))  |
+  private[parser] val statement: Parser[Statement] = P(labeledStatement) |
+    P(compoundStatement) |
+    P(expressionStatement) |
+    P(selectionStatement) |
+    P(iterationStatement) |
+    P(jumpStatement)
+  private[parser] val labeledStatement: Parser[LabelledStatement] = (identifier ~ P(":") ~ statement).map(v => LabelledLabel(v._1, v._2))
+  // TODO
     P(P("case") ~ constantExpression ~ P(":") ~ statement).map(v => LabelledCase(v._1, v._2)) |
     P(P("default") ~ P(":") ~ statement).map(v => LabelledDefault(v))
-  private[parser] lazy val compoundStatement: Parser[CompountStatement] = P("{") ~ blockItemList.?.map(v => CompountStatement(v)) ~ P("}")
+  private[parser] val compoundStatement: Parser[CompountStatement] = P("{") ~ blockItemList.?.map(v => CompountStatement(v)) ~ P("}")
   private[parser] lazy val blockItemList: Parser[BlockItemList] = blockItem.rep(1).map(v => BlockItemList(v))
   private[parser] lazy val blockItem: Parser[BlockItem] = (declaration | statement).!.map(v => BlockItem(v))
-  private[parser] lazy val expressionStatement: Parser[Statement] = (expression.? ~ P(";")).map(v => if (v.isDefined) ExpressionStatement(v.get) else ExpressionEmptyStatement())
-  private[parser] lazy val selectionStatement: Parser[SelectionStatement] = P(P("if") ~ P("(") ~ expression ~ P(")") ~ statement).map(v => SelectionIf(v._1, v._2))
-  // TODO
-//    P(P("if") ~ P("(") ~ expression ~ P(")") ~ statement ~ P("else") ~ statement).map(v => SelectionIfElse(v._1, v._2, v._3)) |
-//    P(P("switch") ~ P("(") ~ expression ~ P(")") ~ statement).map(v => SelectionSwitch(v._1, v._2))
-  private[parser] lazy val iterationStatement: Parser[IterationStatement] = P(P("while") ~ P("(") ~ expression ~ P(")") ~ statement).map(v => IterationWhile(v._1, v._2)) |
+  private[parser] val expressionStatement: Parser[Statement] = (expression.? ~ P(";")).map(v => if (v.isDefined) ExpressionStatement(v.get) else ExpressionEmptyStatement())
+  private[parser] val selectionStatement: Parser[SelectionStatement] = P(P("if") ~ P("(") ~ expression ~ P(")") ~ statement).map(v => SelectionIf(v._1, v._2)) |
+    P(P("if") ~ P("(") ~ expression ~ P(")") ~ statement ~ P("else") ~ statement).map(v => SelectionIfElse(v._1, v._2, v._3)) |
+    P(P("switch") ~ P("(") ~ expression ~ P(")") ~ statement).map(v => SelectionSwitch(v._1, v._2))
+  private[parser] val iterationStatement: Parser[IterationStatement] = P(P("while") ~ P("(") ~ expression ~ P(")") ~ statement).map(v => IterationWhile(v._1, v._2)) |
     P(P("do") ~ statement ~ P("while") ~ P("(") ~ expression ~ P(")") ~ P(";")).map(v => IterationDoWhile(v._2, v._1)) |
     P(P("for") ~ P("(") ~ expression.? ~ P(";") ~ expression.? ~ P(";") ~ expression.? ~ P(")") ~ statement).map(v => IterationFor1(v._1, v._2, v._3, v._4))
   // TODO when declaration read
 //    P(P("for") ~ P("(") ~ declaration ~ expression.? ~ P(";") ~ expression.? ~ P(")") ~ statement).map(v => IterationFor2(v._1, v._2, v._3))
-  private[parser] lazy val jumpStatement: Parser[JumpStatement] = P(P("goto") ~ identifier ~ P(";")).map(v => Goto(v)) |
+  private[parser] val jumpStatement: Parser[JumpStatement] = P(P("goto") ~ identifier ~ P(";")).map(v => Goto(v)) |
     P(P("continue") ~ P(";")).map(v => Continue()) |
     P(P("break") ~ P(";")).map(v => Break()) |
     P(P("return") ~ expression.? ~ P(";")).map(v => Break())
