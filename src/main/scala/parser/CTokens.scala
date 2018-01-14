@@ -113,12 +113,19 @@ case class LabelledLabel(v1: Identifier, v2: Statement) extends LabelledStatemen
 case class LabelledCase(v1: Expression, v2: Statement) extends LabelledStatement
 case class LabelledDefault(v2: Statement) extends LabelledStatement
 
-// Not completely sure what these are yet
-case class Declaration(v: String) extends ExternalDeclaration with BlockItem
+sealed trait Declaration extends ExternalDeclaration with BlockItem
+case class SimpleDeclaration(spec: DeclarationSpecifiers, init: Option[Seq[InitDeclarator]]) extends Declaration
+case class StaticAssertDeclaration(v1: Expression, v2: StringLiteral) extends Declaration
 case class StatementDeclaration(v: Declaration) extends Statement
 case class CompoundStatement(v: Seq[BlockItem]) extends Statement
 //case class BlockItemList(v: Seq[BlockItem])
 sealed trait BlockItem
+sealed trait InitDeclarator
+case class DeclaratorEmpty(declarator: Declarator) extends InitDeclarator
+case class DeclaratorWithInit(declarator: Declarator, init: Initializer) extends InitDeclarator
+sealed trait Initializer
+case class InitializerSimple(exp: Expression) extends Initializer
+case class InitializerList(exp: Expression) extends Initializer
 
 sealed trait DeclarationSpecifier {
   val v: String
@@ -145,11 +152,11 @@ case class ParameterDeclarationDeclarator(v: DeclarationSpecifiers, v2: Declarat
 sealed trait DirectDeclarator
 sealed trait DDBuild
 case class DDBuild2(me: DDBuild, next: DDBuild2)
-case class DDBracketed(declarator: Declarator) extends DirectDeclarator
-case class DDParameterTypeList(v: ParameterTypeList) extends DDBuild
-case class DDIdentifierList(v: Option[Seq[Identifier]]) extends DDBuild
-case class DDTypeQualifierList(v: Option[Seq[TypeQualifier]]) extends DDBuild
-case class DDTypeQualifierListAssignment(v: Option[Seq[TypeQualifier]], v2: Option[Expression]) extends DDBuild
+case class DDBuildParameterTypeList(v: ParameterTypeList) extends DDBuild
+case class DDBuildIdentifierList(v: Option[Seq[Identifier]]) extends DDBuild
+case class DDBuildTypeQualifierList(v: Option[Seq[TypeQualifier]]) extends DDBuild
+case class DDBuildTypeQualifierListAssignment(v: Option[Seq[TypeQualifier]], v2: Option[Expression]) extends DDBuild
 
 case class DirectDeclaratorOnly(v: Identifier) extends DirectDeclarator
+case class DDBracketed(declarator: Declarator) extends DirectDeclarator
 case class FunctionDeclaration(name: Identifier, params: ParameterTypeList) extends DirectDeclarator

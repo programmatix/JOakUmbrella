@@ -20,6 +20,7 @@ class CGeneratorSpec extends FunSuite {
   }
 
   def createParser() = new CParser
+  def createGenerator() = new CGenerator
 
   test("hello++") {
     val g = new CGenerator()
@@ -34,4 +35,66 @@ class CGeneratorSpec extends FunSuite {
     val out = g.generate(in)
     assert(out == Seq("hello", "[", "world", "]", "++"))
   }
+
+//  def testStringsIgnoreWhitespace(in1: String, in2: String): Boolean = {
+//    var idx1 = 0
+//    var idx2 = 0
+//    var done = false
+//    while (!done) {
+//      if (idx1 >= in1.length) done = true
+//      else if (idx2 >= in2.length) done = true
+//      else {
+//
+//
+//        idx1 += 1
+//        idx2 += 1
+//      }
+//    }
+//  }
+
+  def confirm(in: String) = {
+    def clean(s: String) = s.replaceAll(" ", "").replaceAll("\r\n", "").replaceAll("\n", "")
+
+    val p = createParser()
+    val g = createGenerator()
+
+    val parsed = p.parse(in.replaceAll("\r\n", "").replaceAll("\n", ""))
+
+    parsed match {
+      case Parsed.Success(x, y) =>
+        val after = g.generate(x)
+        val mashed = after.mkString(" ", " ", " ")
+        assert (clean(in) == clean(mashed))
+//        if (in.replaceAll(" ", "") != mashed.replaceAll(" ", "")) {
+//          assert(in == mashed)
+//        }
+      case Parsed.Failure(x, y, z) =>
+        assert (false)
+    }
+
+  }
+
+    test("function simple") {
+      val raw = """int main(int argc) { return 0; }"""
+      confirm(raw)
+    }
+
+  test("function newlines") {
+    val raw =
+      """int main(int argc) {
+        |return 0;
+        |}""".stripMargin
+    confirm(raw)
+  }
+
+  test("1") {
+    confirm("""int main(int argc) {
+                |    int hello;
+                |    hello = 1 + 2;
+                |    return 0;
+                |}
+                |""".stripMargin)
+
+  }
+
 }
