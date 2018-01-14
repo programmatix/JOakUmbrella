@@ -100,7 +100,17 @@ case class PostfixRightMinusMinus() extends PostfixRight
 case class PostfixRightArrow(v1: Expression) extends PostfixRight
 case class PostfixRightArgs(v2: Option[ArgumentExpressionList]) extends PostfixRight
 case class PostfixRight2(op: PostfixRight, next: PostfixRight2)
-case class Empty() extends PostfixRight
+case class Empty() extends PostfixRight with MultiplicativeBuild
+
+sealed trait MultiplicativeBuild
+//case class MultiplicativeBuildMultiply() extends MultiplicativeBuild
+case class BinaryOpBuildWrap(op: String, next: Expression)
+case class BinaryOpBuildWrap2(op: String, next: BinaryOpBuildWrap2)
+case class TernaryOpBuildWrap(op1: String, op2: String, v1: Expression, v2: Expression)
+
+sealed trait UnaryExpression extends Expression
+case class UnaryPlusPlus(v: Expression) extends UnaryExpression
+
 
 case class ArgumentExpressionList(v: Seq[Expression]) extends Expression
 case class UnaryExpressionPlusPlus(v: Expression) extends Expression
@@ -155,6 +165,8 @@ case class ExpressionComma(v1: Expression, v2: Expression) extends Expression //
 //
 //}
 
+// https://port70.net/~nsz/c/c11/n1570.html#A
+// Removed left recursion
 class SimpleCFastParse {
   import fastparse.all._
 
@@ -280,140 +292,185 @@ class SimpleCFastParse {
   //  private[parser] lazy val genericAssociation = P(typeName ~ P(":") ~ assignmentExpression) |
   //    P(P("default") ~ P(":") ~ assignmentExpression)
 
-  private[parser] lazy val postfixExpression: Parser[Expression] = P(P(primaryExpression) |
-    P(postfixExpression ~ P("[") ~ expression ~ P("]")).map(v => PostfixExpressionIndex(v._1, v._2)) |
-    P(postfixExpression ~ P("(") ~ argumentExpressionList.? ~ P(")")).map(v => PostfixExpressionArgs(v._1, v._2)) |
-    P(postfixExpression ~ P(".") ~ identifier).map(v => PostfixExpressionDot(v._1, v._2)) |
-    P(postfixExpression ~ P("->") ~ identifier).map(v => PostfixExpressionArrow(v._1, v._2)) |
-    P(postfixExpression ~ P("++")).map(v => PostfixExpressionPlusPlus(v)) |
-    P(postfixExpression ~ P("--")).map(v => PostfixExpressionMinusMinus(v))).log()
+  private[parser] lazy val postfixExpression: Parser[Expression] =
+    P(primaryExpression.log() ~ postfixExpressionR.log()).map(v =>
+      postfixRecurse(v))
 
-  //  private[parser] lazy val postfixExpressionSimple: Parser[Seq[Expression]] = P(primaryExpression.map(PostfixLeft) ~ postfixExpressionR).map(v => {
-  //    v._2._1 match {
-  //      case x: PostfixRightIndex => PostfixExpressionIndex(v._1.v, x.v1) +: v._2._2
-  //      case x: PostfixRightDot => PostfixExpressionDot(v._1.v, x.v1) +: v._2._2
-  //      case x: PostfixRightPlusPlus => PostfixExpressionPlusPlus(v._1.v) +: v._2._2
-  //      case x: PostfixRightMinusMinus => PostfixExpressionMinusMinus(v._1.v) +: v._2._2
-  //      case x: PostfixRightArrow => PostfixExpressionArrow(v._1.v, x.v1) +: v._2._2
-  //      case x: PostfixRightArgs => PostfixExpressionArgs(v._1.v, x.v2) +: v._2._2
-  //    }
-  //  })
+  private def postfixRecurse(v: (Expression, PostfixRight2)): Expression = {
+    val exp = postfixMerge(v._1, v._2.op)
+    if (v._2.next == null) {
+      v._1
+    }
+    else {
+      v._2.next.op match {
+        case _: Empty => exp
+        case _ => postfixRecurse(exp, v._2.next)
+      }
+    }
+  }
 
-  private[parser] lazy val postfixExpressionSimple: Parser[Expression] = P(primaryExpression ~ postfixExpressionR).map(v => {
-    fold(v._1, v._2)
-    //    v._2.op match {
-    //      case x: PostfixRightIndex => PostfixExpressionIndex(v._1.v, x.v1) + v._2.next
-    //      case x: PostfixRightDot => PostfixExpressionDot(v._1.v, x.v1) +: v._2._2
-    //      case x: PostfixRightPlusPlus => PostfixExpressionPlusPlus(v._1.v) +: v._2._2
-    //      case x: PostfixRightMinusMinus => PostfixExpressionMinusMinus(v._1.v) +: v._2._2
-    //      case x: PostfixRightArrow => PostfixExpressionArrow(v._1.v, x.v1) +: v._2._2
-    //      case x: PostfixRightArgs => PostfixExpressionArgs(v._1.v, x.v2) +: v._2._2
-    //    }
-  })
-
-  private[parser] def summat(left: Expression, v: PostfixRight): Expression = {
+  private[parser] def postfixMerge(left: Expression, v: PostfixRight): Expression = {
     val exp: Expression = v match {
-      //      case x: PostfixRightIndex => PostfixExpressionIndex(v.op, v.next.op)
-      //      case x: PostfixRightDot => PostfixExpressionDot(v.op, v.next.op)
+      case x: PostfixRightIndex => PostfixExpressionIndex(left, x.v1)
+      case x: PostfixRightDot => PostfixExpressionDot(left, x.v1)
       case x: PostfixRightPlusPlus => PostfixExpressionPlusPlus(left)
       case x: PostfixRightMinusMinus => PostfixExpressionMinusMinus(left)
-      //      case x: PostfixRightArrow => PostfixExpressionArrow(v.op, v.next.op)
-      //      case x: PostfixRightArgs => PostfixExpressionArgs(v.op, v.next.op)
+      case x: PostfixRightArrow => PostfixExpressionArrow(left, x.v1)
+      case x: PostfixRightArgs => PostfixExpressionArgs(left, x.v2)
       case x: Empty => x
     }
     exp
   }
 
-  private[parser] def fold(left: Expression, v: PostfixRight2): Expression = {
-    val exp = summat(left, v.op)
-    v.next.op match {
-      case _: Empty =>
-        exp
-      case _ =>
-        val expNext = fold(exp, v.next)
-        expNext
-    }
-  }
-
-  //  private[parser] lazy val postfixExpressionSimple = P("hello").! ~ P("++").!
-
-  //  private[parser] lazy val postfixExpressionR: Parser[Any] = P(P(P("[") ~ expression ~ P("]") ~ postfixExpressionR) |
-  //    P(P("(") ~ argumentExpressionList.? ~ P(")") ~ postfixExpressionR) |
-  //    P(P(".") ~ identifier ~ postfixExpressionR) |
-  //    P(P("->") ~ identifier ~ postfixExpressionR) |
-  //    P(P("++") ~ postfixExpressionR) |
-  //    P(P("--") ~ postfixExpressionR) |
-  //    End)
   private[parser] lazy val postfixExpressionR: Parser[PostfixRight2] =
-  //    P(P(P("[") ~ expression.map(PostfixRightIndex(_)) ~ P("]") ~ postfixExpressionR) |
-  //    P(P("(") ~ argumentExpressionList.?.map(PostfixRightArgs(_)) ~ P(")") ~ postfixExpressionR) |
-  //    P(P(".") ~ identifier.map(PostfixRightDot(_)) ~ postfixExpressionR) |
-  //    P(P("->") ~ identifier.map(PostfixRightArrow(_)) ~ postfixExpressionR) |
-  P(P("++") ~ postfixExpressionR).map(v => PostfixRight2(PostfixRightPlusPlus(), v)) |
-    P(P("--") ~ postfixExpressionR).map(v => PostfixRight2(PostfixRightMinusMinus(), v)) |
-    End.map(v => PostfixRight2(Empty(), null))
-
-  //      private[parser] lazy val postfixExpressionR: Parser[PostfixRight2] =
-  //    P(P(P("[") ~ expression.map(PostfixRightIndex(_)) ~ P("]") ~ postfixExpressionR) |
-  //    P(P("(") ~ argumentExpressionList.?.map(PostfixRightArgs(_)) ~ P(")") ~ postfixExpressionR) |
-  //    P(P(".") ~ identifier.map(PostfixRightDot(_)) ~ postfixExpressionR) |
-  //    P(P("->") ~ identifier.map(PostfixRightArrow(_)) ~ postfixExpressionR) |
-  //    P(P("++").!.map(v => PostfixRightPlusPlus()) ~ postfixExpressionR).map(v => PostfixRight2("++", None, v)) |
-  //    P(P("--").!.map(v => PostfixRightMinusMinus()) ~ postfixExpressionR) |
-  //    End.map(v => (Empty(), Seq()))
-
-
+    P(P("[") ~ expression ~ P("]") ~ postfixExpressionR).map(v => PostfixRight2(PostfixRightIndex(v._1), v._2)) |
+//    P(P("[") ~ multiplicativeExpression ~ P("]") ~ postfixExpressionR).map(v => PostfixRight2(PostfixRightIndex(v._1), v._2)) |
+      P(P("(") ~ argumentExpressionList.? ~ P(")") ~ postfixExpressionR).map(v => PostfixRight2(PostfixRightArgs(v._1), v._2)) |
+      P(P(".") ~ identifier ~ postfixExpressionR).map(v => PostfixRight2(PostfixRightDot(v._1), v._2)) |
+      P(P("->") ~ identifier ~ postfixExpressionR).map(v => PostfixRight2(PostfixRightArrow(v._1), v._2)) |
+      P(P("++") ~ postfixExpressionR).map(v => PostfixRight2(PostfixRightPlusPlus(), v)) |
+      P(P("--") ~ postfixExpressionR).map(v => PostfixRight2(PostfixRightMinusMinus(), v)) |
+      P("").log().map(v => PostfixRight2(Empty(), null))
 
   // Can't figure this one out
   // P(P("(") ~ typeName ~ P(")") ~ P("{") ~ initializerList ~ P(",").? ~ P("}"))
   private[parser] lazy val argumentExpressionList: Parser[ArgumentExpressionList] =
-  P(assignmentExpression ~ P(P(",") ~ assignmentExpression).rep(0)).map(v => ArgumentExpressionList(v._1 +: v._2))
+      P(assignmentExpression ~ P(P(",") ~ assignmentExpression).rep(0)).map(v =>
+//  P(unaryExpression ~ P(P(",") ~ unaryExpression).rep(0)).map(v =>
+    ArgumentExpressionList(v._1 +: v._2))
 
-  private[parser] lazy val unaryExpression: Parser[Expression] = P(P(postfixExpression) |
+  //  private[parser] lazy val unaryExpression: Parser[Expression] = P(postfixExpression ~ unaryExpressionBuild).map(v => unaryRecurse(v))
+
+
+  private[parser] lazy val unaryExpression: Parser[Expression] =
     P(P("++") ~ unaryExpression).map(v => UnaryExpressionPlusPlus(v)) |
-    P(P("--") ~ unaryExpression).map(v => UnaryExpressionMinusMinus(v)) |
-    P(unaryOperator.! ~ castExpression).map(v => UnaryExpressionCast(v._1.charAt(0), v._2)) |
-    P(P("sizeof") ~ unaryExpression).map(v => UnaryExpressionSizeOf(v)) |
-    P(P("sizeof") ~ P("(") ~ typeName ~ P(")")).map(v => UnaryExpressionSizeOfType(v)) |
-    P(P("_Alignof") ~ P("(") ~ typeName ~ P(")")).map(v => UnaryExpressionAlignOf(v))).log()
+      P(P("--") ~ unaryExpression).map(v => UnaryExpressionMinusMinus(v)) |
+      P(unaryOperator.! ~ castExpression).map(v => UnaryExpressionCast(v._1.charAt(0), v._2)) |
+      P(P("sizeof") ~ unaryExpression).map(v => UnaryExpressionSizeOf(v)) |
+      P(P("sizeof") ~ P("(") ~ typeName ~ P(")")).map(v => UnaryExpressionSizeOfType(v)) |
+      P(P("_Alignof") ~ P("(") ~ typeName ~ P(")")).map(v => UnaryExpressionAlignOf(v)) |
+      postfixExpression.log()
+
   private[parser] lazy val unaryOperator = CharIn("&*+-~!")
-  private[parser] lazy val castExpression: Parser[Expression] = P(unaryExpression |
-    P(P("(") ~ typeName ~ P(")") ~ castExpression).map(v => CastExpression(v._1, v._2))).log()
-  private[parser] lazy val multiplicativeExpression: Parser[Expression] = P(castExpression |
-    P(multiplicativeExpression ~ P("*") ~ castExpression).map(v => ExpressionMultiply(v._1, v._2)) |
-    P(multiplicativeExpression ~ P("/") ~ castExpression).map(v => ExpressionDivision(v._1, v._2)) |
-    P(multiplicativeExpression ~ P("%") ~ castExpression).map(v => ExpressionMod(v._1, v._2))).log()
-  private[parser] lazy val additiveExpression: Parser[Expression] = multiplicativeExpression |
-    P(additiveExpression ~ P("+") ~ multiplicativeExpression).map(v => ExpressionAdd(v._1, v._2)) |
-    P(additiveExpression ~ P("-") ~ multiplicativeExpression).map(v => ExpressionMinus(v._1, v._2))
-  private[parser] lazy val shiftExpression: Parser[Expression] = additiveExpression |
-    P(shiftExpression ~ P("<<") ~ additiveExpression).map(v => ExpressionLeftShift(v._1, v._2)) |
-    P(shiftExpression ~ P(">>") ~ additiveExpression).map(v => ExpressionRightShift(v._1, v._2))
-  private[parser] lazy val relationalExpression: Parser[Expression] = shiftExpression |
-    P(relationalExpression ~ P("<") ~ shiftExpression).map(v => ExpressionLessThan(v._1, v._2)) |
-    P(relationalExpression ~ P(">") ~ shiftExpression).map(v => ExpressionGreaterThan(v._1, v._2)) |
-    P(relationalExpression ~ P("<=") ~ shiftExpression).map(v => ExpressionLessThanOrEqual(v._1, v._2)) |
-    P(relationalExpression ~ P(">=") ~ shiftExpression).map(v => ExpressionGreaterThanOrEqual(v._1, v._2))
-  private[parser] lazy val equalityExpression: Parser[Expression] = relationalExpression |
-    P(equalityExpression ~ P("==") ~ relationalExpression).map(v => ExpressionEquals(v._1, v._2)) |
-    P(equalityExpression ~ P("!=") ~ relationalExpression).map(v => ExpressionNotEquals(v._1, v._2))
-  private[parser] lazy val ANDExpression: Parser[Expression] = equalityExpression |
-    P(ANDExpression ~ P("&") ~ equalityExpression).map(v => ExpressionAnd(v._1, v._2))
-  private[parser] lazy val exclusiveORExpression: Parser[Expression] = ANDExpression |
-    P(exclusiveORExpression ~ P("^") ~ ANDExpression).map(v => ExpressionXOr(v._1, v._2))
-  private[parser] lazy val inclusiveORExpression: Parser[Expression] = exclusiveORExpression |
-    P(inclusiveORExpression ~ P("|") ~ exclusiveORExpression).map(v => ExpressionInclusiveOr(v._1, v._2))
-  private[parser] lazy val logicalANDExpression: Parser[Expression] = inclusiveORExpression |
-    P(logicalANDExpression ~ P("&&") ~ inclusiveORExpression).map(v => ExpressionLogicalAnd(v._1, v._2))
-  private[parser] lazy val logicalORExpression: Parser[Expression] = logicalANDExpression |
-    P(logicalORExpression ~ P("||") ~ logicalANDExpression).map(v => ExpressionLogicalOr(v._1, v._2))
-  private[parser] lazy val conditionalExpression: Parser[Expression] = logicalORExpression |
-    P(logicalORExpression ~ P("?") ~ expression ~ P(":") ~ conditionalExpression).map(v => ExpressionConditional(v._1, v._2, v._3))
-  private[parser] lazy val assignmentExpression: Parser[Expression] = conditionalExpression |
-    P(unaryExpression ~ assignmentOperator ~ assignmentExpression).map(v => ExpressionRightShift(v._1, v._2))
+
+  private[parser] lazy val castExpression: Parser[Expression] =
+    P(P("(") ~ typeName ~ P(")") ~ castExpression).map(v => CastExpression(v._1, v._2)) |
+    unaryExpression.log()
+
+  private[parser] lazy val multiplicativeExpression: Parser[Expression] =
+    P(castExpression ~ multiplicativeExpressionHelper).map(v => binary(v._1,v._2))
+  private[parser] lazy val multiplicativeExpressionHelper: Parser[BinaryOpBuildWrap] =
+    P(P("*").! ~ multiplicativeExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P(P("/").! ~ multiplicativeExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P(P("%").! ~ multiplicativeExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+  P("").map(v => BinaryOpBuildWrap(" ", null))
+
+  // These methods help us glue full expressions back together, after they had to be split apart during left recursion removal
+  private def binary(left: Expression, right: BinaryOpBuildWrap): Expression = {
+    right.op match {
+      case "*" => ExpressionMultiply(left, right.next)
+      case "/" => ExpressionDivision(left, right.next)
+      case "%" => ExpressionMod(left, right.next)
+      case _ => left
+    }
+  }
+
+  private def ternary(left: Expression, right: TernaryOpBuildWrap): Expression = {
+    right.op1 match {
+      case "?" => ExpressionConditional(left, right.v1, right.v2)
+      case _ => left
+    }
+  }
+
+  private def binary2(left: Expression, right: BinaryOpBuildWrap2): Expression = {
+    val exp = binary2(left, right.next)
+    right.op match {
+      case "*" => ExpressionMultiply(left, exp)
+      case "/" => ExpressionDivision(left, exp)
+      case "%" => ExpressionMod(left, exp)
+      case _ => left
+    }
+  }
+
+  private[parser] lazy val additiveExpression: Parser[Expression] =
+    (multiplicativeExpression ~ additiveExpressionHelper).map(v => binary(v._1, v._2))
+  private[parser] lazy val additiveExpressionHelper: Parser[BinaryOpBuildWrap] =
+    P(P("+").! ~ additiveExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P(P("-").! ~ additiveExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+      P("").map(v => BinaryOpBuildWrap(" ", null))
+
+  private[parser] lazy val shiftExpression: Parser[Expression] =
+    (additiveExpression ~ shiftExpressionHelper).map(v => binary(v._1, v._2))
+  private[parser] lazy val shiftExpressionHelper: Parser[BinaryOpBuildWrap] =
+    P(P("<<").! ~ shiftExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P(P(">>").! ~ shiftExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+  P("").map(v => BinaryOpBuildWrap(" ", null))
+
+  private[parser] lazy val relationalExpression: Parser[Expression] =
+    (shiftExpression ~ relationalExpressionHelper).map(v => binary(v._1, v._2))
+  private[parser] lazy val relationalExpressionHelper: Parser[BinaryOpBuildWrap] =
+    P(P("<").! ~ relationalExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P(P(">").! ~ relationalExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P(P("<=").! ~ relationalExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P(P(">=").! ~ relationalExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P("").map(v => BinaryOpBuildWrap(" ", null))
+
+  private[parser] lazy val equalityExpression: Parser[Expression] =
+    (relationalExpression ~ equalityExpressionHelper).map(v => binary(v._1, v._2))
+  private[parser] lazy val equalityExpressionHelper: Parser[BinaryOpBuildWrap] =
+    P(P("==").! ~ equalityExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P(P("!=").! ~ equalityExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P("").map(v => BinaryOpBuildWrap(" ", null))
+
+  private[parser] lazy val ANDExpression: Parser[Expression] =
+    (equalityExpression ~ ANDExpressionHelper).map(v => binary(v._1, v._2))
+  private[parser] lazy val ANDExpressionHelper: Parser[BinaryOpBuildWrap] =
+    P(P("&").! ~ ANDExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P("").map(v => BinaryOpBuildWrap(" ", null))
+
+  private[parser] lazy val exclusiveORExpression: Parser[Expression] =
+    (ANDExpression ~ exclusiveORExpressionHelper).map(v => binary(v._1, v._2))
+  private[parser] lazy val exclusiveORExpressionHelper: Parser[BinaryOpBuildWrap] =
+    P(P("^").! ~ exclusiveORExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P("").map(v => BinaryOpBuildWrap(" ", null))
+
+  private[parser] lazy val inclusiveORExpression: Parser[Expression] =
+    (exclusiveORExpression ~ inclusiveORExpressionHelper).map(v => binary(v._1, v._2))
+  private[parser] lazy val inclusiveORExpressionHelper: Parser[BinaryOpBuildWrap] =
+    P(P("|").! ~ inclusiveORExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P("").map(v => BinaryOpBuildWrap(" ", null))
+
+  private[parser] lazy val logicalANDExpression: Parser[Expression] =
+    (inclusiveORExpression ~ logicalANDExpressionHelper).map(v => binary(v._1, v._2))
+  private[parser] lazy val logicalANDExpressionHelper: Parser[BinaryOpBuildWrap] =
+    P(P("&&").! ~ logicalANDExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P("").map(v => BinaryOpBuildWrap(" ", null))
+
+  private[parser] lazy val logicalORExpression: Parser[Expression] =
+    (logicalANDExpression ~ logicalORExpressionHelper).map(v => binary(v._1, v._2))
+  private[parser] lazy val logicalORExpressionHelper: Parser[BinaryOpBuildWrap] =
+    P(P("||").! ~ logicalORExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P("").map(v => BinaryOpBuildWrap(" ", null))
+
+  private[parser] lazy val conditionalExpression: Parser[Expression] =
+    (logicalORExpression ~ conditionalExpressionHelper).map(v => ternary(v._1, v._2))
+  private[parser] lazy val conditionalExpressionHelper: Parser[TernaryOpBuildWrap] =
+    P(P("?") ~ expression ~ P(":") ~ conditionalExpression).map(v => TernaryOpBuildWrap("?", ":", v._1, v._2)) |
+    P("").map(v => TernaryOpBuildWrap(" ", " ", null, null))
+
+  private[parser] lazy val assignmentExpression: Parser[Expression] =
+    (conditionalExpression ~ assignmentExpressionHelper).map(v => binary(v._1, v._2))
+  private[parser] lazy val assignmentExpressionHelper: Parser[BinaryOpBuildWrap] =
+    P(assignmentOperator.! ~ assignmentExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P("").map(v => BinaryOpBuildWrap(" ", null))
   private[parser] lazy val assignmentOperator = P("=") | P("*=") | P("/=") | P("%=") | P("+=") | P("-=") | P("<<=") | P(">>=:") | P("&=") | P("^=") | P("|=")
-  private[parser] lazy val expression: Parser[Expression] = assignmentExpression |
-    P(expression ~ P(",") ~ assignmentExpression).map(v => ExpressionComma(v._1, v._2))
+
+  private[parser] lazy val expression: Parser[Expression] =
+    (assignmentExpression ~ expressionHelper).map(v => binary(v._1, v._2))
+  private[parser] lazy val expressionHelper: Parser[BinaryOpBuildWrap] =
+    P(P(",").! ~ assignmentExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
+    P("").map(v => BinaryOpBuildWrap(" ", null))
+
   private[parser] lazy val constantExpression: Parser[Expression] = conditionalExpression
 
   private[parser] lazy val declaration = declarationSpecifiers ~ initDeclaratorList.? ~ P(";") |
@@ -473,7 +530,9 @@ class SimpleCFastParse {
     P(declarationSpecifiers ~ abstractDeclarator.?)
   private[parser] lazy val identifierList: Parser[Any] = identifier |
     P(identifierList ~ P(",") ~ identifier)
-  private[parser] lazy val typeName: Parser[TypeName] = P(specifierQualifierList ~ abstractDeclarator.?).!.map(TypeName)
+  // TODO This needs to go back
+//  private[parser] lazy val typeName: Parser[TypeName] = P(specifierQualifierList ~ abstractDeclarator.?).!.map(TypeName)
+  private[parser] lazy val typeName: Parser[TypeName] = P(specifierQualifierList).!.map(TypeName)
   private[parser] lazy val abstractDeclarator: Parser[Any] = pointer |
     P(pointer.? ~ directAbstractDeclarator)
   private[parser] lazy val directAbstractDeclarator: Parser[Any] = P(P("(") ~ abstractDeclarator ~ P(")")) |

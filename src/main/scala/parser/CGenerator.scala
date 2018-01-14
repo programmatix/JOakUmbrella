@@ -8,6 +8,11 @@ class CGenerator {
     exp match {
       case v: Identifier =>
         out += v.v
+      case v: PostfixExpressionIndex =>
+        out ++= generate(v.v1)
+        out += "["
+        out ++= generate(v.v2)
+        out += "]"
       case v: PostfixExpressionMinusMinus =>
         out ++= generate(v.v1)
         out += "--"
