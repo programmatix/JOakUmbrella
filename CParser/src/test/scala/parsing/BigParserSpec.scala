@@ -1,7 +1,8 @@
-package parser
+package CParser
 
 import fastparse.core.Parsed
 import org.scalatest.FunSuite
+import parsing.CParser
 
 // For testing bigger functions and whole files
 class BigParserSpec extends FunSuite {

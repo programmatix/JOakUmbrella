@@ -1,5 +1,6 @@
 import fastparse.core.Parsed
-import parser.{CGenerator, CParser}
+import generating.CGenerator
+import parsing.CParser
 
 import scala.scalajs.js.annotation.JSExport
 

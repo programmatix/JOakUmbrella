@@ -1,10 +1,10 @@
-package parser
+package parsing
 
 import fastparse.all._
 import fastparse.core.Parsed
 import org.scalatest.FunSuite
 
-// For testing small parts of the parser
+// For testing small parts of the CParser
 class IndividualParserSpec extends FunSuite {
 
   /*
@@ -276,7 +276,7 @@ class IndividualParserSpec extends FunSuite {
     good((parser.unaryExpression ~ End).parse("++hello"), UnaryExpressionPlusPlus(Identifier("hello")))
     good((parser.unaryExpression ~ End).parse("--hello"), UnaryExpressionMinusMinus(Identifier("hello")))
     good((parser.unaryExpression ~ End).parse("++hello++"), UnaryExpressionPlusPlus(PostfixExpressionPlusPlus(Identifier("hello"))))
-    //    good((parser.postfixExpression ~ End).parse("hello.world.again"), PostfixExpressionDot(PostfixExpressionDot(Identifier("hello"), Identifier("world")), Identifier("again")))
+    //    good((CParser.postfixExpression ~ End).parse("hello.world.again"), PostfixExpressionDot(PostfixExpressionDot(Identifier("hello"), Identifier("world")), Identifier("again")))
   }
 
   test("typeName") {

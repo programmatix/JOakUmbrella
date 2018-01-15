@@ -1,4 +1,4 @@
-package parser
+package parsing
 
 case class Nondigit(v: Char)
 case class Digit(v: Char)
