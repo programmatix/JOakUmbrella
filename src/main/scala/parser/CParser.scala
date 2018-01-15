@@ -11,8 +11,8 @@ class CParser {
   private[parser] val identifier: fastparse.all.Parser[Identifier] = {
     import fastparse.all._
     val digit = P(CharIn('0' to '9')).!.map(v => Digit(v.charAt(0)))
-    val hexadecimalDigit =  P(CharIn('0' to '9') | CharIn('a' to 'f') | CharIn('A' to 'F')).!.map(v => HexDigit(v.charAt(0)))
-    val hexQuad = P(hexadecimalDigit ~ hexadecimalDigit~ hexadecimalDigit~ hexadecimalDigit).map(v => HexQuad(v._1, v._2, v._3, v._4))
+    val hexadecimalDigit = P(CharIn('0' to '9') | CharIn('a' to 'f') | CharIn('A' to 'F')).!.map(v => HexDigit(v.charAt(0)))
+    val hexQuad = P(hexadecimalDigit ~ hexadecimalDigit ~ hexadecimalDigit ~ hexadecimalDigit).map(v => HexQuad(v._1, v._2, v._3, v._4))
     val universalCharacterName = P(P("\\u") ~ hexQuad).map(v => UniversalCharacterName1(v)) | P("\\U" ~ hexQuad ~ hexQuad).map(v => UniversalCharacterName2(v._1, v._2))
     val nondigit = P(CharIn('a' to 'z') | CharIn('A' to 'Z') | "_").!.map(v => Nondigit(v.charAt(0)))
     val identifierNondigit = nondigit.map(v => IdentifierNondigit1(v)) |
@@ -33,10 +33,11 @@ class CParser {
   }
 
   // Ignore whitespace
-  private val White = WhitespaceApi.Wrapper{
+  private val White = WhitespaceApi.Wrapper {
     import fastparse.all._
     NoTrace(CharIn(" \t\n").rep | P("\r\n").rep)
   }
+
   import White._
   import fastparse.noApi._
 
@@ -44,30 +45,30 @@ class CParser {
   // Whitespace in-sensitive parsers go here
 
   // http://c0x.coding-guidelines.com/6.4.2.1.html
-  private[parser]  lazy val keyword = P(P("auto ∗") | P("break") | P("case") | P("char") | P("const") | P("continue") | P("default") | P("do") | P("double") | P("else")|
-    P("enum") | P("extern") | P("float") | P("for") | P("goto") | P("if") | P("inline") | P("int") | P("long") | P("register") | P("restrict")|
-    P("return") | P("short") | P("signed") | P("sizeof") | P("static") | P("struct") | P("switch") | P("typedef") | P("union") | P("unsigned")|
-    P("void") | P("volatile") | P("while") | P("_Alignas") | P("_Alignof") | P("_Atomic") | P("_Bool") | P("_Complex") | P("_Generic")|
+  private[parser] lazy val keyword = P(P("auto ∗") | P("break") | P("case") | P("char") | P("const") | P("continue") | P("default") | P("do") | P("double") | P("else") |
+    P("enum") | P("extern") | P("float") | P("for") | P("goto") | P("if") | P("inline") | P("int") | P("long") | P("register") | P("restrict") |
+    P("return") | P("short") | P("signed") | P("sizeof") | P("static") | P("struct") | P("switch") | P("typedef") | P("union") | P("unsigned") |
+    P("void") | P("volatile") | P("while") | P("_Alignas") | P("_Alignof") | P("_Atomic") | P("_Bool") | P("_Complex") | P("_Generic") |
     P("_Imaginary") | P("_Noreturn") | P("_Static_assert") | P("_Thread_local")).!.map(v => Keyword(v))
 
 
-  private[parser]  lazy val constant: Parser[Constant] = P(integerConstant | floatingConstant).opaque("constant")
-  private[parser]  lazy val integerConstant: Parser[IntConstant] =
+  private[parser] lazy val constant: Parser[Constant] = P(integerConstant | floatingConstant).opaque("constant")
+  private[parser] lazy val integerConstant: Parser[IntConstant] =
     P(P(decimalConstant ~ integerSuffix.? | octalConstant ~ integerSuffix.? | hexadecimalConstant ~ integerSuffix.?))
       .opaque("integerConstant")
   private[parser] lazy val hexadecimalPrefix = P("0x") | P("0X")
-  private[parser]  lazy val hexadecimalConstant =
+  private[parser] lazy val hexadecimalConstant =
     P(hexadecimalPrefix ~ CharIn("0123456789abcdef").rep(1)).!.map(v =>
       IntConstant(Integer.parseInt(v, 16)))
-  private[parser]  lazy val nonzeroDigit = P(CharIn('1' to '9')).!.map(v => Digit(v.charAt(0)))
+  private[parser] lazy val nonzeroDigit = P(CharIn('1' to '9')).!.map(v => Digit(v.charAt(0)))
   //  private[parser]  lazy val octalDigit = P(CharIn('0' to '7'))
-  private[parser]  lazy val integerSuffix = P((CharIn("uU") ~ P(P("ll") | P("LL") | P("l") | P("L"))) |
+  private[parser] lazy val integerSuffix = P((CharIn("uU") ~ P(P("ll") | P("LL") | P("l") | P("L"))) |
     ((P("ll") | P("LL") | P("l") | P("L")) ~ P(CharIn("uU")).?))
   //  private[parser]  lazy val unsignedSuffix = P(CharIn("uU"))
   //  private[parser]  lazy val longSuffix = P(CharIn("lL"))
   //  private[parser]  lazy val longLongSuffix = P("ll" | "LL")
-  private[parser]  lazy val floatingConstant: Parser[FloatConstant] = P(decimalFloatingConstant | hexadecimalFloatingConstant)
-  private[parser]  lazy val decimalFloatingConstant: Parser[FloatConstant] = P(P(fractionalConstant ~ exponentPart.? ~ floatingSuffix.?).map(v => FloatConstant(v._1.v * v._2.map(_.calc()).getOrElse(1.0f))) |
+  private[parser] lazy val floatingConstant: Parser[FloatConstant] = P(decimalFloatingConstant | hexadecimalFloatingConstant)
+  private[parser] lazy val decimalFloatingConstant: Parser[FloatConstant] = P(P(fractionalConstant ~ exponentPart.? ~ floatingSuffix.?).map(v => FloatConstant(v._1.v * v._2.map(_.calc()).getOrElse(1.0f))) |
     P(digitSequence.!.map(v => {
       v.toInt
     }) ~ exponentPart ~ floatingSuffix.?).map(v => FloatConstant(v._1 * v._2.calc())))
@@ -79,7 +80,8 @@ class CParser {
   private[parser] lazy val fractionalConstant = P(digitSequence.? ~ P(".") ~ digitSequence).!.map(v => FloatConstant(v.toFloat))
   private[parser] lazy val exponentPart: Parser[Exponent] =
     (P("e" | P("E")) ~ CharIn("+-").? ~ digitSequence).!.map(v => {
-      Exponent(v.stripPrefix("e").stripPrefix("E").toInt)})
+      Exponent(v.stripPrefix("e").stripPrefix("E").toInt)
+    })
   private[parser] lazy val digitSequence = P(CharIn("0123456789").rep(1))
   private[parser] lazy val hexadecimalFractionalConstant: Parser[FloatConstant] =
     P(hexadecimalDigitSequence.?.! ~ P(".").! ~ hexadecimalDigitSequence.!).map(v =>
@@ -94,7 +96,7 @@ class CParser {
 
   private[parser] lazy val enumerationConstant = identifier.map(v => EnumerationConstant(v.v))
   private[parser] lazy val cCharSequence = CharsWhile(v => v != '\'' && v != '\\' && v != '\n')
-  private[parser] lazy val characterConstant:Parser[CharacterConstant] =
+  private[parser] lazy val characterConstant: Parser[CharacterConstant] =
     P(CharIn("LuU").? ~ P("\'") ~ cCharSequence ~ "\'").!.map(v =>
       CharacterConstant(v.stripPrefix("\"").stripSuffix("\"")))
   //  private[parser] lazy val escapeSequence = simpleEscapeSequence
@@ -120,7 +122,7 @@ class CParser {
       P("*=") | P("/=") | P("%=") | P("+=") | P("-=") | P("<<=") | P(">>=") | P("&=") | P("^=") | P("|=") | P(",") |
       P("#") | P("##") | P("<:") | P(":>") | P("<%") | P("%>") | P("%:") | P("%:%:")).!.map(v => Punctuator(v))
 
-  private[parser]  lazy val token: Parser[Token] = keyword | identifier | constant | stringLiteral | punctuator
+  private[parser] lazy val token: Parser[Token] = keyword | identifier | constant | stringLiteral | punctuator
 
   private[parser] lazy val headerName: Parser[HeaderName] = (P(P("<") ~ CharsWhile(v => v != '\n' && v != '>') ~ P(">")) |
     P(P("\"") ~ CharsWhile(v => v != '\n' && v != '"') ~ P("\""))).!.map(v => {
@@ -158,20 +160,20 @@ class CParser {
     else {
       v._2.next.op match {
         case _: Empty => exp
-        case _ => postfixRecurse(exp, v._2.next)
+        case _        => postfixRecurse(exp, v._2.next)
       }
     }
   }
 
   private[parser] def postfixMerge(left: Expression, v: PostfixRight): Expression = {
     val exp: Expression = v match {
-      case x: PostfixRightIndex => PostfixExpressionIndex(left, x.v1)
-      case x: PostfixRightDot => PostfixExpressionDot(left, x.v1)
-      case x: PostfixRightPlusPlus => PostfixExpressionPlusPlus(left)
+      case x: PostfixRightIndex      => PostfixExpressionIndex(left, x.v1)
+      case x: PostfixRightDot        => PostfixExpressionDot(left, x.v1)
+      case x: PostfixRightPlusPlus   => PostfixExpressionPlusPlus(left)
       case x: PostfixRightMinusMinus => PostfixExpressionMinusMinus(left)
-      case x: PostfixRightArrow => PostfixExpressionArrow(left, x.v1)
-      case x: PostfixRightArgs => PostfixExpressionArgs(left, x.v2)
-      case x: Empty => PostfixExpressionSimple(left)
+      case x: PostfixRightArrow      => PostfixExpressionArrow(left, x.v1)
+      case x: PostfixRightArgs       => PostfixExpressionArgs(left, x.v2)
+      case x: Empty                  => PostfixExpressionSimple(left)
     }
     exp
   }
@@ -212,7 +214,7 @@ class CParser {
       unaryExpression).opaque("castExpression")
 
   private[parser] lazy val multiplicativeExpression: Parser[Expression] =
-    P(castExpression ~ multiplicativeExpressionHelper).map(v => binary(v._1,v._2)).opaque("multiplicativeExpression")
+    P(castExpression ~ multiplicativeExpressionHelper).map(v => binary(v._1, v._2)).opaque("multiplicativeExpression")
   private[parser] lazy val multiplicativeExpressionHelper: Parser[BinaryOpBuildWrap] =
     P(P("*").! ~ multiplicativeExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
       P(P("/").! ~ multiplicativeExpression).map(v => BinaryOpBuildWrap(v._1, v._2)) |
@@ -222,38 +224,38 @@ class CParser {
   // These methods help us glue full expressions back together, after they had to be split apart during left recursion removal
   private def binary(left: Expression, right: BinaryOpBuildWrap): Expression = {
     right.op match {
-      case "*" => ExpressionMultiply(left, right.next)
-      case "/" => ExpressionDivision(left, right.next)
-      case "%" => ExpressionMod(left, right.next)
-      case "+" => ExpressionAdd(left, right.next)
-      case "-" => ExpressionMinus(left, right.next)
-      case "<<" => ExpressionLeftShift(left, right.next)
-      case ">>" => ExpressionRightShift(left, right.next)
-      case "<" => ExpressionLessThan(left, right.next)
-      case ">" => ExpressionGreaterThan(left, right.next)
-      case "<=" => ExpressionLessThanOrEqual(left, right.next)
-      case ">=" => ExpressionGreaterThanOrEqual(left, right.next)
-      case "==" => ExpressionEquals(left, right.next)
-      case "!=" => ExpressionNotEquals(left, right.next)
-      case "&" => ExpressionAnd(left, right.next)
-      case "^" => ExpressionXOr(left, right.next)
-      case "|" => ExpressionInclusiveOr(left, right.next)
-      case "&&" => ExpressionLogicalAnd(left, right.next)
-      case "||" => ExpressionLogicalOr(left, right.next)
-      case "=" => ExpressionAssignment(left, right.next)
-      case "*=" => ExpressionAssignment(left, ExpressionMultiply(left, right.next))
-      case "/=" => ExpressionAssignment(left, ExpressionDivision(left, right.next))
-      case "%=" => ExpressionAssignment(left, ExpressionMod(left, right.next))
-      case "+=" => ExpressionAssignment(left, ExpressionAdd(left, right.next))
-      case "-=" => ExpressionAssignment(left, ExpressionMinus(left, right.next))
-      case "<<=" => ExpressionAssignment(left, ExpressionLeftShift(left, right.next))
-      case ">>=" => ExpressionAssignment(left, ExpressionRightShift(left, right.next))
-      case "&=" => ExpressionAssignment(left, ExpressionAnd(left, right.next))
-      case "^=" => ExpressionAssignment(left, ExpressionXOr(left, right.next))
-      case "|=" => ExpressionAssignment(left, ExpressionInclusiveOr(left, right.next))
-      case "," => ExpressionComma(left, right.next)
+      case "*"      => ExpressionMultiply(left, right.next)
+      case "/"      => ExpressionDivision(left, right.next)
+      case "%"      => ExpressionMod(left, right.next)
+      case "+"      => ExpressionAdd(left, right.next)
+      case "-"      => ExpressionMinus(left, right.next)
+      case "<<"     => ExpressionLeftShift(left, right.next)
+      case ">>"     => ExpressionRightShift(left, right.next)
+      case "<"      => ExpressionLessThan(left, right.next)
+      case ">"      => ExpressionGreaterThan(left, right.next)
+      case "<="     => ExpressionLessThanOrEqual(left, right.next)
+      case ">="     => ExpressionGreaterThanOrEqual(left, right.next)
+      case "=="     => ExpressionEquals(left, right.next)
+      case "!="     => ExpressionNotEquals(left, right.next)
+      case "&"      => ExpressionAnd(left, right.next)
+      case "^"      => ExpressionXOr(left, right.next)
+      case "|"      => ExpressionInclusiveOr(left, right.next)
+      case "&&"     => ExpressionLogicalAnd(left, right.next)
+      case "||"     => ExpressionLogicalOr(left, right.next)
+      case "="      => ExpressionAssignment(left, right.next)
+      case "*="     => ExpressionAssignment(left, ExpressionMultiply(left, right.next))
+      case "/="     => ExpressionAssignment(left, ExpressionDivision(left, right.next))
+      case "%="     => ExpressionAssignment(left, ExpressionMod(left, right.next))
+      case "+="     => ExpressionAssignment(left, ExpressionAdd(left, right.next))
+      case "-="     => ExpressionAssignment(left, ExpressionMinus(left, right.next))
+      case "<<="    => ExpressionAssignment(left, ExpressionLeftShift(left, right.next))
+      case ">>="    => ExpressionAssignment(left, ExpressionRightShift(left, right.next))
+      case "&="     => ExpressionAssignment(left, ExpressionAnd(left, right.next))
+      case "^="     => ExpressionAssignment(left, ExpressionXOr(left, right.next))
+      case "|="     => ExpressionAssignment(left, ExpressionInclusiveOr(left, right.next))
+      case ","      => ExpressionComma(left, right.next)
       case "" | " " => left
-      case _ =>
+      case _        =>
         assert(false)
         left
     }
@@ -262,7 +264,7 @@ class CParser {
   private def ternary(left: Expression, right: TernaryOpBuildWrap): Expression = {
     right.op1 match {
       case "?" => ExpressionConditional(left, right.v1, right.v2)
-      case _ => left
+      case _   => left
     }
   }
 
@@ -411,8 +413,8 @@ class CParser {
     P(
       P(P("[") ~ typeQualifierList.? ~ assignmentExpression.? ~ P("]") ~ directDeclaratorHelper).map(v => DDBuild2(DDBuildTypeQualifierListAssignment(v._1, v._2), v._3)) |
         P(P("[") ~ P("static") ~ typeQualifierList.? ~ assignmentExpression ~ P("]") ~ directDeclaratorHelper).map(v => DDBuild2(DDBuildTypeQualifierListAssignment(v._1, Some(v._2)), v._3)) |
-        P(P("[") ~ typeQualifierList ~ P("static") ~ assignmentExpression ~P("]") ~ directDeclaratorHelper).map(v => DDBuild2(DDBuildTypeQualifierListAssignment(Some(v._1), Some(v._2)), v._3)) |
-        P(P("[") ~ typeQualifierList.? ~P("*") ~ P("]") ~ directDeclaratorHelper).map(v => DDBuild2(DDBuildTypeQualifierList(v._1), v._2)) |
+        P(P("[") ~ typeQualifierList ~ P("static") ~ assignmentExpression ~ P("]") ~ directDeclaratorHelper).map(v => DDBuild2(DDBuildTypeQualifierListAssignment(Some(v._1), Some(v._2)), v._3)) |
+        P(P("[") ~ typeQualifierList.? ~ P("*") ~ P("]") ~ directDeclaratorHelper).map(v => DDBuild2(DDBuildTypeQualifierList(v._1), v._2)) |
         P(P("(") ~ parameterTypeList ~ P(")") ~ directDeclaratorHelper).map(v => DDBuild2(DDBuildParameterTypeList(v._1), v._2)) |
         P(P("(") ~ identifierList.? ~ P(")") ~ directDeclaratorHelper).map(v => DDBuild2(DDBuildIdentifierList(v._1), v._2)) |
         P("").map(v => DDBuild2(Empty(), null))
@@ -426,9 +428,9 @@ class CParser {
   private[parser] def directDeclaratorMerge(left: Identifier, right: DDBuild): DirectDeclarator = {
     right match {
       case v: DDBuildParameterTypeList => FunctionDeclaration(left, v.v)
-      case v: Empty => DirectDeclaratorOnly(left)
-      case _ =>
-        assert(false, "Cannot handle yet")
+      case v: Empty                    => DirectDeclaratorOnly(left)
+      case _                           =>
+        assert(false, s"Cannot handle DDBuild $right yet")
         null
     }
   }
@@ -463,8 +465,8 @@ class CParser {
     P(directAbstractDeclarator.? ~ P("(") ~ parameterTypeList.? ~ P(")"))
   private[parser] lazy val typedefName = identifier
   private[parser] lazy val initializer: Parser[Initializer] = assignmentExpression.map(InitializerSimple)
-    // TODO
-//    P(P("{") ~ initializerList ~ P(",").? ~ P("}"))
+  // TODO
+  //    P(P("{") ~ initializerList ~ P(",").? ~ P("}"))
   private[parser] lazy val initializerList: Parser[Any] = designation.? ~ initializer |
     P(initializerList ~ P(",") ~ designation.? ~ initializer)
   private[parser] lazy val designation = designatorList ~ P("=")
@@ -487,7 +489,7 @@ class CParser {
     P(P("default") ~ P(":") ~ statement).map(v => LabelledDefault(v))
   private[parser] val compoundStatement: Parser[CompoundStatement] = P("{") ~ blockItemList.?.opaque("compoundStatement").map(v => CompoundStatement(v.getOrElse(List()))) ~ P("}")
   private[parser] lazy val blockItemList: Parser[Seq[BlockItem]] = blockItem.rep(1).opaque("blockItemList").map(v => v.toList)
-    private[parser] lazy val blockItem: Parser[BlockItem] = declaration | statement
+  private[parser] lazy val blockItem: Parser[BlockItem] = declaration | statement
   private[parser] val expressionStatement: Parser[Statement] = (expression.? ~ P(";")).map(v => if (v.isDefined) ExpressionStatement(v.get) else ExpressionEmptyStatement())
   private[parser] val selectionStatement: Parser[SelectionStatement] = P(P("if") ~ P("(") ~ expression ~ P(")") ~ statement).map(v => SelectionIf(v._1, v._2)) |
     P(P("if") ~ P("(") ~ expression ~ P(")") ~ statement ~ P("else") ~ statement).map(v => SelectionIfElse(v._1, v._2, v._3)) |
@@ -520,6 +522,7 @@ class CParser {
   private[parser] val translationUnit: Parser[TranslationUnit] = externalDeclaration.rep(1).map(v => TranslationUnit(v.toList))
   private[parser] val top = translationUnit
 
+  // TODO only preprocessor tokens left!
   //    A.3 Preprocessing directives
   //  private[parser] lazy val preprocessingFile = group.?
   //  private[parser] lazy val group = groupPart

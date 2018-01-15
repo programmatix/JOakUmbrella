@@ -5,7 +5,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/src/main/scala/parser/CGenerator.scala" afterPath="$PROJECT_DIR$/src/main/scala/parser/CGenerator.scala" />
       <change beforePath="$PROJECT_DIR$/src/main/scala/parser/CParser.scala" afterPath="$PROJECT_DIR$/src/main/scala/parser/CParser.scala" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/parser/CTokens.scala" afterPath="$PROJECT_DIR$/src/main/scala/parser/CTokens.scala" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -41,7 +40,7 @@
     </system>
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.4434968">
+    <splitter split-orientation="horizontal" split-proportion="0.5245203">
       <split-first>
         <splitter split-orientation="vertical" split-proportion="0.6096423">
           <split-first>
@@ -49,10 +48,10 @@
               <file leaf-file-name="CParser.scala" pinned="false" current-in-tab="true">
                 <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CParser.scala">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="156">
-                      <caret line="173" column="52" lean-forward="false" selection-start-line="173" selection-start-column="52" selection-end-line="173" selection-end-column="52" />
+                    <state relative-caret-position="221">
+                      <caret line="525" column="30" lean-forward="true" selection-start-line="525" selection-start-column="30" selection-end-line="525" selection-end-column="30" />
                       <folding>
-                        <element signature="e#1667#1681#0" expanded="true" />
+                        <element signature="e#1670#1684#0" expanded="true" />
                       </folding>
                     </state>
                   </provider>
@@ -61,7 +60,7 @@
               <file leaf-file-name="Api.class" pinned="false" current-in-tab="false">
                 <entry file="jar://$USER_HOME$/.ivy2/cache/com.lihaoyi/fastparse_2.12/jars/fastparse_2.12-1.0.0.jar!/fastparse/Api.class">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="123">
+                    <state relative-caret-position="816">
                       <caret line="48" column="6" lean-forward="false" selection-start-line="48" selection-start-column="6" selection-end-line="48" selection-end-column="6" />
                       <folding />
                     </state>
@@ -91,7 +90,7 @@
               <file leaf-file-name="Main.scala" pinned="false" current-in-tab="false">
                 <entry file="file://$PROJECT_DIR$/src/main/scala/Main.scala">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="294">
+                    <state relative-caret-position="714">
                       <caret line="45" column="32" lean-forward="false" selection-start-line="45" selection-start-column="32" selection-end-line="45" selection-end-column="32" />
                       <folding>
                         <element signature="e#0#28#0" expanded="true" />
@@ -103,7 +102,7 @@
               <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
                 <entry file="file://$PROJECT_DIR$/src/main/web/index.html">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="260">
+                    <state relative-caret-position="340">
                       <caret line="20" column="0" lean-forward="false" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
                       <folding />
                     </state>
@@ -123,7 +122,7 @@
               <file leaf-file-name="WhitespaceApi.scala" pinned="false" current-in-tab="false">
                 <entry file="jar://$USER_HOME$/.ideaLibSources/fastparse_2.12-1.0.0-sources.jar!/fastparse/WhitespaceApi.scala">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="85">
+                    <state relative-caret-position="595">
                       <caret line="38" column="45" lean-forward="false" selection-start-line="38" selection-start-column="45" selection-end-line="38" selection-end-column="45" />
                       <folding />
                     </state>
@@ -133,7 +132,7 @@
               <file leaf-file-name="Parsing.scala" pinned="false" current-in-tab="false">
                 <entry file="file://$PROJECT_DIR$/fastparse/fastparse/shared/src/main/scala/fastparse/core/Parsing.scala">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="139">
+                    <state relative-caret-position="663">
                       <caret line="44" column="75" lean-forward="false" selection-start-line="44" selection-start-column="75" selection-end-line="44" selection-end-column="75" />
                       <folding />
                     </state>
@@ -143,7 +142,7 @@
               <file leaf-file-name="Api.scala" pinned="false" current-in-tab="false">
                 <entry file="jar://$USER_HOME$/.ideaLibSources/fastparse_2.12-1.0.0-sources.jar!/fastparse/Api.scala">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="17">
+                    <state relative-caret-position="884">
                       <caret line="58" column="6" lean-forward="false" selection-start-line="58" selection-start-column="6" selection-end-line="58" selection-end-column="6" />
                       <folding />
                     </state>
@@ -157,8 +156,8 @@
               <file leaf-file-name="CTokens.scala" pinned="false" current-in-tab="true">
                 <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CTokens.scala">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="136">
-                      <caret line="38" column="11" lean-forward="false" selection-start-line="38" selection-start-column="11" selection-end-line="38" selection-end-column="34" />
+                    <state relative-caret-position="0">
+                      <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
                       <folding />
                     </state>
                   </provider>
@@ -173,7 +172,7 @@
           <file leaf-file-name="Combinators.scala" pinned="false" current-in-tab="false">
             <entry file="jar://$USER_HOME$/.ideaLibSources/fastparse_2.12-1.0.0-sources.jar!/fastparse/parsers/Combinators.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="422">
+                <state relative-caret-position="5423">
                   <caret line="328" column="7" lean-forward="false" selection-start-line="328" selection-start-column="7" selection-end-line="328" selection-end-column="7" />
                   <folding />
                 </state>
@@ -193,8 +192,8 @@
           <file leaf-file-name="CGenerator.scala" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CGenerator.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="427">
-                  <caret line="156" column="36" lean-forward="false" selection-start-line="156" selection-start-column="36" selection-end-line="156" selection-end-column="36" />
+                <state relative-caret-position="51">
+                  <caret line="3" column="0" lean-forward="true" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
                   <folding />
                 </state>
               </provider>
@@ -213,7 +212,7 @@
           <file leaf-file-name="IndividualParserSpec.scala" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="394">
+                <state relative-caret-position="7412">
                   <caret line="436" column="43" lean-forward="false" selection-start-line="436" selection-start-column="43" selection-end-line="436" selection-end-column="43" />
                   <folding>
                     <element signature="e#16#38#0" expanded="true" />
@@ -235,7 +234,7 @@
           <file leaf-file-name="BigParserSpec.scala" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/test/scala/parser/BigParserSpec.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="237">
+                <state relative-caret-position="306">
                   <caret line="19" column="0" lean-forward="false" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
                   <folding>
                     <element signature="e#16#44#0" expanded="true" />
@@ -261,7 +260,7 @@
           <file leaf-file-name="Parsing.scala" pinned="false" current-in-tab="false">
             <entry file="jar://$USER_HOME$/.ideaLibSources/fastparse_2.12-1.0.0-sources.jar!/fastparse/core/Parsing.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="167">
+                <state relative-caret-position="6256">
                   <caret line="373" column="4" lean-forward="false" selection-start-line="373" selection-start-column="4" selection-end-line="373" selection-end-column="4" />
                   <folding />
                 </state>
@@ -271,7 +270,7 @@
           <file leaf-file-name="CGeneratorSpec.scala" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/test/scala/parser/CGeneratorSpec.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="186">
+                <state relative-caret-position="1377">
                   <caret line="81" column="29" lean-forward="false" selection-start-line="81" selection-start-column="28" selection-end-line="81" selection-end-column="29" />
                   <folding>
                     <element signature="e#16#44#0" expanded="true" />
@@ -293,7 +292,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>+:</find>
       <find>blockitemlist</find>
       <find>cunt</find>
       <find>translat</find>
@@ -323,6 +321,7 @@
       <find>stringliter</find>
       <find>postfixri</find>
       <find>;</find>
+      <find>cannot handl</find>
     </findStrings>
     <replaceStrings>
       <replace>&quot;</replace>
@@ -372,8 +371,8 @@
         <option value="$PROJECT_DIR$/src/test/scala/parser/CGeneratorSpec.scala" />
         <option value="$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/parser/CTokens.scala" />
-        <option value="$PROJECT_DIR$/src/main/scala/parser/CParser.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/parser/CGenerator.scala" />
+        <option value="$PROJECT_DIR$/src/main/scala/parser/CParser.scala" />
       </list>
     </option>
   </component>
@@ -387,7 +386,7 @@
     <servers />
   </component>
   <component name="PhpWorkspaceProjectConfiguration" backward_compatibility_performed="true" />
-  <component name="ProjectFrameBounds" extendedState="6" fullScreen="true">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-8" />
     <option name="y" value="-8" />
     <option name="width" value="1932" />
@@ -409,148 +408,25 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="AndroidView" />
+      <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
             <path>
               <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-              <item name="shared" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-              <item name="shared" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-              <item name="shared" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-              <item name="shared" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="scala" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-              <item name="shared" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="scala" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-              <item name="shared" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="scala" type="462c0819:PsiDirectoryNode" />
-              <item name="fastparse" type="462c0819:PsiDirectoryNode" />
-              <item name="core" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="project" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="scala" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="scala" type="462c0819:PsiDirectoryNode" />
-              <item name="parser" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="target" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CCompiler" type="b2602c69:ProjectViewProjectNode" />
-              <item name="CCompiler" type="462c0819:PsiDirectoryNode" />
-              <item name="target" type="462c0819:PsiDirectoryNode" />
-              <item name="scala-2.12" type="462c0819:PsiDirectoryNode" />
+              <item name="CTranspiler" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scratches" />
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.Scala" />
     <property name="nodejs_interpreter_path" value="C:/Program Files/nodejs/node" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
@@ -559,6 +435,7 @@
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RecentsManager">
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
@@ -830,7 +707,8 @@
       <workItem from="1515728435989" duration="11862000" />
       <workItem from="1515740535365" duration="25323000" />
       <workItem from="1515833950040" duration="11492000" />
-      <workItem from="1515898636039" duration="30573000" />
+      <workItem from="1515898636039" duration="30630000" />
+      <workItem from="1515980343195" duration="1028000" />
     </task>
     <task id="LOCAL-00001" summary="More statements working">
       <created>1515914550331</created>
@@ -874,7 +752,14 @@
       <option name="project" value="LOCAL" />
       <updated>1515944893738</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Fix bugs">
+      <created>1515945672507</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1515945672507</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -910,38 +795,38 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="82411000" />
+    <option name="totallyTimeSpent" value="83496000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1920" height="1080" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="sbt" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.1705757" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.41492864" sideWeight="0.5042644" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3286004" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.48241758" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Build" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17857143" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="sbt-shell-toolwindow" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29513183" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21703854" sideWeight="0.49573562" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.48241758" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3286004" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.16791044" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="sbt-shell-toolwindow" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30425963" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.29513183" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="true" content_ui="tabs" />
+      <window_info id="Build" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21703854" sideWeight="0.49573562" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="SBT" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30425963" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.09434968" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -965,7 +850,8 @@
     <MESSAGE value="Functions better" />
     <MESSAGE value="Handle 0" />
     <MESSAGE value="Handle declarations" />
-    <option name="LAST_COMMIT_MESSAGE" value="Handle declarations" />
+    <MESSAGE value="Fix bugs" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix bugs" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -982,7 +868,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/src/main/scala/parser/CParser.scala</url>
-          <line>430</line>
+          <line>432</line>
           <properties>
             <option name="lambda-ordinal" value="-1" />
           </properties>
@@ -1203,7 +1089,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="255">
           <caret line="15" column="0" lean-forward="false" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1218,7 +1103,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="9282">
           <caret line="579" column="0" lean-forward="false" selection-start-line="579" selection-start-column="0" selection-end-line="579" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1233,9 +1117,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1156">
           <caret line="71" column="0" lean-forward="false" selection-start-line="71" selection-start-column="0" selection-end-line="71" selection-end-column="0" />
-          <folding>
-            <element signature="e#24#43#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1243,7 +1124,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="255">
           <caret line="20" column="59" lean-forward="false" selection-start-line="20" selection-start-column="59" selection-end-line="20" selection-end-column="59" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1251,7 +1131,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2159">
           <caret line="127" column="34" lean-forward="false" selection-start-line="127" selection-start-column="34" selection-end-line="127" selection-end-column="34" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1259,7 +1138,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="102">
           <caret line="6" column="0" lean-forward="false" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1279,13 +1157,12 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="336">
           <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="jar://$USER_HOME$/.ivy2/cache/com.lihaoyi/fastparse_2.12/jars/fastparse_2.12-1.0.0.jar!/fastparse/Api.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="123">
+        <state relative-caret-position="816">
           <caret line="48" column="6" lean-forward="false" selection-start-line="48" selection-start-column="6" selection-end-line="48" selection-end-column="6" />
           <folding />
         </state>
@@ -1325,7 +1202,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/fastparse/fastparse/shared/src/main/scala/fastparse/core/Parsing.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="139">
+        <state relative-caret-position="663">
           <caret line="44" column="75" lean-forward="false" selection-start-line="44" selection-start-column="75" selection-end-line="44" selection-end-column="75" />
           <folding />
         </state>
@@ -1341,7 +1218,7 @@
     </entry>
     <entry file="jar://$USER_HOME$/.ideaLibSources/fastparse_2.12-1.0.0-sources.jar!/fastparse/parsers/Combinators.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="422">
+        <state relative-caret-position="5423">
           <caret line="328" column="7" lean-forward="false" selection-start-line="328" selection-start-column="7" selection-end-line="328" selection-end-column="7" />
           <folding />
         </state>
@@ -1349,7 +1226,7 @@
     </entry>
     <entry file="jar://$USER_HOME$/.ideaLibSources/fastparse_2.12-1.0.0-sources.jar!/fastparse/core/Parsing.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="167">
+        <state relative-caret-position="6256">
           <caret line="373" column="4" lean-forward="false" selection-start-line="373" selection-start-column="4" selection-end-line="373" selection-end-column="4" />
           <folding />
         </state>
@@ -1357,7 +1234,7 @@
     </entry>
     <entry file="jar://$USER_HOME$/.ideaLibSources/fastparse_2.12-1.0.0-sources.jar!/fastparse/Api.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
+        <state relative-caret-position="884">
           <caret line="58" column="6" lean-forward="false" selection-start-line="58" selection-start-column="6" selection-end-line="58" selection-end-column="6" />
           <folding />
         </state>
@@ -1365,7 +1242,7 @@
     </entry>
     <entry file="jar://$USER_HOME$/.ideaLibSources/fastparse_2.12-1.0.0-sources.jar!/fastparse/WhitespaceApi.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
+        <state relative-caret-position="595">
           <caret line="38" column="45" lean-forward="false" selection-start-line="38" selection-start-column="45" selection-end-line="38" selection-end-column="45" />
           <folding />
         </state>
@@ -1381,7 +1258,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/web/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="260">
+        <state relative-caret-position="340">
           <caret line="20" column="0" lean-forward="false" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
           <folding />
         </state>
@@ -1389,7 +1266,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/scala/parser/BigParserSpec.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="237">
+        <state relative-caret-position="306">
           <caret line="19" column="0" lean-forward="false" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
           <folding>
             <element signature="e#16#44#0" expanded="true" />
@@ -1399,7 +1276,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/Main.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="294">
+        <state relative-caret-position="714">
           <caret line="45" column="32" lean-forward="false" selection-start-line="45" selection-start-column="32" selection-end-line="45" selection-end-column="32" />
           <folding>
             <element signature="e#0#28#0" expanded="true" />
@@ -1409,7 +1286,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/scala/parser/IndividualParserSpec.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="394">
+        <state relative-caret-position="7412">
           <caret line="436" column="43" lean-forward="false" selection-start-line="436" selection-start-column="43" selection-end-line="436" selection-end-column="43" />
           <folding>
             <element signature="e#16#38#0" expanded="true" />
@@ -1419,7 +1296,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/scala/parser/CGeneratorSpec.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="186">
+        <state relative-caret-position="1377">
           <caret line="81" column="29" lean-forward="false" selection-start-line="81" selection-start-column="28" selection-end-line="81" selection-end-column="29" />
           <folding>
             <element signature="e#16#44#0" expanded="true" />
@@ -1427,29 +1304,29 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CGenerator.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="51">
+          <caret line="3" column="0" lean-forward="true" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CTokens.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="38" column="11" lean-forward="false" selection-start-line="38" selection-start-column="11" selection-end-line="38" selection-end-column="34" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CParser.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="156">
-          <caret line="173" column="52" lean-forward="false" selection-start-line="173" selection-start-column="52" selection-end-line="173" selection-end-column="52" />
+        <state relative-caret-position="221">
+          <caret line="525" column="30" lean-forward="true" selection-start-line="525" selection-start-column="30" selection-end-line="525" selection-end-column="30" />
           <folding>
-            <element signature="e#1667#1681#0" expanded="true" />
+            <element signature="e#1670#1684#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/scala/parser/CGenerator.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="427">
-          <caret line="156" column="36" lean-forward="false" selection-start-line="156" selection-start-column="36" selection-end-line="156" selection-end-column="36" />
-          <folding />
         </state>
       </provider>
     </entry>
