@@ -5,7 +5,7 @@ import parsing.CParser
 import scala.scalajs.js.annotation.JSExport
 
 @JSExport
-class Main {
+class ParseMain {
   private lazy val parser = new CParser
   private lazy val generator = new CGenerator
 

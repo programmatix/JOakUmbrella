@@ -1,0 +1,3 @@
+[submodule "CParser"]
+	path = CParser
+	url = https://github.com/gropple/CParser.git
