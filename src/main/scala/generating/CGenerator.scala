@@ -5,7 +5,9 @@ import parsing.{BlockItem, TranslationUnit}
 
 import scala.collection.mutable.ArrayBuffer
 
-class CGenerator {
+
+
+class CGenerator  {
   private val nll = "\n"
   private val nl = Seq[String](nll)
   private val el = Seq(";", nll)

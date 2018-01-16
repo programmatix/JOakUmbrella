@@ -1,6 +1,6 @@
-import fastparse.core.Parsed
 import generating.CGenerator
-import parsing.CParser
+import parsing._
+import pprint.PPrinter
 
 import scala.scalajs.js.annotation.JSExport
 
@@ -9,45 +9,37 @@ class ParseMain {
   private lazy val parser = new CParser
   private lazy val generator = new CGenerator
 
-//  def main(args: Array[String]): Unit = {
-//  }
-
+  // Generates the AST
   @JSExport
   def parse(in: String): String = {
-    val parsedRaw = parser.parse(in)
-    val parsed = parsedRaw match {
-      case Parsed.Success(x, y) => parsedRaw
-      case Parsed.Failure(x, y, z) =>
+    parser.parse(in) match {
+      case CParseSuccess(x: TranslationUnit) =>
+        PPrinter.BlackWhite.apply(x).toString
+      case CParseFail(x)                     =>
         // Couldn't parse as a full C file, try again as though it's the inside of a function
-        parser.parseSnippet(in)
+        val parsedSnippet = parser.parseSnippet(in)
+        parsedSnippet match {
+          case CParseSuccess(y) => PPrinter.BlackWhite.apply(y).toString
+          case CParseFail(_)    => parsedSnippet.toString
+        }
     }
-
-    val parsedText: String = parsed match {
-      case Parsed.Success(x, y) =>
-        parsed.toString
-      case Parsed.Failure(x, y, z) =>
-        parsed.toString
-    }
-
-    parsedText
   }
 
+  // Generates the C translation
   @JSExport
   def generate(in: String): String = {
     val parsedRaw = parser.parse(in)
 
     val genText: Seq[String] = parsedRaw match {
-      case Parsed.Success(x, y) =>
+      case CParseSuccess(x) =>
         generator.generate(x)
-      case Parsed.Failure(x, y, z) =>
+      case CParseFail(x)    =>
         // Couldn't parse as a full C file, try again as though it's the inside of a function
         val parsedSnippet = parser.parseSnippet(in)
         parsedSnippet match {
-          case Parsed.Success(x, y) =>
-            generator.generate(x)
-          case _ => Seq("")
+          case CParseSuccess(y) => generator.generate(y)
+          case CParseFail(_)    => Seq(parsedSnippet.toString)
         }
-
     }
 
     genText.mkString(" ")
