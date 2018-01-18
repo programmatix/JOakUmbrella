@@ -1,7 +1,7 @@
 package CGenerator
 
 import fastparse.core.Parsed
-import generating.CGenerator
+import generating.{CGeneratedPrinter, CGenerator, GenStrings}
 import org.scalatest.FunSuite
 import parsing._
 import pprint.PPrinter
@@ -32,32 +32,9 @@ class CGeneratorSpec extends FunSuite {
   test("hello++") {
     val g = new CGenerator()
     val out = g.generateExpression(PostfixExpressionPlusPlus(Identifier("hello")))
-    assert(out(0) == "hello")
-    assert(out(1) == "++")
+    assert(out(0) == GenStrings(List("hello")))
+    assert(out(1) == GenStrings(List("++")))
   }
-
-  test("hello[world]++") {
-    val in = PostfixExpressionPlusPlus(PostfixExpressionIndex(Identifier("hello"), Identifier("world")))
-    val g = new CGenerator()
-    val out = g.generateExpression(in)
-    assert(out == Seq("hello", "[", "world", "]", "++"))
-  }
-
-//  def testStringsIgnoreWhitespace(in1: String, in2: String): Boolean = {
-//    var idx1 = 0
-//    var idx2 = 0
-//    var done = false
-//    while (!done) {
-//      if (idx1 >= in1.length) done = true
-//      else if (idx2 >= in2.length) done = true
-//      else {
-//
-//
-//        idx1 += 1
-//        idx2 += 1
-//      }
-//    }
-//  }
 
   def clean(s: String) = s.replaceAll(" ", "").replaceAll("\r\n", "").replaceAll("\n", "")
 
@@ -75,9 +52,11 @@ class CGeneratorSpec extends FunSuite {
         val after = g.generateTranslationUnit(x)
         if (print) {
           PPrinter.Color.log(x, width = 3, height = 1000)
+//          PPrinter.Color.log(after, width = 10, height = 1000)
+          println(after)
         }
 //        println(pretty)
-        val mashed = after.mkString(" ", " ", " ")
+        val mashed = CGeneratedPrinter.print(after)
         assert (clean(in) == clean(mashed))
 //        if (in.replaceAll(" ", "") != mashed.replaceAll(" ", "")) {
 //          assert(in == mashed)
@@ -89,7 +68,36 @@ class CGeneratorSpec extends FunSuite {
 
   }
 
-    test("function simple") {
+  def confirmSnippet(in: String, print: Boolean = false) = {
+
+    val p = createParser()
+    val g = createGenerator()
+
+    // Don't do this, it messes up PP
+    //    val parsed = p.parse(in.replaceAll("\r\n", "").replaceAll("\n", ""))
+    val parsed = p.parseSnippet(in)
+
+    parsed match {
+      case CParseSuccess(x) =>
+        val after = g.generateSeqBlockItem(x)
+        if (print) {
+          PPrinter.Color.log(x, width = 3, height = 1000)
+          println(after)
+        }
+        //        println(pretty)
+        val mashed = CGeneratedPrinter.print(after)
+        assert (clean(in) == clean(mashed))
+      //        if (in.replaceAll(" ", "") != mashed.replaceAll(" ", "")) {
+      //          assert(in == mashed)
+      //        }
+      case CParseFail(x) =>
+        println(parsed)
+        assert (false)
+    }
+
+  }
+
+  test("function simple") {
       val raw = """int main(int argc) { return 0; }"""
       confirm(raw)
     }
@@ -120,7 +128,7 @@ class CGeneratorSpec extends FunSuite {
       case CParseSuccess(v) =>
         val gen = gg.generateTranslationUnit(v)
         PPrinter.BlackWhite.log(v)
-        val mashed = gen.mkString(" ", " ", " ")
+        val mashed = CGeneratedPrinter.print(gen)
         assert (clean(raw) == clean(mashed))
       case _ => assert(false)
     }
@@ -143,7 +151,7 @@ class CGeneratorSpec extends FunSuite {
             |    c++;
             |    }
             |    return c;
-            |}""".stripMargin)
+            |}""".stripMargin, true)
   }
 
   test("simple") {
@@ -171,71 +179,14 @@ class CGeneratorSpec extends FunSuite {
                 |    int i,num;
                 |}""".stripMargin
     check(raw, true)
+  }
 
-    TranslationUnit(
-      List(
-        FunctionDefinition(
-          DeclarationSpecifiers(
-            List(
-              TypeSpecifierSimple(
-                "int"
-              )
-            )
-          ),
-          Declarator(
-            None,
-            FunctionDeclaration(
-              Identifier(
-                "main"
-              ),
-              ParameterTypeList(
-                List(
-
-                ),
-                false
-              )
-            )
-          ),
-          None,
-          CompoundStatement(
-            List(
-              SimpleDeclaration(
-                DeclarationSpecifiers(
-                  List(
-                    TypeSpecifierSimple(
-                      "int"
-                    )
-                  )
-                ),
-                Some(
-                  List(
-                    DeclaratorEmpty(
-                      Declarator(
-                        None,
-                        DirectDeclaratorOnly(
-                          Identifier(
-                            "i"
-                          )
-                        )
-                      )
-                    ),
-                    DeclaratorEmpty(
-                      Declarator(
-                        None,
-                        DirectDeclaratorOnly(
-                          Identifier(
-                            "num"
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        )
-      )
-    )
+  test("while") {
+    val raw = """    while(1)
+                |    {
+                |    c++;
+                |    }
+                |""".stripMargin
+    confirmSnippet(raw, true)
   }
 }
