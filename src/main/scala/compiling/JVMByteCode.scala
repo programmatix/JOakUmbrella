@@ -22,27 +22,27 @@ object JVMByteCode {
   }
 
   // Increase the indent, but don't print anything
-  @Deprecated
-  case class IndentUp() extends Generated
+//  @Deprecated
+//  case class IndentUp() extends Generated
 
-  @Deprecated
-  case class IndentDown() extends Generated
+//  @Deprecated
+//  case class IndentDown() extends Generated
 
   // Print a newline only
-  @Deprecated
-  case class NewlineOnly() extends Generated
+//  @Deprecated
+//  case class NewlineOnly() extends Generated
 
   // Print a newline, then the current indent
-  @Deprecated
-  case class NewlineAndIndent() extends Generated
+//  @Deprecated
+//  case class NewlineAndIndent() extends Generated
 
   // Print a newline, then increase indent, then print the current indent
-  @Deprecated
-  case class NewlineAndIndentUp() extends Generated
+//  @Deprecated
+//  case class NewlineAndIndentUp() extends Generated
 
   // Print a newline, then decrease indent, then print the current indent
-  @Deprecated
-  case class NewlineAndIndentDown() extends Generated
+//  @Deprecated
+//  case class NewlineAndIndentDown() extends Generated
 
   // push a short onto the stack as an integer value
   case class sipush(v: Short) extends ByteCode {

@@ -1,6 +1,6 @@
 package compiling
 
-import java.io.{ByteArrayOutputStream, FileOutputStream}
+import java.io.{ByteArrayOutputStream, FileOutputStream, PrintWriter}
 import java.nio.charset.StandardCharsets
 
 import compiling.JVMByteCode.GenParams
@@ -10,15 +10,17 @@ import pprint.PPrinter
 import scala.io.Source
 
 class JVMClassFileWriter {
-  import scala.language.implicitConversions
 
-  private implicit def stringToBytes(x: String): Array[Byte] = (x + '\n').getBytes("UTF-8")
+  //  import scala.language.implicitConversions
+  //
+  //  private implicit def stringToBytes(x: String): Array[Byte] = (x + '\n').getBytes("UTF-8")
 
   def process(input: Seq[JVMByteCode.ByteCode]): Seq[String] = {
     implicit val genParams = GenParams()
     input.flatMap(_.gen(genParams).split('\n'))
   }
 
+  // https://docs.oracle.com/javase/specs/jvms/se6/html/ClassFile.doc.html
   def write(input: Seq[JVMByteCode.ByteCode], packageName: String, className: String): Array[Byte] = {
     val out = new ByteArrayOutputStream()
 
@@ -26,30 +28,77 @@ class JVMClassFileWriter {
     //ClassFile {
     //    u4             magic; //CAFEBABE
     val charset = StandardCharsets.UTF_8
-    out.write("CAFEBABE".getBytes(charset))
+    out.write(0xca)
+    out.write(0xfe)
+    out.write(0xba)
+    out.write(0xbe)
+
+    /*
+    Java 1.2 uses major version 46
+    Java 1.3 uses major version 47
+    Java 1.4 uses major version 48
+    Java 5 uses major version 49
+    Java 6 uses major version 50
+    Java 7 uses major version 51
+    Java 8 uses major version 52
+    Java 9 uses major version 53
+    */
 
     //    u2             minor_version;
     out.write(0)
-    out.write(1)
+    out.write(0)
 
     //    u2             major_version;
     out.write(0)
-    out.write(0)
+    out.write(50)
 
     //    u2             constant_pool_count;
+    // The value of the constant_pool_count item is equal to the number of entries in the constant_pool table plus one.
+    // The constant_pool table is indexed from 1 to constant_pool_count-1.
     out.write(0)
-    out.write(0)
+    out.write(3)
 
     //    cp_info        constant_pool[constant_pool_count-1]; //string constants etc...
+    /*
+    The CONSTANT_Class_info structure is used to represent a class or an interface:
+
+        CONSTANT_Class_info {
+          u1 tag; // 7
+          u2 name_index; // CONSTANT_Utf8_info
+        }
+     */
+    out.write(7)
+    out.write(0)
+    out.write(2)
+
+    /*
+    CONSTANT_Utf8_info {
+    	u1 tag; // 1
+    	u2 length;
+    	u1 bytes[length];
+    }
+
+     */
+    out.write(1)
+    val info = packageName + "/" + className
+    out.write(0)
+    out.write(info.length)
+    out.write(info.getBytes(charset))
+
+
+
     //    u2             access_flags;
     out.write(0)
-    out.write(0)
+    out.write(0x0001) // public
 
     //    u2             this_class;
+    // The value of the this_class item must be a valid index into the constant_pool table. The constant_pool entry at that index must be a CONSTANT_Class_info
+    // The constant_pool table is indexed from 1 to constant_pool_count-1.
     out.write(0)
-    out.write(0)
+    out.write(1)
 
     //    u2             super_class;
+    // For a class, the value of the super_class item either must be zero or must be a valid index into the constant_pool table.
     out.write(0)
     out.write(0)
 
@@ -95,8 +144,8 @@ class JVMClassFileWriter {
     })
 
 
-    out.write(s"public class $packageName.$className {")
-    out.write("}")
+    //    out.write(s"public class $packageName.$className {".)
+    //    out.write("}")
     out.toByteArray
   }
 
@@ -119,17 +168,24 @@ object JVMClassFileWriter {
         case CParseSuccess(v) =>
           val interim = g.generateTranslationUnit(v)
           val generated = i.parse(interim)
+          val byteCode = cw.process(generated)
 
           PPrinter.Color.log(v)
           PPrinter.Color.log(interim)
           PPrinter.Color.log(generated)
+          PPrinter.Color.log(byteCode)
 
           val classFile = cw.write(generated, "test", "Test")
           val classOutputFile = new FileOutputStream(classFilename)
           classOutputFile.write(classFile)
+          classOutputFile.close()
 
-//          println(classFile)
-        case CParseFail(v)    =>
+          val classOutputBytecodeFile = new PrintWriter(new FileOutputStream(classFilename.replace(".class", ".bc")))
+          classOutputBytecodeFile.write(byteCode.mkString("\n"))
+          classOutputBytecodeFile.close()
+
+        //          println(classFile)
+        case CParseFail(v) =>
           println(s"Failed to parse: ${v}")
       }
     }

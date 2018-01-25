@@ -199,26 +199,26 @@ class JVMByteCodeGenerator {
         v.v2.map(x => generateExpression(x)).getOrElse(Seq[Generated]()) ++ GS(")") ++ newlineIndent ++
         generateStatement(v.v3) ++ newlineIndent
       case v: LabelledLabel            => generateIdentifier(v.v1) ++ GS(":") ++ generateStatement(v.v2)
-      case v: LabelledCase             => GS("case") ++ generateExpression(v.v1) ++ GS(":") ++ Seq(NewlineAndIndentUp()) ++ generateStatement(v.v2) ++ Seq(IndentDown())
+      case v: LabelledCase             => GS("case") ++ generateExpression(v.v1) ++ GS(":") ++ generateStatement(v.v2)
       case cs: CompoundStatement       => {
         val blockItems: Seq[Generated] = {
           val it = cs.v.iterator
           val out = ArrayBuffer.empty[Generated]
           while (it.hasNext) {
             out ++= generateBlockItem(it.next())
-            if (it.hasNext) out ++= Seq(GenString(";"), NewlineAndIndent())
+            if (it.hasNext) {}
             else out ++= Seq(GenString(";"))
           }
           //          val out = it.flatMap(x => generateBlockItem(x)) ++ (if (it.hasNext) Seq(GenString(";"), NewlineAndIndent()) else Seq())
           out.toList
         }
-        GS("{") ++ Seq(NewlineAndIndentUp()) ++ blockItems ++ Seq(NewlineAndIndentDown()) ++ GS("}") ++ newlineIndent
+        blockItems
       }
       case v: ExpressionStatement      => generateExpression(v.expression) ++ endlineIndent
       case v: SelectionIf              => GS("if", "(") ++ generateExpression(v.v1) ++ GS(")") ++ generateStatement(v.v2)
       case v: SelectionIfElse          => GS("if", "(") ++ generateExpression(v.v1) ++ GS(")") ++ generateStatement(v.v2) ++ GS("else") ++ generateStatement(v.v3)
       case v: SelectionSwitch          => GS("switch", "(") ++ generateExpression(v.v1) ++ GS(")") ++ generateStatement(v.v2)
-      case v: ExpressionEmptyStatement => newlineIndent ++ Seq(GenString(";"), NewlineAndIndent())
+      case v: ExpressionEmptyStatement => Seq()
       //      case v: StatementDeclaration =>
       case v: Return          =>
         v.v match {
@@ -227,7 +227,7 @@ class JVMByteCodeGenerator {
             Seq(sipush(simple), ireturn())
           case _         => Seq(ret())
         }
-      case v: LabelledDefault => GS("default:") ++ Seq(NewlineAndIndentUp()) ++ generateStatement(v.v2) ++ Seq(IndentDown())
+      case v: LabelledDefault => GS("default:") ++ generateStatement(v.v2)
     }
   }
 
@@ -270,7 +270,7 @@ class JVMByteCodeGenerator {
   def generateSpecifierQualifierList(v: Seq[DeclarationSpecifier]): Seq[Generated] = v.flatMap(generateDeclarationSpecifier)
 
   def generateStructDeclaration(in: StructDeclaration): Seq[Generated] = {
-    generateSpecifierQualifierList(in.v) ++ in.v2.map(x => generateStructDeclaratorList(x)).getOrElse(Seq()) ++ Seq(GenString(";"), NewlineAndIndent())
+    generateSpecifierQualifierList(in.v) ++ in.v2.map(x => generateStructDeclaratorList(x)).getOrElse(Seq())
   }
 
   def generateIdentifier(in: Identifier): Seq[Generated] = {
@@ -280,7 +280,7 @@ class JVMByteCodeGenerator {
   def generateExternalDeclaration(in: ExternalDeclaration): Seq[Generated] = {
     in match {
       case v: FunctionDefinition => generateFunctionDefinition(v)
-      case v: Declaration        => generateDeclaration(v) ++ Seq(GenString(";"), NewlineAndIndent())
+      case v: Declaration        => generateDeclaration(v)
     }
   }
 
@@ -316,7 +316,7 @@ class JVMByteCodeGenerator {
   def generateDeclarationSpecifier(in: DeclarationSpecifier): Seq[Generated] = {
     in match {
       case v: StorageClassSpecifier => GS(v.v)
-      case v: StructImpl            => GS(if (v.isStruct) "struct" else "union") ++ v.id.map(generateIdentifier).getOrElse(Seq()) ++ GS("{") ++ Seq(NewlineAndIndentUp()) ++ generateStructDeclarationList(v.v2) ++ Seq(NewlineAndIndentDown()) ++ GS("}")
+      case v: StructImpl            => GS(if (v.isStruct) "struct" else "union") ++ v.id.map(generateIdentifier).getOrElse(Seq()) ++ generateStructDeclarationList(v.v2)
       case v: StructUse             => GS(if (v.isStruct) "struct" else "union") ++ generateIdentifier(v.id)
       case v: TypeSpecifierSimple   => GS(v.v)
       case v: TypeQualifier         => GS(v.v)
@@ -446,7 +446,7 @@ class JVMByteCodeGenerator {
     GS(name.v)
   }
 
-  def generateGroup(v: Group): Seq[Generated] = v.v.flatMap(x => generateGroupPart(x) ++ Seq(NewlineAndIndent()))
+  def generateGroup(v: Group): Seq[Generated] = v.v.flatMap(x => generateGroupPart(x))
 
   def generateGroupPart(in: GroupPart): Seq[Generated] = {
     in match {
