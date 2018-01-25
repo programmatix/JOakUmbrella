@@ -1,6 +1,25 @@
+# C to JVM
+Reads C source and compiles it into Java .class files so it can run on the JVM.
+
+## Status
+Parser working well with quite complex source, probably a few bugs left.
+A C generator working quite well, great for testing the parser.
+A ScalaJS widget that turns C into the AST, and back into C.
+JVM generation just started.
+
 Desirables
 ==========
-* Convert to Scala support
 * Better display of errors
 * Handle comments
-* Handle preprocessing
+
+Release Process
+===============
+sbt
+fastOptJS
+fullOptJS
+
+Copy to site:
+copy
+copyProd
+
+Build & release site

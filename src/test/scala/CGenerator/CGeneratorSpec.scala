@@ -1,14 +1,15 @@
 package CGenerator
 
 import fastparse.core.Parsed
-import generating.{CGeneratedPrinter, CGenerator, GenStrings}
+import generating.{CGeneratedPrinter, CGenerator}
+import generating.CGenerator._
 import org.scalatest.FunSuite
 import parsing._
 import pprint.PPrinter
 
 class CGeneratorSpec extends FunSuite {
-  val gg = createGenerator()
-  val pp = createParser()
+  private val gg = createGenerator()
+  private val pp = createParser()
 
   def good[T, Elem, Repr](p: Parsed[T, Elem, Repr], expected: T): Unit = {
     p match {

@@ -1,14 +1,14 @@
-package generating
+package compiling
 
-import generating.CGenerator._
-import generating.CGenerator.{GenString, GenStrings, Generated}
+import compiling.JVMByteCode._
 import parsing._
 import parsing.{BlockItem, TranslationUnit}
 
 import scala.collection.mutable.ArrayBuffer
 
-// Converts a C AST back into C code.  It returns a Seq[Generated] which can be given to CGeneratedPrinter
-class CGenerator {
+
+// Converts a C AST into JVM bytecode.  It returns a Seq[JVMByteCode.Generated]
+class JVMByteCodeGenerator {
   @Deprecated
   private val newlineIndent: Seq[Generated] = Seq()
   @Deprecated
@@ -32,14 +32,70 @@ class CGenerator {
 
   def generateDeclaration(in: Declaration): Seq[Generated] = {
     in match {
-      case v: SimpleDeclaration       => generateDeclarationSpecifiers(v.spec) ++ v.init.map(generateInitDeclatorList).getOrElse(Seq()) ++ endlineIndent
+      case v: SimpleDeclaration       => generateSimpleDeclaration(v)
       case v: StaticAssertDeclaration => GS("_Static_assert", "(") ++ generateExpression(v.v1) ++ GS(",") ++ generateExpression(v.v2) ++ GS(")") ++ endlineIndent
+    }
+  }
+
+  def resolveDeclaratorToIdentifer(in: Declarator): Identifier = {
+    if (in.pointer.isDefined) {
+      throw JVMGenUnsupportedCurrently("handle pointers while trying to create identifier")
+    }
+    in.v match {
+      case v: DDBracketed          => throw JVMGenUnsupportedCurrently("handle DDBracketed while trying to create identifier")
+      case v: DirectDeclaratorOnly => v.v
+      case v: FunctionDeclaration  => throw JVMGenUnsupportedCurrently("handle FunctionDeclaration while trying to create identifier")
+    }
+
+  }
+
+  // >>int hello = "world"<<;
+  def generateSimpleDeclaration(in: SimpleDeclaration): Seq[Generated] = {
+
+    val typ = resolveDeclarationSpecifiersToTypeString(in.spec)
+
+    in.init match {
+      case Some(initDeclarators) =>
+        // int >>hello<<;
+        // int >>hello=3<<;
+        initDeclarators.flatMap(initDeclarator => initDeclarator match {
+          // int >>hello<<;
+          case v: DeclaratorEmpty =>
+            val varName = resolveDeclaratorToIdentifer(v.declarator).v
+            val out: Seq[Generated] = Seq(DeclareVariable(varName, typ))
+            out
+
+          // int >>hello=3<<;
+          case v: DeclaratorWithInit =>
+            val varName = resolveDeclaratorToIdentifer(v.declarator).v
+            val out: Seq[Generated] = Seq(DeclareVariable(varName, typ)) ++ generateInitializer(v.init)
+            out
+        })
+      case _                     =>
+        throw JVMGenUnsupportedCurrently(s"cannot handle SimpleDeclaration ${in} as no declaration")
     }
   }
 
   def generateSeqBlockItem(in: Seq[BlockItem]): Seq[Generated] = in.flatMap(v => generateBlockItem(v))
 
   def generateTranslationUnit(in: TranslationUnit): Seq[Generated] = in.v.flatMap(v => generateTop(v))
+
+  def resolveDeclarationSpecifiersToTypeString(in: DeclarationSpecifiers): String = {
+    var out: Option[String] = None
+    in.v.foreach {
+      case v: StorageClassSpecifier => throw JVMGenUnsupportedCurrently("StorageClassSpecifier while trying to resolve declaration specifier to type")
+      case v: StructImpl            => throw JVMGenUnsupportedCurrently("StructImpl while trying to resolve declaration specifier to type")
+      case v: StructUse             => throw JVMGenUnsupportedCurrently("StructUse while trying to resolve declaration specifier to type")
+      case v: TypeQualifier         => throw JVMGenUnsupportedCurrently("TypeQualifier while trying to resolve declaration specifier to type")
+      case v: TypeSpecifierSimple   => out = Some(v.v)
+      case v: FunctionSpecifier     => throw JVMGenUnsupportedCurrently("FunctionSpecifier while trying to resolve declaration specifier to type")
+      case v: AlignmentSpecifier    => throw JVMGenUnsupportedCurrently("AlignmentSpecifier while trying to resolve declaration specifier to type")
+    }
+
+    if (out.isEmpty) throw JVMGenUnsupportedCurrently(s"unable to find useful type in ${in}")
+    out.get
+  }
+
 
   def generateDeclarationSpecifiers(in: DeclarationSpecifiers): Seq[Generated] = in.v.flatMap(v => generateDeclarationSpecifier(v))
 
@@ -100,7 +156,7 @@ class CGenerator {
         generateStatement(v.v3) ++ newlineIndent
       case v: LabelledLabel            => generateIdentifier(v.v1) ++ GS(":") ++ generateStatement(v.v2)
       case v: LabelledCase             => GS("case") ++ generateExpression(v.v1) ++ GS(":") ++ Seq(NewlineAndIndentUp()) ++ generateStatement(v.v2) ++ Seq(IndentDown())
-      case cs: CompoundStatement        => {
+      case cs: CompoundStatement       => {
         val blockItems: Seq[Generated] = {
           val it = cs.v.iterator
           val out = ArrayBuffer.empty[Generated]
@@ -109,7 +165,7 @@ class CGenerator {
             if (it.hasNext) out ++= Seq(GenString(";"), NewlineAndIndent())
             else out ++= Seq(GenString(";"))
           }
-//          val out = it.flatMap(x => generateBlockItem(x)) ++ (if (it.hasNext) Seq(GenString(";"), NewlineAndIndent()) else Seq())
+          //          val out = it.flatMap(x => generateBlockItem(x)) ++ (if (it.hasNext) Seq(GenString(";"), NewlineAndIndent()) else Seq())
           out.toList
         }
         GS("{") ++ Seq(NewlineAndIndentUp()) ++ blockItems ++ Seq(NewlineAndIndentDown()) ++ GS("}") ++ newlineIndent
@@ -122,8 +178,10 @@ class CGenerator {
       //      case v: StatementDeclaration =>
       case v: Return          =>
         v.v match {
-          case Some(exp) => GS("return ") ++ generateExpression(exp)
-          case _         => GS("return")
+          case Some(exp) =>
+            val simple = convertExpressionToSimple(exp).toShort
+            Seq(sipush(simple), ireturn())
+          case _         => Seq(ret())
         }
       case v: LabelledDefault => GS("default:") ++ Seq(NewlineAndIndentUp()) ++ generateStatement(v.v2) ++ Seq(IndentDown())
     }
@@ -131,11 +189,13 @@ class CGenerator {
 
   def generateInitializer(in: Initializer): Seq[Generated] = {
     in match {
-      case v: InitializerSimple => generateExpression(v.exp)
+      case v: InitializerSimple =>
+        generateExpression(v.exp) ++ Seq(StoreExpressionInCurrentVar())
       case v: InitializerList   => generateExpression(v.exp)
     }
   }
 
+  @Deprecated
   def generateInitDeclarator(in: InitDeclarator): Seq[Generated] = {
     in match {
       case v: DeclaratorEmpty    => generateDeclarator(v.declarator)
@@ -150,6 +210,7 @@ class CGenerator {
     }
   }
 
+  @Deprecated
   def generateInitDeclatorList(v: Seq[InitDeclarator]): Seq[Generated] = {
     val it = v.iterator
     generateInitDeclarator(it.next()) ++ it.flatMap(x => GS(",") ++ generateInitDeclarator(x))
@@ -202,12 +263,68 @@ class CGenerator {
     }
   }
 
+  private def convertExpressionToSimple(exp: Expression): String
+
+  = {
+    exp match {
+      //      case v: ExpressionMultiply           => generateExpression(v.v1) ++ GS("*") ++ generateExpression(v.v2)
+      //      case v: ExpressionDivision           => generateExpression(v.v1) ++ GS("/") ++ generateExpression(v.v2)
+      //      case v: ExpressionMod                => generateExpression(v.v1) ++ GS("%") ++ generateExpression(v.v2)
+      //      case v: ExpressionAdd                => generateExpression(v.v1) ++ GS("+") ++ generateExpression(v.v2)
+      //      case v: ExpressionMinus              => generateExpression(v.v1) ++ GS("-") ++ generateExpression(v.v2)
+      //      case v: ExpressionLeftShift          => generateExpression(v.v1) ++ GS("<<") ++ generateExpression(v.v2)
+      //      case v: ExpressionRightShift         => generateExpression(v.v1) ++ GS(">>") ++ generateExpression(v.v2)
+      //      case v: ExpressionLessThan           => generateExpression(v.v1) ++ GS("<") ++ generateExpression(v.v2)
+      //      case v: ExpressionGreaterThan        => generateExpression(v.v1) ++ GS(">") ++ generateExpression(v.v2)
+      //      case v: ExpressionLessThanOrEqual    => generateExpression(v.v1) ++ GS("<=") ++ generateExpression(v.v2)
+      //      case v: ExpressionGreaterThanOrEqual => generateExpression(v.v1) ++ GS(">=") ++ generateExpression(v.v2)
+      //      case v: ExpressionEquals             => generateExpression(v.v1) ++ GS("==") ++ generateExpression(v.v2)
+      //      case v: ExpressionNotEquals          => generateExpression(v.v1) ++ GS("!=") ++ generateExpression(v.v2)
+      //      case v: ExpressionAnd                => generateExpression(v.v1) ++ GS("&") ++ generateExpression(v.v2)
+      //      case v: ExpressionXOr                => generateExpression(v.v1) ++ GS("^") ++ generateExpression(v.v2)
+      //      case v: ExpressionInclusiveOr        => generateExpression(v.v1) ++ GS("|") ++ generateExpression(v.v2)
+      //      case v: ExpressionLogicalAnd         => generateExpression(v.v1) ++ GS("&&") ++ generateExpression(v.v2)
+      //      case v: ExpressionLogicalOr          => generateExpression(v.v1) ++ GS("||") ++ generateExpression(v.v2)
+      //      case v: ExpressionConditional        => generateExpression(v.v1) ++ GS("?") ++ generateExpression(v.v2) ++ GS(":") ++ generateExpression(v.v3)
+      //      case v: ExpressionComma              => generateExpression(v.v1) ++ GS(",") ++ generateExpression(v.v2)
+      //      case v: ExpressionAssignment         => generateExpression(v.v1) ++ GS("=") ++ generateExpression(v.v2)
+      //      case v: EnumerationConstant          => GS(v.v)
+      //      case v: CharacterConstant            => GS(v.v)
+      case v: IntConstant => v.v.toString
+      //      case v: FloatConstant                => GS(v.v.toString)
+      //      case v: StringLiteral                => GS("\"" + v.v + "\"")
+      //      case v: Identifier                   => GS(v.v)
+      //      case v: PostfixExpressionIndex       => generateExpression(v.v1) ++ GS("[") ++ generateExpression(v.v2) ++ GS("]")
+      //      case v: PostfixExpressionMinusMinus  => generateExpression(v.v1) ++ GS("--")
+      //      case v: PostfixExpressionPlusPlus    => generateExpression(v.v1) ++ GS("++")
+      //      case v: PostfixExpressionDot         => generateExpression(v.v1) ++ GS("->") ++ generateExpression(v.v2)
+      //      case v: PostfixExpressionArrow       => generateExpression(v.v1) ++ GS("->") ++ generateExpression(v.v2)
+      //      case v: PostfixExpressionArgs        => generateExpression(v.v1) ++ GS("(") ++ v.v2.map(generateExpression).getOrElse(Seq()) ++ GS(")")
+      //      case v: PostfixExpressionSimple      => generateExpression(v.v1)
+      //      case v: CastExpression               => GS("(") ++ generateTypeName(v.v) ++ GS(")") ++ generateExpression(v.v2)
+      //      case v: UnaryExpressionPlusPlus      => GS("++") ++ generateExpression(v.v)
+      //      case v: UnaryExpressionMinusMinus    => GS("--") ++ generateExpression(v.v)
+      //      case v: UnaryExpressionCast          => GS(v.v.toString) ++ generateExpression(v.v2)
+      //      case v: UnaryExpressionSizeOf        => GS("sizeof") ++ generateExpression(v.v)
+      //      case v: UnaryExpressionSizeOfType    => GS("sizeof", "(") ++ generateTypeName(v.v) ++ GS(")")
+      //      case v: UnaryExpressionAlignOf       => GS("_Alignof", "(") ++ generateTypeName(v.v) ++ GS(")")
+      //      case v: ArgumentExpressionList       => if (v.v.nonEmpty) {
+      //        val it = v.v.iterator
+      //        it.next()
+      //        generateExpression(v.v.head) ++ it.flatMap(x => GS(",") ++ generateExpression(x))
+      //      }
+      //      else {
+      //        Seq()
+      //      }
+    }
+  }
+
   def generateExpression(exp: Expression): Seq[Generated] = {
     exp match {
-      case v: ExpressionMultiply           => generateExpression(v.v1) ++ GS("*") ++ generateExpression(v.v2)
+      case v: ExpressionMultiply           => generateExpression(v.v1) ++ generateExpression(v.v2) ++ Seq(imul())
       case v: ExpressionDivision           => generateExpression(v.v1) ++ GS("/") ++ generateExpression(v.v2)
       case v: ExpressionMod                => generateExpression(v.v1) ++ GS("%") ++ generateExpression(v.v2)
-      case v: ExpressionAdd                => generateExpression(v.v1) ++ GS("+") ++ generateExpression(v.v2)
+      case v: ExpressionAdd                => generateExpression(v.v1) ++ generateExpression(v.v2) ++ Seq(iadd())
       case v: ExpressionMinus              => generateExpression(v.v1) ++ GS("-") ++ generateExpression(v.v2)
       case v: ExpressionLeftShift          => generateExpression(v.v1) ++ GS("<<") ++ generateExpression(v.v2)
       case v: ExpressionRightShift         => generateExpression(v.v1) ++ GS(">>") ++ generateExpression(v.v2)
@@ -224,10 +341,17 @@ class CGenerator {
       case v: ExpressionLogicalOr          => generateExpression(v.v1) ++ GS("||") ++ generateExpression(v.v2)
       case v: ExpressionConditional        => generateExpression(v.v1) ++ GS("?") ++ generateExpression(v.v2) ++ GS(":") ++ generateExpression(v.v3)
       case v: ExpressionComma              => generateExpression(v.v1) ++ GS(",") ++ generateExpression(v.v2)
-      case v: ExpressionAssignment         => generateExpression(v.v1) ++ GS("=") ++ generateExpression(v.v2)
+      case v: ExpressionAssignment         =>
+        generateExpression(v.v1) ++ generateExpression(v.v2) ++ Seq(StoreExpressionInCurrentVar())
       case v: EnumerationConstant          => GS(v.v)
       case v: CharacterConstant            => GS(v.v)
-      case v: IntConstant                  => GS(v.v.toString)
+      case v: IntConstant                  =>
+        if (v.v <= Byte.MaxValue) Seq(bipush(v.v.toByte))
+        else if (v.v <= Short.MaxValue) Seq(sipush(v.v.toShort))
+        else {
+          assert(false)
+          Seq()
+        }
       case v: FloatConstant                => GS(v.v.toString)
       case v: StringLiteral                => GS("\"" + v.v + "\"")
       case v: Identifier                   => GS(v.v)
@@ -260,7 +384,7 @@ class CGenerator {
     GS(name.v)
   }
 
-  def generateGroup(v: Group): Seq[Generated] = v.v.flatMap(x => generateGroupPart(x) ++  Seq(NewlineAndIndent()))
+  def generateGroup(v: Group): Seq[Generated] = v.v.flatMap(x => generateGroupPart(x) ++ Seq(NewlineAndIndent()))
 
   def generateGroupPart(in: GroupPart): Seq[Generated] = {
     in match {
@@ -328,33 +452,4 @@ class CGenerator {
       case v: PreprocessingFile   => generateGroup(v.v)
     }
   }
-}
-
-object CGenerator {
-  // Output by CGenerator, these represent commands
-  sealed trait Generated
-
-  case class GenStrings(v: Seq[String]) extends Generated {
-    override def toString = v.mkString(" ")
-  }
-  case class GenString(v: String) extends Generated {
-    override def toString = v
-  }
-
-  // Increase the indent, but don't print anything
-  case class IndentUp() extends Generated
-
-  case class IndentDown() extends Generated
-
-  // Print a newline only
-  case class NewlineOnly() extends Generated
-
-  // Print a newline, then the current indent
-  case class NewlineAndIndent() extends Generated
-
-  // Print a newline, then increase indent, then print the current indent
-  case class NewlineAndIndentUp() extends Generated
-
-  // Print a newline, then decrease indent, then print the current indent
-  case class NewlineAndIndentDown() extends Generated
 }
