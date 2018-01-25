@@ -1,5 +1,7 @@
 package compiling
 
+import parsing._
+
 object JVMByteCode {
   case class GenParams()
 
@@ -95,8 +97,46 @@ object JVMByteCode {
     override def gen(implicit params: GenParams): String = s"neg %$register"
   }
 
+  def unsupported(err: String) = JVMGenUnsupportedCurrently(err)
 
-  case class DeclareVariable(name: String, typ: String) extends Command
+  private def makeTypes(in: Types): String = {
+    val mapped = in.types.map {
+      case v: TypeSpecifierVoid     => "void"
+      case v: TypeSpecifierChar     => "char"
+      case v: TypeSpecifierShort    => "short"
+      case v: TypeSpecifierInt      => "int"
+      case v: TypeSpecifierLong     => "long"
+      case v: TypeSpecifierFloat    => "float"
+      case v: TypeSpecifierDouble   => "double"
+      case v: TypeSpecifierSigned   => "signed"
+      case v: TypeSpecifierUnsigned => "unsigned"
+      case v: TypeSpecifierBool     => "boolean"
+      case v: TypeSpecifierComplex  => throw unsupported("_Complex type")
+      case _ => throw unsupported("unhandled type")
+    }
+    mapped.mkString(" ")
+  }
+
+  private def makeIdentifier(in: Identifier): String = in.v
+
+  private def makePassedVariables(in: Seq[DeclareVariable]): String = {
+    ""
+  }
+
+  // public static void main(java.lang.String[]);
+  // Code:
+  case class Function(in: DefineFunction) extends ByteCode {
+    override def gen(implicit params: GenParams): String = {
+      s"public static ${makeTypes(in.types)} ${makeIdentifier(in.name)}(${makePassedVariables(in.passedVariables)});\nCode:"
+    }
+
+  }
+
+
+  // Most of the time this will just be one type like "int"
+  case class Types(types: Seq[TypeSpecifier])
+  case class DefineFunction(name: Identifier, types: Types, passedVariables: Seq[DeclareVariable]) extends Command
+  case class DeclareVariable(name: Identifier, types: Types) extends Command
   case class StoreExpressionInCurrentVar() extends Command
 
   case class JVMGenUnsupportedCurrently(err: String) extends RuntimeException(s"Operation is not currently supported: ${err}")

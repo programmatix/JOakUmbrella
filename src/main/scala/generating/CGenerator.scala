@@ -100,7 +100,7 @@ class CGenerator {
         generateStatement(v.v3) ++ newlineIndent
       case v: LabelledLabel            => generateIdentifier(v.v1) ++ GS(":") ++ generateStatement(v.v2)
       case v: LabelledCase             => GS("case") ++ generateExpression(v.v1) ++ GS(":") ++ Seq(NewlineAndIndentUp()) ++ generateStatement(v.v2) ++ Seq(IndentDown())
-      case cs: CompoundStatement        => {
+      case cs: CompoundStatement       => {
         val blockItems: Seq[Generated] = {
           val it = cs.v.iterator
           val out = ArrayBuffer.empty[Generated]
@@ -109,7 +109,7 @@ class CGenerator {
             if (it.hasNext) out ++= Seq(GenString(";"), NewlineAndIndent())
             else out ++= Seq(GenString(";"))
           }
-//          val out = it.flatMap(x => generateBlockItem(x)) ++ (if (it.hasNext) Seq(GenString(";"), NewlineAndIndent()) else Seq())
+          //          val out = it.flatMap(x => generateBlockItem(x)) ++ (if (it.hasNext) Seq(GenString(";"), NewlineAndIndent()) else Seq())
           out.toList
         }
         GS("{") ++ Seq(NewlineAndIndentUp()) ++ blockItems ++ Seq(NewlineAndIndentDown()) ++ GS("}") ++ newlineIndent
@@ -195,6 +195,17 @@ class CGenerator {
       case v: StorageClassSpecifier => GS(v.v)
       case v: StructImpl            => GS(if (v.isStruct) "struct" else "union") ++ v.id.map(generateIdentifier).getOrElse(Seq()) ++ GS("{") ++ Seq(NewlineAndIndentUp()) ++ generateStructDeclarationList(v.v2) ++ Seq(NewlineAndIndentDown()) ++ GS("}")
       case v: StructUse             => GS(if (v.isStruct) "struct" else "union") ++ generateIdentifier(v.id)
+      case v: TypeSpecifierVoid     => GS("void")
+      case v: TypeSpecifierChar     => GS("char")
+      case v: TypeSpecifierShort    => GS("short")
+      case v: TypeSpecifierInt      => GS("int")
+      case v: TypeSpecifierLong     => GS("long")
+      case v: TypeSpecifierFloat    => GS("float")
+      case v: TypeSpecifierDouble   => GS("double")
+      case v: TypeSpecifierSigned   => GS("signed")
+      case v: TypeSpecifierUnsigned => GS("unsigned")
+      case v: TypeSpecifierBool     => GS("_Bool")
+      case v: TypeSpecifierComplex  => GS("_Complex")
       case v: TypeSpecifierSimple   => GS(v.v)
       case v: TypeQualifier         => GS(v.v)
       case v: FunctionSpecifier     => GS(v.v)
@@ -260,7 +271,7 @@ class CGenerator {
     GS(name.v)
   }
 
-  def generateGroup(v: Group): Seq[Generated] = v.v.flatMap(x => generateGroupPart(x) ++  Seq(NewlineAndIndent()))
+  def generateGroup(v: Group): Seq[Generated] = v.v.flatMap(x => generateGroupPart(x) ++ Seq(NewlineAndIndent()))
 
   def generateGroupPart(in: GroupPart): Seq[Generated] = {
     in match {
@@ -331,12 +342,14 @@ class CGenerator {
 }
 
 object CGenerator {
+
   // Output by CGenerator, these represent commands
   sealed trait Generated
 
   case class GenStrings(v: Seq[String]) extends Generated {
     override def toString = v.mkString(" ")
   }
+
   case class GenString(v: String) extends Generated {
     override def toString = v
   }
@@ -357,4 +370,5 @@ object CGenerator {
 
   // Print a newline, then decrease indent, then print the current indent
   case class NewlineAndIndentDown() extends Generated
+
 }

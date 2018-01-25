@@ -1,8 +1,7 @@
 package compiling
 
 import compiling.JVMByteCode._
-import parsing._
-import parsing.{BlockItem, TranslationUnit}
+import parsing.{BlockItem, TranslationUnit, _}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -37,7 +36,7 @@ class JVMByteCodeGenerator {
     }
   }
 
-  def resolveDeclaratorToIdentifer(in: Declarator): Identifier = {
+  def resolveDeclaratorToIdentifier(in: Declarator): Identifier = {
     if (in.pointer.isDefined) {
       throw JVMGenUnsupportedCurrently("handle pointers while trying to create identifier")
     }
@@ -52,7 +51,7 @@ class JVMByteCodeGenerator {
   // >>int hello = "world"<<;
   def generateSimpleDeclaration(in: SimpleDeclaration): Seq[Generated] = {
 
-    val typ = resolveDeclarationSpecifiersToTypeString(in.spec)
+    val types = resolveDeclarationSpecifiersToTypes(in.spec)
 
     in.init match {
       case Some(initDeclarators) =>
@@ -61,16 +60,42 @@ class JVMByteCodeGenerator {
         initDeclarators.flatMap(initDeclarator => initDeclarator match {
           // int >>hello<<;
           case v: DeclaratorEmpty =>
-            val varName = resolveDeclaratorToIdentifer(v.declarator).v
-            val out: Seq[Generated] = Seq(DeclareVariable(varName, typ))
+            val varName = resolveDeclaratorToIdentifier(v.declarator)
+            val out: Seq[Generated] = Seq(DeclareVariable(varName, types))
             out
 
           // int >>hello=3<<;
           case v: DeclaratorWithInit =>
-            val varName = resolveDeclaratorToIdentifer(v.declarator).v
-            val out: Seq[Generated] = Seq(DeclareVariable(varName, typ)) ++ generateInitializer(v.init)
+            val varName = resolveDeclaratorToIdentifier(v.declarator)
+            val out: Seq[Generated] = Seq(DeclareVariable(varName, types)) ++ generateInitializer(v.init)
             out
         })
+      case _                     =>
+        throw JVMGenUnsupportedCurrently(s"cannot handle SimpleDeclaration ${in} as no declaration")
+    }
+  }
+
+  def resolveSimpleDeclarationToVariable(in: SimpleDeclaration): DeclareVariable = {
+
+    val types = resolveDeclarationSpecifiersToTypes(in.spec)
+
+    in.init match {
+      case Some(initDeclarators) =>
+        if (initDeclarators.size > 1) {
+          throw JVMGenUnsupportedCurrently("got multiple DeclaratorWithInit")
+        }
+        // int >>hello<<;
+        // int >>hello=3<<;
+        initDeclarators.head match {
+          // int >>hello<<;
+          case v: DeclaratorEmpty =>
+            val varName = resolveDeclaratorToIdentifier(v.declarator)
+            DeclareVariable(varName, types)
+
+          // int >>hello=3<<;
+          case v: DeclaratorWithInit =>
+            throw JVMGenUnsupportedCurrently("got DeclaratorWithInit in SimpleDeclaration")
+        }
       case _                     =>
         throw JVMGenUnsupportedCurrently(s"cannot handle SimpleDeclaration ${in} as no declaration")
     }
@@ -80,26 +105,45 @@ class JVMByteCodeGenerator {
 
   def generateTranslationUnit(in: TranslationUnit): Seq[Generated] = in.v.flatMap(v => generateTop(v))
 
-  def resolveDeclarationSpecifiersToTypeString(in: DeclarationSpecifiers): String = {
-    var out: Option[String] = None
-    in.v.foreach {
+  def resolveDeclarationSpecifiersToTypes(in: DeclarationSpecifiers): Types = {
+    Types(in.v.map {
       case v: StorageClassSpecifier => throw JVMGenUnsupportedCurrently("StorageClassSpecifier while trying to resolve declaration specifier to type")
       case v: StructImpl            => throw JVMGenUnsupportedCurrently("StructImpl while trying to resolve declaration specifier to type")
       case v: StructUse             => throw JVMGenUnsupportedCurrently("StructUse while trying to resolve declaration specifier to type")
       case v: TypeQualifier         => throw JVMGenUnsupportedCurrently("TypeQualifier while trying to resolve declaration specifier to type")
-      case v: TypeSpecifierSimple   => out = Some(v.v)
+      case v: TypeSpecifierTyped    => v
+      case v: TypeSpecifierSimple   => throw JVMGenUnsupportedCurrently("TypeSpecifierSimple while trying to resolve declaration specifier to type")
       case v: FunctionSpecifier     => throw JVMGenUnsupportedCurrently("FunctionSpecifier while trying to resolve declaration specifier to type")
       case v: AlignmentSpecifier    => throw JVMGenUnsupportedCurrently("AlignmentSpecifier while trying to resolve declaration specifier to type")
-    }
-
-    if (out.isEmpty) throw JVMGenUnsupportedCurrently(s"unable to find useful type in ${in}")
-    out.get
+    })
   }
 
 
   def generateDeclarationSpecifiers(in: DeclarationSpecifiers): Seq[Generated] = in.v.flatMap(v => generateDeclarationSpecifier(v))
 
-  def generateDeclarationList(in: DeclarationList): Seq[Generated] = in.v.flatMap(v => generateBlockItem(v))
+  def resolveDeclarationListToVariables(in: DeclarationList): Seq[DeclareVariable] = {
+    in.v.map {
+      case x: SimpleDeclaration       => resolveSimpleDeclarationToVariable(x)
+      case x: StaticAssertDeclaration => throw JVMGenUnsupportedCurrently("got StaticAssertDeclaration in DeclarationList")
+    }
+  }
+
+  def unsupported(err: String) = JVMByteCode.unsupported(err)
+
+  def resolveParameterTypeListToVariables(in: ParameterTypeList): Seq[DeclareVariable] = {
+    if (in.ellipses) {
+      throw unsupported("ellipses in parameter type list")
+    }
+    in.v.map {
+      case x: ParameterDeclarationDeclarator       => resolveToVariable(x.v2, x.v)
+    }
+  }
+
+  def resolveToVariable(declarator: Declarator, specifiers: DeclarationSpecifiers): DeclareVariable = {
+    val types = resolveDeclarationSpecifiersToTypes(specifiers)
+    val varName = resolveDeclaratorToIdentifier(declarator)
+    DeclareVariable(varName, types)
+  }
 
   def generateParameterDeclaration(in: ParameterDeclaration): Seq[Generated] = {
     in match {
@@ -233,16 +277,34 @@ class JVMByteCodeGenerator {
     GS(in.v)
   }
 
-  def generateOptDeclarationList(in: Option[DeclarationList]): Seq[Generated] = {
-    val out = ArrayBuffer.empty[Generated]
-    in.map(v => out ++= generateDeclarationList(v))
-    out
-  }
-
   def generateExternalDeclaration(in: ExternalDeclaration): Seq[Generated] = {
     in match {
-      case v: FunctionDefinition => generateDeclarationSpecifiers(v.spec) ++ generateDeclarator(v.dec) ++ generateOptDeclarationList(v.decs) ++ generateStatement(v.v) ++ Seq(NewlineOnly(), NewlineAndIndent())
+      case v: FunctionDefinition => generateFunctionDefinition(v)
       case v: Declaration        => generateDeclaration(v) ++ Seq(GenString(";"), NewlineAndIndent())
+    }
+  }
+
+  def generateFunctionDefinition(in: FunctionDefinition): Seq[Generated] = {
+    val typ = resolveDeclarationSpecifiersToTypes(in.spec)
+//    val varName = resolveDeclaratorToIdentifier(in.dec).v
+
+    if (in.dec.pointer.isDefined) {
+      throw JVMGenUnsupportedCurrently("handle pointers while trying to declare function")
+    }
+    in.dec.v match {
+      case v: DDBracketed          => throw JVMGenUnsupportedCurrently("handle DDBracketed while trying to declare function")
+      case v: DirectDeclaratorOnly => throw JVMGenUnsupportedCurrently("handle DDBracketed while trying to declare function")
+      case v: FunctionDeclaration  =>
+//        val variables: Seq[DeclareVariable] = in.decs match {
+//          case Some(declarationList) => resolveDeclarationListToVariables(declarationList)
+//          case _                     => Seq()
+//        }
+
+        val name = v.name
+        val variables = resolveParameterTypeListToVariables(v.params)
+
+        Seq(DefineFunction(name, typ, variables)) ++ generateStatement(in.v)
+
     }
   }
 

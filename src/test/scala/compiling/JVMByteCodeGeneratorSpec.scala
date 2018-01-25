@@ -39,23 +39,14 @@ class JVMByteCodeGeneratorSpec extends FunSuite {
   }
 
 
-    ignore("func just returns;") {
-    CompilingTestUtils.testCSnippetAgainstJVM("""int main() {
-                                                       |    return;
-                                                       |}""".stripMargin,
-      """_main:
-        |ret
-      """.stripMargin)
-  }
-
-  ignore("func just returns 2;") {
-    CompilingTestUtils.testCSnippetAgainstJVM("""int main() {
+    test("func returns 2;") {
+    CompilingTestUtils.testCTopAgainstJVM("""int main() {
                                                        |    return 2;
                                                        |}""".stripMargin,
-      """_main:
-        |movl $2,%eax
-        |ret
+      """public static int main();
+        |Code:
+        |sipush 2
+        |ireturn
       """.stripMargin)
   }
-
 }

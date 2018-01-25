@@ -24,6 +24,8 @@ class JVMByteCodeInterim {
     val out = ArrayBuffer.empty[JVMByteCode.ByteCode]
 
     var fc = FunctionContext(Seq(), None)
+//    val stack = mutable.Stack.empty[FunctionContext]
+
 
     in.foreach {
       case byteCode: JVMByteCode.ByteCode =>
@@ -32,7 +34,7 @@ class JVMByteCodeInterim {
       case command: JVMByteCode.Command   =>
         command match {
           case v: DeclareVariable =>
-            val variable = Variable(v.name, fc.variables.length)
+            val variable = Variable(v.name.v, fc.variables.length)
             fc = FunctionContext.addVariable(fc, variable)
 
           case v: StoreExpressionInCurrentVar =>
@@ -42,6 +44,10 @@ class JVMByteCodeInterim {
               case _ =>
                 throw JVMInterimBadState("Current variable is required but not available")
             }
+
+          case v: DefineFunction =>
+            out += Function(v)
+//            fc = FunctionContext(Seq(), Seq())
         }
 
 
