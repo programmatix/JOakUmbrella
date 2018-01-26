@@ -1,6 +1,6 @@
 package compiling
 
-import java.io.{ByteArrayOutputStream, FileOutputStream, PrintWriter}
+import java.io.{ByteArrayOutputStream, FileOutputStream}
 import java.nio.charset.StandardCharsets
 
 import compiling.JVMByteCode.GenParams
@@ -80,10 +80,18 @@ class JVMClassFileWriter {
 
      */
     out.write(1)
-    val info = packageName + "/" + className
+    val fullClassName = packageName + "/" + className
     out.write(0)
-    out.write(info.length)
-    out.write(info.getBytes(charset))
+    out.write(fullClassName.length)
+    out.write(fullClassName.getBytes(charset))
+
+    // Method
+    out.write(1)
+    val methodName = "main"
+    out.write(0)
+    out.write(methodName.length)
+    out.write(methodName.getBytes(charset))
+
 
 
 
@@ -115,16 +123,35 @@ class JVMClassFileWriter {
     out.write(0)
 
     //    field_info     fields[fields_count];
+    // The field_info (§4.5) structures represent all fields, both class variables and instance variables, declared by this class or interface type.
     out.write(0)
     out.write(0)
 
     //    u2             methods_count;
     out.write(0)
-    out.write(0)
+    out.write(1)
 
     //    method_info    methods[methods_count];
+    // Each value in the methods table must be a method_info (§4.6) structure giving a complete description of a method in this class or interface.
+    /*
+
+    method_info {
+    	u2 access_flags;
+    	u2 name_index;
+    	u2 descriptor_index;
+    	u2 attributes_count;
+    	attribute_info attributes[attributes_count];
+    }
+
+
+     */
+
     out.write(0)
+    out.write(1 | 8) // public static
+
+    // The value of the name_index item must be a valid index into the constant_pool table. The constant_pool entry at that index must be a CONSTANT_Utf8_info
     out.write(0)
+    out.write(2)
 
     //    u2             attributes_count;
     out.write(0)
@@ -159,30 +186,33 @@ object JVMClassFileWriter {
     else {
       val p = new CParser
       val g = new JVMByteCodeGenerator
-      val i = new JVMByteCodeInterim
+//      val i = new JVMClassFileGenerator
       val cw = new JVMClassFileWriter
       val cFilename = args(0)
       val classFilename = args(1)
       val in = Source.fromFile(cFilename, "UTF-8").getLines().mkString("\n")
       p.parse(in) match {
         case CParseSuccess(v) =>
-          val interim = g.generateTranslationUnit(v)
-          val generated = i.parse(interim)
-          val byteCode = cw.process(generated)
+          val cf = new JVMClassFileBuilder(50, 0, "test", "Test")
+          g.generateTranslationUnit(v, cf)
+//          val generated = i.parse(interim)
+          val byteCode = new ByteArrayOutputStream()
+          cf.write(byteCode, StandardCharsets.UTF_8)
+//          val byteCode = cw.process(generated)
 
           PPrinter.Color.log(v)
-          PPrinter.Color.log(interim)
-          PPrinter.Color.log(generated)
+//          PPrinter.Color.log(interim)
+//          PPrinter.Color.log(generated)
           PPrinter.Color.log(byteCode)
 
-          val classFile = cw.write(generated, "test", "Test")
+//          val classFile = cw.write(byteCode.toByteArray, "test", "Test")
           val classOutputFile = new FileOutputStream(classFilename)
-          classOutputFile.write(classFile)
+          classOutputFile.write(byteCode.toByteArray)
           classOutputFile.close()
 
-          val classOutputBytecodeFile = new PrintWriter(new FileOutputStream(classFilename.replace(".class", ".bc")))
-          classOutputBytecodeFile.write(byteCode.mkString("\n"))
-          classOutputBytecodeFile.close()
+//          val classOutputBytecodeFile = new PrintWriter(new FileOutputStream(classFilename.replace(".class", ".bc")))
+//          classOutputBytecodeFile.write(byteCode.mkString("\n"))
+//          classOutputBytecodeFile.close()
 
         //          println(classFile)
         case CParseFail(v) =>

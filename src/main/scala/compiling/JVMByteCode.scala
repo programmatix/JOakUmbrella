@@ -1,5 +1,9 @@
 package compiling
 
+import java.io.ByteArrayOutputStream
+import java.nio.charset.Charset
+
+import compiling.JVMClassFileTypes.JVMClassFileBuilderUtils
 import parsing._
 
 object JVMByteCode {
@@ -7,6 +11,12 @@ object JVMByteCode {
 
   // Output by CGenerator, these represent commands
   sealed trait Generated {
+    // Returns bytes written
+    def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+      assert(false)
+      0
+    }
+
     def gen(implicit genParams: GenParams): String = toString
   }
   sealed trait ByteCode extends Generated
@@ -15,48 +25,43 @@ object JVMByteCode {
   @Deprecated
   case class GenStrings(v: Seq[String]) extends Generated {
     override def toString = v.mkString(" ")
+    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = 0
   }
   @Deprecated
   case class GenString(v: String) extends Generated {
     override def toString = v
+    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = 0
   }
-
-  // Increase the indent, but don't print anything
-//  @Deprecated
-//  case class IndentUp() extends Generated
-
-//  @Deprecated
-//  case class IndentDown() extends Generated
-
-  // Print a newline only
-//  @Deprecated
-//  case class NewlineOnly() extends Generated
-
-  // Print a newline, then the current indent
-//  @Deprecated
-//  case class NewlineAndIndent() extends Generated
-
-  // Print a newline, then increase indent, then print the current indent
-//  @Deprecated
-//  case class NewlineAndIndentUp() extends Generated
-
-  // Print a newline, then decrease indent, then print the current indent
-//  @Deprecated
-//  case class NewlineAndIndentDown() extends Generated
 
   // push a short onto the stack as an integer value
   case class sipush(v: Short) extends ByteCode {
     override def gen(implicit params: GenParams): String = s"sipush $v"
+    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+      JVMClassFileBuilderUtils.writeByte(out, 0x11)
+      JVMClassFileBuilderUtils.writeByte(out, v)
+      2
+    }
   }
 
   // push a byte onto the stack as an integer value
-  case class bipush(v: Byte) extends ByteCode {
+  case class bipush(v: Short) extends ByteCode {
+    assert (v < 256)
+
     override def gen(implicit params: GenParams): String = s"bipush $v"
+    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+      JVMClassFileBuilderUtils.writeByte(out, 0x10)
+      JVMClassFileBuilderUtils.writeByte(out, v)
+      2
+    }
   }
 
   // return an integer from a method
   case class ireturn() extends ByteCode {
     override def gen(implicit params: GenParams): String = "ireturn"
+    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+      JVMClassFileBuilderUtils.writeByte(out, 0xac)
+      1
+    }
   }
 
   // store int value into variable #index
@@ -67,35 +72,75 @@ object JVMByteCode {
         case _ => s"istore $variable"
       }
     }
+    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+      variable match {
+        case 0 =>
+          JVMClassFileBuilderUtils.writeByte(out, 0x3b)
+          1
+        case 1 =>
+          JVMClassFileBuilderUtils.writeByte(out, 0x3c)
+          1
+        case 2 =>
+          JVMClassFileBuilderUtils.writeByte(out, 0x3d)
+          1
+        case 3 =>
+          JVMClassFileBuilderUtils.writeByte(out, 0x3e)
+          1
+        case _ =>
+          JVMClassFileBuilderUtils.writeByte(out, 0x36)
+          JVMClassFileBuilderUtils.writeByte(out, variable)
+          2
+      }
+
+    }
   }
 
   // multiply two integers
   case class imul() extends ByteCode {
     override def gen(implicit params: GenParams): String = "imul"
+    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+      JVMClassFileBuilderUtils.writeByte(out, 0x68)
+      1
+    }
   }
 
   // add two integers
   case class iadd() extends ByteCode {
     override def gen(implicit params: GenParams): String = "iadd"
+    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+      JVMClassFileBuilderUtils.writeByte(out, 0x60)
+      1
+    }
   }
 
   // return void from method
   case class ret() extends ByteCode {
     override def gen(implicit params: GenParams): String = "return"
+    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+      JVMClassFileBuilderUtils.writeByte(out, 0xa9)
+      1
+    }
   }
 
-  case class label(symbol: String) extends ByteCode {
-    override def gen(implicit params: GenParams): String = symbol + ":"
-  }
+//  case class label(symbol: String) extends ByteCode {
+//    override def gen(implicit params: GenParams): String = symbol + ":"
+//    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+//      assert(false) // ???
+//      0
+//    }
+//  }
 
-  case class movl(constant: String, register: String) extends ByteCode {
-    override def gen(implicit params: GenParams): String = s"movl $constant,%$register"
-  }
+//  case class movl(constant: String, register: String) extends ByteCode {
+//    override def gen(implicit params: GenParams): String = s"movl $constant,%$register"
+//  }
 
   // 3 -> -3
-  case class neg(register: String) extends ByteCode {
-    override def gen(implicit params: GenParams): String = s"neg %$register"
-  }
+//  case class neg(register: String) extends ByteCode {
+//    override def gen(implicit params: GenParams): String = s"neg %$register"
+//    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+//      JVMClassFileBuilderUtils.writeByte(out, 0xac)
+//    }
+//  }
 
   def unsupported(err: String) = JVMGenUnsupportedCurrently(err)
 
@@ -117,25 +162,27 @@ object JVMByteCode {
     mapped.mkString(" ")
   }
 
-  private def makeIdentifier(in: Identifier): String = in.v
+//  private def makeIdentifier(in: Identifier): String = in.v
+//
+//  private def makePassedVariables(in: Seq[DeclareVariable]): String = {
+//    ""
+//  }
 
-  private def makePassedVariables(in: Seq[DeclareVariable]): String = {
-    ""
-  }
-
-  // public static void main(java.lang.String[]);
-  // Code:
-  case class Function(in: DefineFunction) extends ByteCode {
-    override def gen(implicit params: GenParams): String = {
-      s"public static ${makeTypes(in.types)} ${makeIdentifier(in.name)}(${makePassedVariables(in.passedVariables)});\nCode:"
-    }
-
-  }
+//  sealed trait ByteCodeComplex
+//
+//  // public static void main(java.lang.String[]);
+//  // Code:
+//  case class Function(in: DefineFunction) extends ByteCodeComplex {
+//    override def gen(implicit params: GenParams): String = {
+//      s"public static ${makeTypes(in.types)} ${makeIdentifier(in.name)}(${makePassedVariables(in.passedVariables)});\nCode:"
+//    }
+//
+//  }
 
 
   // Most of the time this will just be one type like "int"
   case class Types(types: Seq[TypeSpecifier])
-  case class DefineFunction(name: Identifier, types: Types, passedVariables: Seq[DeclareVariable]) extends Command
+//  case class DefineFunction(name: Identifier, types: Types, passedVariables: Seq[DeclareVariable]) extends Command
   case class DeclareVariable(name: Identifier, types: Types) extends Command
   case class StoreExpressionInCurrentVar() extends Command
 

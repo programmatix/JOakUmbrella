@@ -103,7 +103,7 @@ class JVMByteCodeGenerator {
 
   def generateSeqBlockItem(in: Seq[BlockItem]): Seq[Generated] = in.flatMap(v => generateBlockItem(v))
 
-  def generateTranslationUnit(in: TranslationUnit): Seq[Generated] = in.v.flatMap(v => generateTop(v))
+  def generateTranslationUnit(in: TranslationUnit, cf: JVMClassFileBuilder): Unit = in.v.foreach(v => generateTop(v, cf))
 
   def resolveDeclarationSpecifiersToTypes(in: DeclarationSpecifiers): Types = {
     Types(in.v.map {
@@ -224,7 +224,13 @@ class JVMByteCodeGenerator {
         v.v match {
           case Some(exp) =>
             val simple = convertExpressionToSimple(exp).toShort
-            Seq(sipush(simple), ireturn())
+            if (simple < 256) {
+              Seq(bipush(simple), ireturn())
+            }
+            else {
+              Seq(sipush(simple), ireturn())
+            }
+
           case _         => Seq(ret())
         }
       case v: LabelledDefault => GS("default:") ++ generateStatement(v.v2)
@@ -277,14 +283,16 @@ class JVMByteCodeGenerator {
     GS(in.v)
   }
 
-  def generateExternalDeclaration(in: ExternalDeclaration): Seq[Generated] = {
+  def generateExternalDeclaration(in: ExternalDeclaration,cf: JVMClassFileBuilder): Unit = {
     in match {
-      case v: FunctionDefinition => generateFunctionDefinition(v)
-      case v: Declaration        => generateDeclaration(v)
+      case v: FunctionDefinition => generateFunctionDefinition(v, cf)
+      case v: Declaration        =>
+        throw unsupported("Declaration at ExternalDeclaration")
+        generateDeclaration(v)
     }
   }
 
-  def generateFunctionDefinition(in: FunctionDefinition): Seq[Generated] = {
+  def generateFunctionDefinition(in: FunctionDefinition, cf: JVMClassFileBuilder): Unit = {
     val typ = resolveDeclarationSpecifiersToTypes(in.spec)
 //    val varName = resolveDeclaratorToIdentifier(in.dec).v
 
@@ -300,10 +308,12 @@ class JVMByteCodeGenerator {
 //          case _                     => Seq()
 //        }
 
+        val ret = resolveDeclarationSpecifiersToTypes(in.spec)
         val name = v.name
         val variables = resolveParameterTypeListToVariables(v.params)
+        val definition = generateStatement(in.v)
 
-        Seq(DefineFunction(name, typ, variables)) ++ generateStatement(in.v)
+        cf.addFunction(name, variables, ret, definition)
 
     }
   }
@@ -508,9 +518,9 @@ class JVMByteCodeGenerator {
     GS(if (v.angularBrackets) "<" else "\"", v.v, if (v.angularBrackets) ">" else "\"")
   }
 
-  def generateTop(x: Top): Seq[Generated] = {
+  def generateTop(x: Top, cf: JVMClassFileBuilder): Unit = {
     x match {
-      case v: ExternalDeclaration => generateExternalDeclaration(v)
+      case v: ExternalDeclaration => generateExternalDeclaration(v, cf)
       case v: PreprocessingFile   => generateGroup(v.v)
     }
   }

@@ -1,6 +1,9 @@
 package compiling
 
+import compiling.JVMByteCode.Types
+import compiling.JVMClassFileTypes.JVMClassFileBuilderUtils
 import org.scalatest.FunSuite
+import parsing.{TypeSpecifierDouble, TypeSpecifierInt, TypeSpecifierVoid}
 
 class JVMByteCodeGeneratorSpec extends FunSuite {
   ignore("return;") {
@@ -48,5 +51,9 @@ class JVMByteCodeGeneratorSpec extends FunSuite {
         |sipush 2
         |ireturn
       """.stripMargin)
+  }
+
+  test("method params") {
+    assert (JVMClassFileBuilderUtils.createMethodDescriptor(JVMByteCode.Types(Seq(TypeSpecifierVoid())), Seq(JVMByteCode.Types(Seq(TypeSpecifierInt())), Types(Seq(TypeSpecifierDouble())))) ==  "(ID)V")
   }
 }
