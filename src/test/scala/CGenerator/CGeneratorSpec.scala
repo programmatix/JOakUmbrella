@@ -194,4 +194,12 @@ class CGeneratorSpec extends FunSuite {
                 |""".stripMargin
     confirmSnippet(raw, true)
   }
+
+  test("main") {
+    val raw = """int main(int argc, const char* argv[]) {
+                |    return 2;
+                |}""".stripMargin
+    confirm(raw, true)
+  }
+
 }

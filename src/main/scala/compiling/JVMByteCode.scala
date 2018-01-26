@@ -34,95 +34,126 @@ object JVMByteCode {
   }
 
   // push a short onto the stack as an integer value
-  case class sipush(v: Short) extends ByteCode {
-    override def gen(implicit params: GenParams): String = s"sipush $v"
-    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
-      JVMClassFileBuilderUtils.writeByte(out, 0x11)
-      JVMClassFileBuilderUtils.writeByte(out, v)
-      2
-    }
-  }
+//  case class sipush(v: Short) extends ByteCode {
+//    override def gen(implicit params: GenParams): String = s"sipush $v"
+//    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+//      JVMClassFileBuilderUtils.writeByte(out, 0x11)
+//      JVMClassFileBuilderUtils.writeByte(out, v)
+//      2
+//    }
+//  }
 
   // push a byte onto the stack as an integer value
-  case class bipush(v: Short) extends ByteCode {
-    assert (v < 256)
-
-    override def gen(implicit params: GenParams): String = s"bipush $v"
-    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
-      JVMClassFileBuilderUtils.writeByte(out, 0x10)
-      JVMClassFileBuilderUtils.writeByte(out, v)
-      2
-    }
-  }
-
-  // return an integer from a method
-  case class ireturn() extends ByteCode {
-    override def gen(implicit params: GenParams): String = "ireturn"
-    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
-      JVMClassFileBuilderUtils.writeByte(out, 0xac)
-      1
-    }
-  }
+//  case class bipush(v: Short) extends ByteCode {
+//    assert (v < 256)
+//
+//    override def gen(implicit params: GenParams): String = s"bipush $v"
+//    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+//      JVMClassFileBuilderUtils.writeByte(out, 0x10)
+//      JVMClassFileBuilderUtils.writeByte(out, v)
+//      2
+//    }
+//  }
+//
+//  // return an integer from a method
+//  case class ireturn() extends ByteCode {
+//    override def gen(implicit params: GenParams): String = "ireturn"
+//    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+//      JVMClassFileBuilderUtils.writeByte(out, 0xac)
+//      1
+//    }
+//  }
 
   // store int value into variable #index
-  case class istore(variable: Int) extends ByteCode {
-    override def gen(implicit params: GenParams): String = {
-      variable match {
-        case 0|1|2|3 => s"istore_$variable"
-        case _ => s"istore $variable"
-      }
-    }
-    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
-      variable match {
-        case 0 =>
-          JVMClassFileBuilderUtils.writeByte(out, 0x3b)
-          1
-        case 1 =>
-          JVMClassFileBuilderUtils.writeByte(out, 0x3c)
-          1
-        case 2 =>
-          JVMClassFileBuilderUtils.writeByte(out, 0x3d)
-          1
-        case 3 =>
-          JVMClassFileBuilderUtils.writeByte(out, 0x3e)
-          1
-        case _ =>
-          JVMClassFileBuilderUtils.writeByte(out, 0x36)
-          JVMClassFileBuilderUtils.writeByte(out, variable)
-          2
-      }
-
-    }
-  }
+//  case class istore(variable: Int) extends ByteCode {
+//    override def gen(implicit params: GenParams): String = {
+//      variable match {
+//        case 0|1|2|3 => s"istore_$variable"
+//        case _ => s"istore $variable"
+//      }
+//    }
+//    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+//      variable match {
+//        case 0 =>
+//          JVMClassFileBuilderUtils.writeByte(out, 0x3b)
+//          1
+//        case 1 =>
+//          JVMClassFileBuilderUtils.writeByte(out, 0x3c)
+//          1
+//        case 2 =>
+//          JVMClassFileBuilderUtils.writeByte(out, 0x3d)
+//          1
+//        case 3 =>
+//          JVMClassFileBuilderUtils.writeByte(out, 0x3e)
+//          1
+//        case _ =>
+//          JVMClassFileBuilderUtils.writeByte(out, 0x36)
+//          JVMClassFileBuilderUtils.writeByte(out, variable)
+//          2
+//      }
+//
+//    }
+//  }
 
   // multiply two integers
-  case class imul() extends ByteCode {
-    override def gen(implicit params: GenParams): String = "imul"
+//  case class imul() extends ByteCode {
+//    override def gen(implicit params: GenParams): String = "imul"
+//    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+//      JVMClassFileBuilderUtils.writeByte(out, 0x68)
+//      1
+//    }
+//  }
+//
+//  // add two integers
+//  case class iadd() extends ByteCode {
+//    override def gen(implicit params: GenParams): String = "iadd"
+//    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+//      JVMClassFileBuilderUtils.writeByte(out, 0x60)
+//      1
+//    }
+//  }
+//
+//  // return void from method
+//  case class ret() extends ByteCode {
+//    override def gen(implicit params: GenParams): String = "return"
+//    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
+//      JVMClassFileBuilderUtils.writeByte(out, 0xa9)
+//      1
+//    }
+//  }
+
+  def make(oc: JVMOpCode) = generic(oc, Array())
+  def make(oc: JVMOpCode, args: Int*) = generic(oc, args.toArray)
+
+  case class generic(oc: JVMOpCode, args: Array[Int] = Array()) extends ByteCode {
+    assert (oc.args.length == args.length)
+
+    override def gen(implicit params: GenParams): String = {
+      oc.name + " " + (
+        args.map(arg => {
+//          val argDef = oc.args(idx)
+//          val argActual = args(idx)
+          arg.toString
+        }).mkString(" ")
+      )
+    }
+
     override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
-      JVMClassFileBuilderUtils.writeByte(out, 0x68)
-      1
+      JVMClassFileBuilderUtils.writeByte(out, oc.hexcode)
+      for (idx <- args.indices) {
+        val argDef = oc.args(idx)
+        val argActual = args(idx)
+        argDef.lengthBytes match {
+          case 1 => JVMClassFileBuilderUtils.writeByte(out, argActual)
+          case 2 => JVMClassFileBuilderUtils.writeShort(out, argActual)
+          case 4 => JVMClassFileBuilderUtils.writeInt(out, argActual)
+        }
+      }
+      oc.lengthInBytes
     }
   }
 
-  // add two integers
-  case class iadd() extends ByteCode {
-    override def gen(implicit params: GenParams): String = "iadd"
-    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
-      JVMClassFileBuilderUtils.writeByte(out, 0x60)
-      1
-    }
-  }
-
-  // return void from method
-  case class ret() extends ByteCode {
-    override def gen(implicit params: GenParams): String = "return"
-    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
-      JVMClassFileBuilderUtils.writeByte(out, 0xa9)
-      1
-    }
-  }
-
-//  case class label(symbol: String) extends ByteCode {
+  //  case class label(symbol: String) extends ByteCode {
 //    override def gen(implicit params: GenParams): String = symbol + ":"
 //    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
 //      assert(false) // ???
@@ -180,10 +211,38 @@ object JVMByteCode {
 //  }
 
 
+
   // Most of the time this will just be one type like "int"
   case class Types(types: Seq[TypeSpecifier])
-//  case class DefineFunction(name: Identifier, types: Types, passedVariables: Seq[DeclareVariable]) extends Command
-  case class DeclareVariable(name: Identifier, types: Types) extends Command
+  sealed trait JVMType
+
+  case class JVMTypeVoid() extends JVMType
+  case class JVMTypeBoolean() extends JVMType
+  case class JVMTypeInt() extends JVMType
+  case class JVMTypeShort() extends JVMType
+  case class JVMTypeChar() extends JVMType
+  case class JVMTypeByte() extends JVMType
+  case class JVMTypeFloat() extends JVMType
+  case class JVMTypeDouble() extends JVMType
+  case class JVMTypeLong() extends JVMType
+
+  // String is not a primitive type but needed to create a valid main
+  // Why don't we use char* -> String?  Because it makes the assumption the c code won't do fancy array/pointer stuff with it
+  case class JVMTypeString() extends JVMType
+
+  case class JVMTypeArray(typ: JVMType) extends JVMType
+
+//  case class JVMTypeShortArray() extends JVMType
+//  case class JVMTypeBooleanArray() extends JVMType
+//  case class JVMTypeIntArray() extends JVMType
+//  case class JVMTypeCharArray() extends JVMType
+//  case class JVMTypeByteArray() extends JVMType
+//  case class JVMTypeFloatArray() extends JVMType
+//  case class JVMTypeDoubleArray() extends JVMType
+//  case class JVMTypeLongArray() extends JVMType
+
+  //  case class DefineFunction(name: Identifier, types: Types, passedVariables: Seq[DeclareVariable]) extends Command
+  case class DeclareVariable(name: Identifier, typ: JVMType) extends Command
   case class StoreExpressionInCurrentVar() extends Command
 
   case class JVMGenUnsupportedCurrently(err: String) extends RuntimeException(s"Operation is not currently supported: ${err}")

@@ -1,9 +1,9 @@
 package compiling
 
-import java.io.ByteArrayOutputStream
+import java.io.{ByteArrayOutputStream, PrintWriter}
 import java.nio.charset.Charset
 
-import compiling.JVMByteCode.{GenParams, Types}
+import compiling.JVMByteCode.{ByteCode, GenParams, JVMType}
 import compiling.JVMClassFileTypes._
 import parsing.Identifier
 
@@ -40,11 +40,9 @@ class JVMClassFileBuilderForWriting(
   private val superClassConstantIdx = addConstant(CONSTANT_Class_info(addUTF8("java/lang/Object")))
 
 
-  def addFunction(name: Identifier, variables: Seq[JVMByteCode.DeclareVariable], ret: Types, definition: Seq[JVMByteCode.Generated]): Unit = {
-    //    val code = attribute_info(
-    //      addUTF8("AttributeForCodeFor" + name.v),
-    //    )
-
+  def addFunction(name: Identifier, variables: Seq[JVMByteCode.DeclareVariable], ret: JVMType, definitionRaw: Seq[JVMByteCode.Generated]): Int = {
+    // Get rid of any strings or other junk
+    val definition: Seq[JVMByteCode.Generated] = definitionRaw filter(_.isInstanceOf[ByteCode])
     val genParams = GenParams()
     val codeBuffer = new ByteArrayOutputStream()
     val charset = StandardCharsets.UTF_8
@@ -55,25 +53,38 @@ class JVMClassFileBuilderForWriting(
 
     val code = Code_attribute(
       STRING_CODE,
-      maxStack = 1,
-      maxLocals = 0,
+      // TODO calc this properly
+      maxStack = 100,
+      maxLocals = 100,
       definition,
       codeBytes,
       Seq()
     )
 
+    val methodDescriptor = JVMClassFileBuilderUtils.createMethodDescriptor(ret, variables.map(_.typ))
 
-    val methodDescriptor = JVMClassFileBuilderUtils.createMethodDescriptor(ret, variables.map(_.types))
-
+    val nameIdx = addUTF8(name.v)
+    val methodDescriptorIdx = addUTF8(methodDescriptor)
     val method = method_info(
-      0 | 8, // Public static
-      // https://docs.oracle.com/javase/specs/jvms/se6/html/Concepts.doc.html#21410
-      addUTF8(name.v),
-      addUTF8(methodDescriptor),
+      1 | 8, // Public static
+        // https://docs.oracle.com/javase/specs/jvms/se6/html/Concepts.doc.html#21410
+      nameIdx,
+      methodDescriptorIdx,
       Seq(code)
     )
 
     methods += method
+
+    val nameAndTypeIdx = addConstant(CONSTANT_NameAndType_info(nameIdx, methodDescriptorIdx))
+    addConstant(CONSTANT_Methodref_info(thisConstantIdx, nameAndTypeIdx))
+  }
+
+  def write(out: PrintWriter, charset: Charset): Unit = {
+    methods.foreach(method => {
+      out.write(s"method: ${getConstant(method.nameIndex)} ${getConstant(method.descriptorIndex)}\n")
+
+      method.write(out, charset)
+    })
   }
 
   def write(out: ByteArrayOutputStream, charset: Charset): Unit = {

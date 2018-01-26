@@ -1,6 +1,6 @@
 package compiling
 
-import java.io.{ByteArrayOutputStream, File, FileOutputStream}
+import java.io.{ByteArrayOutputStream, File, FileOutputStream, PrintWriter}
 import java.nio.charset.StandardCharsets
 
 import parsing.{CParseFail, CParseSuccess, CParser}
@@ -200,6 +200,7 @@ object JVMClassFileWriter {
 //          val generated = i.parse(interim)
           val byteCode = new ByteArrayOutputStream()
           cf.write(byteCode, StandardCharsets.UTF_8)
+
 //          val byteCode = cw.process(generated)
 
           PPrinter.Color.log(v)
@@ -213,9 +214,10 @@ object JVMClassFileWriter {
           classOutputFile.write(byteCode.toByteArray)
           classOutputFile.close()
 
-//          val classOutputBytecodeFile = new PrintWriter(new FileOutputStream(classFilename.replace(".class", ".bc")))
-//          classOutputBytecodeFile.write(byteCode.mkString("\n"))
-//          classOutputBytecodeFile.close()
+          val classOutputBytecodeFile = new PrintWriter(new FileOutputStream(classFilename.replace(".class", ".bc")))
+          cf.write(classOutputBytecodeFile, StandardCharsets.UTF_8)
+//          classOutputBytecodeFile.write(sb.toString)
+          classOutputBytecodeFile.close()
 
         //          println(classFile)
         case CParseFail(v) =>

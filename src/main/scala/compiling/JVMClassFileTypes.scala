@@ -1,10 +1,9 @@
 package compiling
 
-import java.io.ByteArrayOutputStream
+import java.io.{ByteArrayOutputStream, PrintWriter}
 import java.nio.charset.Charset
 
-import compiling.JVMByteCode.{Types, unsupported}
-import parsing._
+import compiling.JVMByteCode._
 
 object JVMClassFileTypes {
 
@@ -140,7 +139,7 @@ object JVMClassFileTypes {
 
    */
   case class CONSTANT_NameAndType_info(nameIndex: Int, descriptorIndex: Int) extends CONSTANT {
-    override def tag() = 8
+    override def tag() = 12
     override def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
       JVMClassFileBuilderUtils.writeByte(out, tag())
       JVMClassFileBuilderUtils.writeShort(out, nameIndex)
@@ -156,27 +155,43 @@ object JVMClassFileTypes {
     // ReturnDescriptor: FieldType | V
 
 
-    def typesToStr(types: Types): String = {
-      if (types.types.length != 1) throw JVMByteCode.unsupported(s"Multiple types in ${types}")
-      types.types.head match {
-          // TODO handle C has signed and Java doesn't
-        case v: TypeSpecifierVoid     => "V"
-        case v: TypeSpecifierChar     => "C"
-        case v: TypeSpecifierShort    => "S"
-        case v: TypeSpecifierInt      => "I"
-        case v: TypeSpecifierLong     => "J"
-        case v: TypeSpecifierFloat    => "F"
-        case v: TypeSpecifierDouble   => "D"
-        case v: TypeSpecifierSigned   => throw unsupported("signed type")
-        case v: TypeSpecifierUnsigned => throw unsupported("unsigned type")
-        case v: TypeSpecifierBool     => "Z"
-        case v: TypeSpecifierComplex  => throw unsupported("_Complex type")
-        case _ => throw unsupported("unhandled type")
+//    def typesToStr(types: Types): String = {
+//      if (types.types.length != 1) throw JVMByteCode.unsupported(s"Multiple types in ${types}")
+//      types.types.head match {
+//          // TODO handle C has signed and Java doesn't
+//        case v: TypeSpecifierVoid     => "V"
+//        case v: TypeSpecifierChar     => "C"
+//        case v: TypeSpecifierShort    => "S"
+//        case v: TypeSpecifierInt      => "I"
+//        case v: TypeSpecifierLong     => "J"
+//        case v: TypeSpecifierFloat    => "F"
+//        case v: TypeSpecifierDouble   => "D"
+//        case v: TypeSpecifierSigned   => throw unsupported("signed type")
+//        case v: TypeSpecifierUnsigned => throw unsupported("unsigned type")
+//        case v: TypeSpecifierBool     => "Z"
+//        case v: TypeSpecifierComplex  => throw unsupported("_Complex type")
+//        case _ => throw unsupported("unhandled type")
+//
+//      }
+//    }
 
+    def typesToStr(typ: JVMType): String = {
+      typ match {
+        case v: JVMTypeVoid           => "V"
+        case v: JVMTypeChar           => "C"
+        case v: JVMTypeShort => "S"
+        case v: JVMTypeInt => "I"
+        case v: JVMTypeLong => "J"
+        case v: JVMTypeFloat => "F"
+        case v: JVMTypeDouble => "D"
+        case v: JVMTypeBoolean => "Z"
+        case v: JVMTypeArray => "[" + typesToStr(v.typ)
+        case v: JVMTypeString => "Ljava/lang/String;"
+        case _ => throw unsupported(s"unhandled type ${typ}")
       }
     }
 
-    def createMethodDescriptor(ret: Types, params: Seq[Types]): String = {
+    def createMethodDescriptor(ret: JVMType, params: Seq[JVMType]): String = {
       s"(${params.map(typesToStr).mkString("")})${typesToStr(ret)}"
     }
 
@@ -245,11 +260,16 @@ object JVMClassFileTypes {
       JVMClassFileBuilderUtils.writeShort(out, attributes.length)
       attributes.foreach(_.write(out, charset))
     }
+
+    def write(out: PrintWriter, charset: Charset): Unit = {
+      attributes.foreach(_.write(out, charset))
+    }
   }
 
   sealed trait Attribute {
     def lengthBytes(): Int
     def write(out: ByteArrayOutputStream, charset: Charset): Unit
+    def write(out: PrintWriter, charset: Charset): Unit
   }
 
   /*
@@ -287,6 +307,10 @@ object JVMClassFileTypes {
       JVMClassFileBuilderUtils.writeShort(out, attributeNameIndex)
       JVMClassFileBuilderUtils.writeInt(out, 2)
       JVMClassFileBuilderUtils.writeShort(out, valueIndex)
+    }
+
+    override def write(out: PrintWriter, charset: Charset): Unit = {
+
     }
   }
 
@@ -333,6 +357,11 @@ object JVMClassFileTypes {
 
     override def lengthBytes(): Int = {
       2+2+4+code.length+2+0+2+0
+    }
+
+    override def write(out: PrintWriter, charset: Charset): Unit = {
+      val gp = GenParams()
+      codeOrig.foreach(c => out.write(c.gen(gp) + '\n'))
     }
   }
 

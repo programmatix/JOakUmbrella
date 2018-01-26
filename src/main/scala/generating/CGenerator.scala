@@ -71,6 +71,7 @@ class CGenerator {
   def generateDirectDeclarator(in: DirectDeclarator): Seq[Generated] = {
     in match {
       case v: DDBracketed          => generateDeclarator(v.declarator)
+      case v: DDArray              => generateIdentifier(v.identifier) ++ GS("[]")
       case v: DirectDeclaratorOnly => generateIdentifier(v.v)
       case v: FunctionDeclaration  => ((generateIdentifier(v.name) ++ GS("(")) ++ generateParameterTypeList(v.params) ++ GS(")")) ++ newlineIndent
     }

@@ -4,7 +4,7 @@ import compiling.JVMByteCode._
 import parsing.{BlockItem, TranslationUnit, _}
 
 import scala.collection.mutable.ArrayBuffer
-
+import JVMOpCodes._
 
 // Converts a C AST into JVM bytecode.  It returns a Seq[JVMByteCode.Generated]
 class JVMByteCodeGenerator {
@@ -51,7 +51,7 @@ class JVMByteCodeGenerator {
   // >>int hello = "world"<<;
   def generateSimpleDeclaration(in: SimpleDeclaration): Seq[Generated] = {
 
-    val types = resolveDeclarationSpecifiersToTypes(in.spec)
+    val types = resolveDeclarationSpecifiersToType(in.spec)
 
     in.init match {
       case Some(initDeclarators) =>
@@ -77,7 +77,7 @@ class JVMByteCodeGenerator {
 
   def resolveSimpleDeclarationToVariable(in: SimpleDeclaration): DeclareVariable = {
 
-    val types = resolveDeclarationSpecifiersToTypes(in.spec)
+    val types = resolveDeclarationSpecifiersToType(in.spec)
 
     in.init match {
       case Some(initDeclarators) =>
@@ -105,17 +105,44 @@ class JVMByteCodeGenerator {
 
   def generateTranslationUnit(in: TranslationUnit, cf: JVMClassFileBuilderForWriting): Unit = in.v.foreach(v => generateTop(v, cf))
 
-  def resolveDeclarationSpecifiersToTypes(in: DeclarationSpecifiers): Types = {
-    Types(in.v.map {
-      case v: StorageClassSpecifier => throw JVMGenUnsupportedCurrently("StorageClassSpecifier while trying to resolve declaration specifier to type")
-      case v: StructImpl            => throw JVMGenUnsupportedCurrently("StructImpl while trying to resolve declaration specifier to type")
-      case v: StructUse             => throw JVMGenUnsupportedCurrently("StructUse while trying to resolve declaration specifier to type")
-      case v: TypeQualifier         => throw JVMGenUnsupportedCurrently("TypeQualifier while trying to resolve declaration specifier to type")
-      case v: TypeSpecifierTyped    => v
-      case v: TypeSpecifierSimple   => throw JVMGenUnsupportedCurrently("TypeSpecifierSimple while trying to resolve declaration specifier to type")
-      case v: FunctionSpecifier     => throw JVMGenUnsupportedCurrently("FunctionSpecifier while trying to resolve declaration specifier to type")
-      case v: AlignmentSpecifier    => throw JVMGenUnsupportedCurrently("AlignmentSpecifier while trying to resolve declaration specifier to type")
-    })
+  def resolveDeclarationSpecifiersToType(in: DeclarationSpecifiers): JVMType = {
+    var out: Option[JVMType] = None
+
+    in.v.foreach {
+      case v: StorageClassSpecifier =>
+        throw JVMGenUnsupportedCurrently("StorageClassSpecifier while trying to resolve declaration specifier to type")
+      case v: StructImpl            =>
+        throw JVMGenUnsupportedCurrently("StructImpl while trying to resolve declaration specifier to type")
+      case v: StructUse             =>
+        throw JVMGenUnsupportedCurrently("StructUse while trying to resolve declaration specifier to type")
+      case v: TypeQualifier         => // We can discard these, only important one is const
+      case v: TypeSpecifierVoid     => out = Some(JVMTypeVoid())
+      case v: TypeSpecifierChar     => out = Some(JVMTypeChar())
+      case v: TypeSpecifierShort    => out = Some(JVMTypeShort())
+      case v: TypeSpecifierInt      => out = Some(JVMTypeInt())
+      case v: TypeSpecifierLong     => out = Some(JVMTypeLong())
+      case v: TypeSpecifierFloat    => out = Some(JVMTypeFloat())
+      case v: TypeSpecifierDouble   => out = Some(JVMTypeDouble())
+      case v: TypeSpecifierSigned   => // Discard, JVM types are signed
+      case v: TypeSpecifierUnsigned =>
+        // TODO upgrade to a larger type?
+        throw JVMGenUnsupportedCurrently("unsigned types on JVM")
+      case v: TypeSpecifierBool     => out = Some(JVMTypeBoolean())
+      case v: TypeSpecifierComplex  =>
+        throw JVMGenUnsupportedCurrently("complex type")
+      case v: TypeSpecifierSimple   =>
+        throw JVMGenUnsupportedCurrently("TypeSpecifierSimple while trying to resolve declaration specifier to type")
+      case v: FunctionSpecifier     =>
+        throw JVMGenUnsupportedCurrently("FunctionSpecifier while trying to resolve declaration specifier to type")
+      case v: AlignmentSpecifier    =>
+        throw JVMGenUnsupportedCurrently("AlignmentSpecifier while trying to resolve declaration specifier to type")
+    }
+
+    if (out.isEmpty) {
+      throw JVMGenUnsupportedCurrently(s"could not get type from ${in}")
+    }
+
+    out.get
   }
 
 
@@ -135,12 +162,12 @@ class JVMByteCodeGenerator {
       throw unsupported("ellipses in parameter type list")
     }
     in.v.map {
-      case x: ParameterDeclarationDeclarator       => resolveToVariable(x.v2, x.v)
+      case x: ParameterDeclarationDeclarator => resolveToVariable(x.v2, x.v)
     }
   }
 
   def resolveToVariable(declarator: Declarator, specifiers: DeclarationSpecifiers): DeclareVariable = {
-    val types = resolveDeclarationSpecifiersToTypes(specifiers)
+    val types = resolveDeclarationSpecifiersToType(specifiers)
     val varName = resolveDeclaratorToIdentifier(declarator)
     DeclareVariable(varName, types)
   }
@@ -206,7 +233,8 @@ class JVMByteCodeGenerator {
           val out = ArrayBuffer.empty[Generated]
           while (it.hasNext) {
             out ++= generateBlockItem(it.next())
-            if (it.hasNext) {}
+            if (it.hasNext) {
+            }
             else out ++= Seq(GenString(";"))
           }
           //          val out = it.flatMap(x => generateBlockItem(x)) ++ (if (it.hasNext) Seq(GenString(";"), NewlineAndIndent()) else Seq())
@@ -225,13 +253,13 @@ class JVMByteCodeGenerator {
           case Some(exp) =>
             val simple = convertExpressionToSimple(exp).toShort
             if (simple < 256) {
-              Seq(bipush(simple), ireturn())
+              Seq(make(bipush,simple), make(ireturn))
             }
             else {
-              Seq(sipush(simple), ireturn())
+              Seq(make(sipush,simple), make(ireturn))
             }
 
-          case _         => Seq(ret())
+          case _ => Seq(make(ret))
         }
       case v: LabelledDefault => GS("default:") ++ generateStatement(v.v2)
     }
@@ -283,7 +311,7 @@ class JVMByteCodeGenerator {
     GS(in.v)
   }
 
-  def generateExternalDeclaration(in: ExternalDeclaration,cf: JVMClassFileBuilderForWriting): Unit = {
+  def generateExternalDeclaration(in: ExternalDeclaration, cf: JVMClassFileBuilderForWriting): Unit = {
     in match {
       case v: FunctionDefinition => generateFunctionDefinition(v, cf)
       case v: Declaration        =>
@@ -293,8 +321,8 @@ class JVMByteCodeGenerator {
   }
 
   def generateFunctionDefinition(in: FunctionDefinition, cf: JVMClassFileBuilderForWriting): Unit = {
-    val typ = resolveDeclarationSpecifiersToTypes(in.spec)
-//    val varName = resolveDeclaratorToIdentifier(in.dec).v
+    val typ = resolveDeclarationSpecifiersToType(in.spec)
+    //    val varName = resolveDeclaratorToIdentifier(in.dec).v
 
     if (in.dec.pointer.isDefined) {
       throw JVMGenUnsupportedCurrently("handle pointers while trying to declare function")
@@ -303,17 +331,32 @@ class JVMByteCodeGenerator {
       case v: DDBracketed          => throw JVMGenUnsupportedCurrently("handle DDBracketed while trying to declare function")
       case v: DirectDeclaratorOnly => throw JVMGenUnsupportedCurrently("handle DDBracketed while trying to declare function")
       case v: FunctionDeclaration  =>
-//        val variables: Seq[DeclareVariable] = in.decs match {
-//          case Some(declarationList) => resolveDeclarationListToVariables(declarationList)
-//          case _                     => Seq()
-//        }
+        //        val variables: Seq[DeclareVariable] = in.decs match {
+        //          case Some(declarationList) => resolveDeclarationListToVariables(declarationList)
+        //          case _                     => Seq()
+        //        }
 
-        val ret = resolveDeclarationSpecifiersToTypes(in.spec)
+        val ret = resolveDeclarationSpecifiersToType(in.spec)
         val name = v.name
         val variables = resolveParameterTypeListToVariables(v.params)
         val definition = generateStatement(in.v)
 
-        cf.addFunction(name, variables, ret, definition)
+        if (name.v == "main") {
+          val methodRefIdx = cf.addFunction(Identifier("__" + name.v + "Original"), variables, ret, definition)
+
+          cf.addFunction(Identifier("main"),
+//            Seq(DeclareVariable(Identifier("args"), JVMTypeInt())),
+            Seq(DeclareVariable(Identifier("args"), JVMTypeArray(JVMTypeString()))),
+            JVMTypeVoid(),
+            Seq(
+              generic(invokestatic, Array(methodRefIdx)),
+              generic(return_)
+            )
+          )
+        }
+        else {
+          cf.addFunction(name, variables, ret, definition)
+        }
 
     }
   }
@@ -393,10 +436,10 @@ class JVMByteCodeGenerator {
 
   def generateExpression(exp: Expression): Seq[Generated] = {
     exp match {
-      case v: ExpressionMultiply           => generateExpression(v.v1) ++ generateExpression(v.v2) ++ Seq(imul())
+      case v: ExpressionMultiply           => generateExpression(v.v1) ++ generateExpression(v.v2) ++ Seq(make(imul))
       case v: ExpressionDivision           => generateExpression(v.v1) ++ GS("/") ++ generateExpression(v.v2)
       case v: ExpressionMod                => generateExpression(v.v1) ++ GS("%") ++ generateExpression(v.v2)
-      case v: ExpressionAdd                => generateExpression(v.v1) ++ generateExpression(v.v2) ++ Seq(iadd())
+      case v: ExpressionAdd                => generateExpression(v.v1) ++ generateExpression(v.v2) ++ Seq(make(iadd))
       case v: ExpressionMinus              => generateExpression(v.v1) ++ GS("-") ++ generateExpression(v.v2)
       case v: ExpressionLeftShift          => generateExpression(v.v1) ++ GS("<<") ++ generateExpression(v.v2)
       case v: ExpressionRightShift         => generateExpression(v.v1) ++ GS(">>") ++ generateExpression(v.v2)
@@ -418,9 +461,10 @@ class JVMByteCodeGenerator {
       case v: EnumerationConstant          => GS(v.v)
       case v: CharacterConstant            => GS(v.v)
       case v: IntConstant                  =>
-        if (v.v <= Byte.MaxValue) Seq(bipush(v.v.toByte))
-        else if (v.v <= Short.MaxValue) Seq(sipush(v.v.toShort))
+        if (v.v <= Byte.MaxValue && v.v >= Byte.MinValue) Seq(make(bipush, v.v))
+        else if (v.v <= Short.MaxValue && v.v >= Short.MinValue) Seq(make(sipush,v.v))
         else {
+          // TODO longer ints
           assert(false)
           Seq()
         }
