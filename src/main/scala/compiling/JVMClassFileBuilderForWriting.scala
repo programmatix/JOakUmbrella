@@ -1,6 +1,6 @@
 package compiling
 
-import java.io.{ByteArrayOutputStream, PrintWriter}
+import java.io.{ByteArrayOutputStream, Writer}
 import java.nio.charset.Charset
 
 import compiling.JVMByteCode.{ByteCode, GenParams, JVMType}
@@ -79,7 +79,7 @@ class JVMClassFileBuilderForWriting(
     addConstant(CONSTANT_Methodref_info(thisConstantIdx, nameAndTypeIdx))
   }
 
-  def write(out: PrintWriter, charset: Charset): Unit = {
+  def write(out: Writer, charset: Charset): Unit = {
     methods.foreach(method => {
       out.write(s"method: ${getConstant(method.nameIndex)} ${getConstant(method.descriptorIndex)}\n")
 

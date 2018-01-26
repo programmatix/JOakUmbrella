@@ -243,7 +243,7 @@ object JVMByteCode {
 
   //  case class DefineFunction(name: Identifier, types: Types, passedVariables: Seq[DeclareVariable]) extends Command
   case class DeclareVariable(name: Identifier, typ: JVMType) extends Command
-  case class StoreExpressionInCurrentVar() extends Command
+//  case class StoreExpressionInCurrentVar() extends Command
 
   case class JVMGenUnsupportedCurrently(err: String) extends RuntimeException(s"Operation is not currently supported: ${err}")
   case class JVMInterimBadState(err: String) extends RuntimeException(err)

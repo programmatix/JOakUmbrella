@@ -1,6 +1,6 @@
 package compiling
 
-import java.io.{ByteArrayOutputStream, PrintWriter}
+import java.io.{ByteArrayOutputStream, Writer}
 import java.nio.charset.Charset
 
 import compiling.JVMByteCode._
@@ -261,7 +261,7 @@ object JVMClassFileTypes {
       attributes.foreach(_.write(out, charset))
     }
 
-    def write(out: PrintWriter, charset: Charset): Unit = {
+    def write(out: Writer, charset: Charset): Unit = {
       attributes.foreach(_.write(out, charset))
     }
   }
@@ -269,7 +269,7 @@ object JVMClassFileTypes {
   sealed trait Attribute {
     def lengthBytes(): Int
     def write(out: ByteArrayOutputStream, charset: Charset): Unit
-    def write(out: PrintWriter, charset: Charset): Unit
+    def write(out: Writer, charset: Charset): Unit
   }
 
   /*
@@ -309,7 +309,7 @@ object JVMClassFileTypes {
       JVMClassFileBuilderUtils.writeShort(out, valueIndex)
     }
 
-    override def write(out: PrintWriter, charset: Charset): Unit = {
+    override def write(out: Writer, charset: Charset): Unit = {
 
     }
   }
@@ -359,7 +359,7 @@ object JVMClassFileTypes {
       2+2+4+code.length+2+0+2+0
     }
 
-    override def write(out: PrintWriter, charset: Charset): Unit = {
+    override def write(out: Writer, charset: Charset): Unit = {
       val gp = GenParams()
       codeOrig.foreach(c => out.write(c.gen(gp) + '\n'))
     }

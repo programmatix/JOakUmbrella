@@ -13,7 +13,7 @@ class JVMByteCodeGeneratorSpec extends FunSuite {
 
   test("return 2;") {
     CompilingTestUtils.testCSnippetAgainstJVM("return 2;",
-      """sipush 2
+      """bipush 2
         |ireturn
       """.stripMargin)
   }
@@ -42,12 +42,11 @@ class JVMByteCodeGeneratorSpec extends FunSuite {
 
 
     test("func returns 2;") {
-    CompilingTestUtils.testCTopAgainstJVM("""int main() {
+    CompilingTestUtils.testCTopAgainstJVM("""int test() {
                                                        |    return 2;
                                                        |}""".stripMargin,
-      """public static int main();
-        |Code:
-        |sipush 2
+      """method test:
+        |bipush 2
         |ireturn
       """.stripMargin)
   }

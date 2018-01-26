@@ -101,7 +101,15 @@ class JVMByteCodeGenerator {
     }
   }
 
-  def generateSeqBlockItem(in: Seq[BlockItem]): Seq[Generated] = in.flatMap(v => generateBlockItem(v))
+  def generateSeqBlockItem(in: Seq[BlockItem], cf: JVMClassFileBuilderForWriting): Seq[Generated] = {
+    val out = in.flatMap(v => {
+      generateBlockItem(v)
+    })
+
+    cf.addFunction(Identifier("fake"), Seq(), JVMTypeVoid(), out)
+
+    out
+  }
 
   def generateTranslationUnit(in: TranslationUnit, cf: JVMClassFileBuilderForWriting): Unit = in.v.foreach(v => generateTop(v, cf))
 
@@ -268,7 +276,7 @@ class JVMByteCodeGenerator {
   def generateInitializer(in: Initializer): Seq[Generated] = {
     in match {
       case v: InitializerSimple =>
-        generateExpression(v.exp) ++ Seq(StoreExpressionInCurrentVar())
+        generateExpression(v.exp) ++ Seq(make(istore_0))
       case v: InitializerList   => generateExpression(v.exp)
     }
   }
@@ -457,7 +465,7 @@ class JVMByteCodeGenerator {
       case v: ExpressionConditional        => generateExpression(v.v1) ++ GS("?") ++ generateExpression(v.v2) ++ GS(":") ++ generateExpression(v.v3)
       case v: ExpressionComma              => generateExpression(v.v1) ++ GS(",") ++ generateExpression(v.v2)
       case v: ExpressionAssignment         =>
-        generateExpression(v.v1) ++ generateExpression(v.v2) ++ Seq(StoreExpressionInCurrentVar())
+        generateExpression(v.v1) ++ generateExpression(v.v2) ++ Seq(make(istore_0))
       case v: EnumerationConstant          => GS(v.v)
       case v: CharacterConstant            => GS(v.v)
       case v: IntConstant                  =>

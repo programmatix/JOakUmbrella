@@ -1,12 +1,18 @@
 package compiling
 
+import java.io.StringWriter
+
 import parsing._
 import pprint.PPrinter
 
+import scala.scalajs.niocharset.StandardCharsets
+
 object CompilingTestUtils {
   def createParser() = new CParser
+
   def createByteCode() = new JVMByteCodeGenerator
-//  def createInterim() = new JVMClassFileGenerator
+
+  //  def createInterim() = new JVMClassFileGenerator
 
   def testCSnippetAgainstJVM(cCode: String, asmCode: String): Unit = {
     testCAgainstJVM(cCode, asmCode, isSnippet = true)
@@ -19,9 +25,9 @@ object CompilingTestUtils {
   private def testCAgainstJVM(cCode: String, asmCode: String, isSnippet: Boolean): Unit = {
     val p = createParser()
     val asm = createByteCode()
-//    val interimParser = createInterim()
-//    val writer = new JVMClassFileWriter()
-    val split = asmCode.trim().replace("\r\n", "\n").split('\n')
+    //    val interimParser = createInterim()
+    //    val writer = new JVMClassFileWriter()
+    val split = asmCode.trim().replace("\r\n", "\n").split('\n').filterNot(_.startsWith("method "))
 
     val parsed = if (isSnippet) p.parseSnippet(cCode) else p.parse(cCode)
     parsed match {
@@ -29,33 +35,39 @@ object CompilingTestUtils {
         PPrinter.Color.log(x)
         val cf = new JVMClassFileBuilderForWriting(50, 0, Some("test"), "Test")
         x match {
-          case v: Seq[BlockItem]  => asm.generateSeqBlockItem(v)
+          case v: Seq[BlockItem]  =>
+            asm.generateSeqBlockItem(v, cf)
           case v: TranslationUnit =>
             asm.generateTranslationUnit(v, cf)
 
-        }
-//        val generated = interimParser.parse(interim)
-//        val resolved = writer.process(generated)
-//
-//        if (resolved.length != split.length) {
-////          println(s"length mismatch\n${resolved.mkString("\n")} != \n$asmCode")
-//          PPrinter.Color.log(interim)
-//          PPrinter.Color.log(generated)
-//          PPrinter.Color.log(resolved)
-//          assert(false, s"length mismatch\n${resolved.mkString("\n")} \n!= \n\n$asmCode")
-//        }
-//        else {
-//          implicit val genParams: JVMByteCode.GenParams = JVMByteCode.GenParams()
-//          for (idx <- resolved.indices) {
-//            val a = resolved(idx)
-//            val s = split(idx)
-////            val genned = a.gen(genParams)
-//
-//            assert (a == s, s"${a} != $s")
-//          }
-//        }
 
-      case CParseFail(v)=>
+        }
+
+        val sb = new StringWriter()
+        cf.write(sb, StandardCharsets.UTF_8)
+        val resolved = sb.toString.trim().split('\n').map(_.trim).filterNot(_.startsWith("method:"))
+//        val resolved = resolvedRaw.takeRight(resolvedRaw.length - 1)
+
+
+        if (resolved.length != split.length) {
+          ////          println(s"length mismatch\n${resolved.mkString("\n")} != \n$asmCode")
+          PPrinter.Color.log(x)
+//          PPrinter.Color.log(generated)
+          PPrinter.Color.log(resolved)
+          assert(false, s"length mismatch\n${resolved.mkString("\n")} \n!= \n\n$asmCode")
+        }
+        else {
+          implicit val genParams: JVMByteCode.GenParams = JVMByteCode.GenParams()
+          for (idx <- resolved.indices) {
+            val a = resolved(idx)
+            val s = split(idx)
+            //            val genned = a.gen(genParams)
+
+            assert(a == s, s"${a} != $s")
+          }
+        }
+
+      case CParseFail(v) =>
         assert(false, s"Parse fail on $cCode:\n$v")
     }
 
