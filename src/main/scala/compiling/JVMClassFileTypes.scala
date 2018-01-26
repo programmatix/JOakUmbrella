@@ -258,10 +258,12 @@ object JVMClassFileTypes {
     	u4 attribute_length;
     	u1 info[attribute_length];
     }
+
+      // Attributes are essentially unions, with the name indicating the type
    */
   case class attribute_info(attributeNameIndex: Int,
                             info: Attribute) {
-    def lengthBytes(): Int = 2 + 4 + info.lengthBytes()
+    def lengthBytes(): Int = info.lengthBytes()
 
     def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
       JVMClassFileBuilderUtils.writeShort(out, attributeNameIndex)
@@ -330,7 +332,7 @@ object JVMClassFileTypes {
     }
 
     override def lengthBytes(): Int = {
-      2+4+2+2+4+code.length+2+0+0
+      2+2+4+code.length+2+0+2+0
     }
   }
 

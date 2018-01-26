@@ -7,54 +7,43 @@ import compiling.JVMByteCode.{GenParams, Types}
 import compiling.JVMClassFileTypes._
 import parsing.Identifier
 
-import scala.collection.mutable.ArrayBuffer
 import scala.scalajs.niocharset.StandardCharsets
 
 
+class JVMClassFileBuilderForWriting(
+                                     /*
+                                        Java 1.2 uses major version 46
+                                        Java 1.3 uses major version 47
+                                        Java 1.4 uses major version 48
+                                        Java 5 uses major version 49
+                                        Java 6 uses major version 50
+                                        Java 7 uses major version 51
+                                        Java 8 uses major version 52
+                                        Java 9 uses major version 53
+                                      */
+                                     val jvmMajorVersion: Int,
+                                     val jvmMinorVersion: Int,
+                                     val packageName: Option[String],
+                                     val className: String
 
-class JVMClassFileBuilder(
-                           /*
-                              Java 1.2 uses major version 46
-                              Java 1.3 uses major version 47
-                              Java 1.4 uses major version 48
-                              Java 5 uses major version 49
-                              Java 6 uses major version 50
-                              Java 7 uses major version 51
-                              Java 8 uses major version 52
-                              Java 9 uses major version 53
-                            */
-                           jvmMajorVersion: Int,
-                           jvmMinorVersion: Int,
-                           packageName: String,
-                           className: String
-
-                         ) {
-  def addConstant(constant: CONSTANT) = {
-    constantPool += constant
-  }
-
-  def getConstant(idx: Int): CONSTANT = {
-    constantPool(idx - 1)
-  }
-
-  private val constantPool = ArrayBuffer.empty[CONSTANT]
-  private val methods = ArrayBuffer.empty[method_info]
-
-  private val fullClassName = packageName + "/" + className
-  constantPool += CONSTANT_Class_info(2) // Have to hardcode this as first constant must be class
-  addUTF8(fullClassName)
-
+                                   ) extends JVMClassFileBuilder {
   private val STRING_CODE = addUTF8("Code")
 
-  def addUTF8(value: String): Int = {
-    constantPool += CONSTANT_Utf8_info(value)
-    constantPool.length
+  private val fullClassName = packageName match {
+    case Some(v) => v + "/" + className
+    case _       => className
   }
 
+  private val thisConstantIdx = addConstant(CONSTANT_Class_info(addUTF8(fullClassName)))
+
+  // Subclass Object
+  private val superClassConstantIdx = addConstant(CONSTANT_Class_info(addUTF8("java/lang/Object")))
+
+
   def addFunction(name: Identifier, variables: Seq[JVMByteCode.DeclareVariable], ret: Types, definition: Seq[JVMByteCode.Generated]): Unit = {
-//    val code = attribute_info(
-//      addUTF8("AttributeForCodeFor" + name.v),
-//    )
+    //    val code = attribute_info(
+    //      addUTF8("AttributeForCodeFor" + name.v),
+    //    )
 
     val genParams = GenParams()
     val codeBuffer = new ByteArrayOutputStream()
@@ -103,20 +92,20 @@ class JVMClassFileBuilder(
 
     //      u2 constant_pool_count;
     JVMClassFileBuilderUtils.writeShort(out, constantPool.length + 1)
-//    JVMClassFileBuilderUtils.writeShort(out, 2)
+    //    JVMClassFileBuilderUtils.writeShort(out, 2)
 
     //      cp_info constant_pool[constant_pool_count-1];
     constantPool.foreach(_.write(out, charset))
-//    constantPool.head.write(out, charset)
+    //    constantPool.head.write(out, charset)
 
     //      u2 access_flags;
     JVMClassFileBuilderUtils.writeShort(out, 1) // public
 
     //      u2 this_class;
-    JVMClassFileBuilderUtils.writeShort(out, 1)
+    JVMClassFileBuilderUtils.writeShort(out, thisConstantIdx)
 
     //      u2 super_class;
-    JVMClassFileBuilderUtils.writeShort(out, 0)
+    JVMClassFileBuilderUtils.writeShort(out, superClassConstantIdx)
 
     //      u2 interfaces_count;
     //      u2 interfaces[interfaces_count];
@@ -128,7 +117,7 @@ class JVMClassFileBuilder(
 
     //      u2 methods_count;
     JVMClassFileBuilderUtils.writeShort(out, methods.length)
-//    JVMClassFileBuilderUtils.writeShort(out, 0)
+    //    JVMClassFileBuilderUtils.writeShort(out, 0)
 
     //      method_info methods[methods_count];
     methods.foreach(_.write(out, charset))

@@ -20,14 +20,14 @@ object CompilingTestUtils {
     val p = createParser()
     val asm = createByteCode()
 //    val interimParser = createInterim()
-    val writer = new JVMClassFileWriter()
+//    val writer = new JVMClassFileWriter()
     val split = asmCode.trim().replace("\r\n", "\n").split('\n')
 
     val parsed = if (isSnippet) p.parseSnippet(cCode) else p.parse(cCode)
     parsed match {
       case CParseSuccess(x) =>
         PPrinter.Color.log(x)
-        val cf = new JVMClassFileBuilder(50, 0, "test", "Test")
+        val cf = new JVMClassFileBuilderForWriting(50, 0, Some("test"), "Test")
         x match {
           case v: Seq[BlockItem]  => asm.generateSeqBlockItem(v)
           case v: TranslationUnit =>

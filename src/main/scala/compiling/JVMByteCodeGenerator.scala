@@ -103,7 +103,7 @@ class JVMByteCodeGenerator {
 
   def generateSeqBlockItem(in: Seq[BlockItem]): Seq[Generated] = in.flatMap(v => generateBlockItem(v))
 
-  def generateTranslationUnit(in: TranslationUnit, cf: JVMClassFileBuilder): Unit = in.v.foreach(v => generateTop(v, cf))
+  def generateTranslationUnit(in: TranslationUnit, cf: JVMClassFileBuilderForWriting): Unit = in.v.foreach(v => generateTop(v, cf))
 
   def resolveDeclarationSpecifiersToTypes(in: DeclarationSpecifiers): Types = {
     Types(in.v.map {
@@ -283,7 +283,7 @@ class JVMByteCodeGenerator {
     GS(in.v)
   }
 
-  def generateExternalDeclaration(in: ExternalDeclaration,cf: JVMClassFileBuilder): Unit = {
+  def generateExternalDeclaration(in: ExternalDeclaration,cf: JVMClassFileBuilderForWriting): Unit = {
     in match {
       case v: FunctionDefinition => generateFunctionDefinition(v, cf)
       case v: Declaration        =>
@@ -292,7 +292,7 @@ class JVMByteCodeGenerator {
     }
   }
 
-  def generateFunctionDefinition(in: FunctionDefinition, cf: JVMClassFileBuilder): Unit = {
+  def generateFunctionDefinition(in: FunctionDefinition, cf: JVMClassFileBuilderForWriting): Unit = {
     val typ = resolveDeclarationSpecifiersToTypes(in.spec)
 //    val varName = resolveDeclaratorToIdentifier(in.dec).v
 
@@ -518,7 +518,7 @@ class JVMByteCodeGenerator {
     GS(if (v.angularBrackets) "<" else "\"", v.v, if (v.angularBrackets) ">" else "\"")
   }
 
-  def generateTop(x: Top, cf: JVMClassFileBuilder): Unit = {
+  def generateTop(x: Top, cf: JVMClassFileBuilderForWriting): Unit = {
     x match {
       case v: ExternalDeclaration => generateExternalDeclaration(v, cf)
       case v: PreprocessingFile   => generateGroup(v.v)

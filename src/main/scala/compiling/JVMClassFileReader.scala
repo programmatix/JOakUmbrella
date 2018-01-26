@@ -64,12 +64,12 @@ object JVMClassFileReader {
     println((" " * indent * 2) + msg)
   }
 
-  private def addConstant(cf: JVMClassFileBuilder, constant: CONSTANT, idx: Int) = {
+  private def addConstant(cf: JVMClassFileBuilderForReading, constant: CONSTANT, idx: Int) = {
     println(s"Constant $idx: $constant")
     cf.addConstant(constant)
   }
 
-  private def goodConstant(in: ByteArrayInputStream, indent: Int, cf: JVMClassFileBuilder, name: String, value: Int): Unit = {
+  private def goodConstant(in: ByteArrayInputStream, indent: Int, cf: JVMClassFileBuilderForReading, name: String, value: Int): Unit = {
     try {
       val constant = cf.getConstant(value)
       good(in, s"${" " * indent * 2}$name = $value (${constant})")
@@ -81,7 +81,7 @@ object JVMClassFileReader {
   }
 
 
-  private def printCode(in: ByteArrayInputStream, cf: JVMClassFileBuilder, indent: Int, code: Array[Byte]): Unit = {
+  private def printCode(in: ByteArrayInputStream, cf: JVMClassFileBuilderForReading, indent: Int, code: Array[Byte]): Unit = {
     var idx = 0
     val stream = new ByteArrayInputStream(code)
 
@@ -95,7 +95,7 @@ object JVMClassFileReader {
     }
   }
 
-  private def readAttribute(in: ByteArrayInputStream, cf: JVMClassFileBuilder, indent: Int): Code_attribute = {
+  private def readAttribute(in: ByteArrayInputStream, cf: JVMClassFileBuilderForReading, indent: Int): Code_attribute = {
     val attribute_name_index = readShort(in)
       goodConstant(in, indent, cf, "attribute_name_index", attribute_name_index)
 
@@ -135,7 +135,7 @@ object JVMClassFileReader {
       // Can be LineNumberTable or LocalVariableTable, both optional and for debugging
       val attribute_name_index = readShort(in)
       var attribute_length = readInt(in)
-      good(in, s"Skipping attribute len ${attribute_length} attribute_name_index = $attribute_name_index (${cf.getConstant(attribute_name_index)})")
+      good(in, s"${" " * indent * 2}Skipping attribute len ${attribute_length} attribute_name_index = $attribute_name_index (${cf.getConstant(attribute_name_index)})")
       while (attribute_length > 0) {
         in.read()
         attribute_length -= 1
@@ -151,7 +151,7 @@ object JVMClassFileReader {
     )
   }
 
-  private def readMethod(in: ByteArrayInputStream, cf: JVMClassFileBuilder, indentIn: Int): Unit = {
+  private def readMethod(in: ByteArrayInputStream, cf: JVMClassFileBuilderForReading, indentIn: Int): Unit = {
     good(in, indentIn, "Method:")
     val indent = indentIn + 1
 
@@ -198,7 +198,7 @@ object JVMClassFileReader {
 
     good(in, s"Constant pool count = $constantPoolCount")
 
-    val cf = new JVMClassFileBuilder(major_version, minor_version, "test", "test")
+    val cf = new JVMClassFileBuilderForReading(major_version, minor_version, Some("test"), "test")
     
     for(idx <- Range(1, constantPoolCount)) {
       val tag = readByte(in)
@@ -285,7 +285,6 @@ object JVMClassFileReader {
     good(in, s"attributes_count = $attributes_count")
 
     for (idx <- Range(0, attributes_count)) {
-//      println("Attribute:")
       val attribute_name_index = readShort(in)
       var attribute_length = readInt(in)
       good(in, s"Skipping attribute $idx len ${attribute_length} attribute_name_index = $attribute_name_index (${cf.getConstant(attribute_name_index)})")
