@@ -1,10 +1,10 @@
-package compiling
+package jvm
 
 import java.io.{ByteArrayOutputStream, Writer}
 import java.nio.charset.Charset
 
-import compiling.JVMByteCode.{GenParams, JVMOpCodeWithArgs, JVMType}
-import compiling.JVMClassFileTypes._
+import jvm.JVMByteCode.{GenParams, JVMOpCodeWithArgs, JVMType}
+import jvm.JVMClassFileTypes._
 import parsing.Identifier
 
 import scala.scalajs.niocharset.StandardCharsets

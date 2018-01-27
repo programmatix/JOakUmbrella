@@ -2,6 +2,8 @@ package compiling
 
 import java.io.ByteArrayInputStream
 
+import jvm.JVMClassFileReaderUtils
+
 //sealed trait JVMOpCode {
 //  val hexcode: Int
 //  val name: String

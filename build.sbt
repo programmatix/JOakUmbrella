@@ -3,6 +3,7 @@ enablePlugins(ScalaJSPlugin)
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.4"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % "test"
 libraryDependencies += "com.lihaoyi" %%% "pprint" % "0.5.3"
+libraryDependencies += "com.lihaoyi" %%% "fastparse" % "1.0.0"
 
 import scala.sys.process._
 val copy = taskKey[Unit]("")

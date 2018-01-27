@@ -1,7 +1,8 @@
 package compiling
 
-import compiling.JVMByteCode._
 import compiling.JVMOpCodes._
+import jvm.JVMByteCode._
+import jvm.{JVMByteCode, JVMClassFileBuilderForWriting}
 import parsing.{BlockItem, TranslationUnit, _}
 
 import scala.collection.mutable.ArrayBuffer
@@ -196,7 +197,7 @@ class JVMByteCodeGenerator(cf: JVMClassFileBuilderForWriting) {
   def resolveToVariable(declarator: Declarator, specifiers: DeclarationSpecifiers): DeclareVariable = {
     val types = resolveDeclarationSpecifiersToType(specifiers)
     val varName = resolveDeclaratorToIdentifier(declarator)
-    DeclareVariable(varName, types)
+    JVMByteCode.DeclareVariable(varName, types)
   }
 
   def generateParameterDeclaration(in: ParameterDeclaration): Seq[Generated] = {

@@ -4,9 +4,9 @@ import java.io.{File, IOException, StringWriter}
 import java.util
 import javax.tools.{DiagnosticCollector, JavaFileObject, ToolProvider}
 
-import compiling.JVMByteCode.JVMOpCodeWithArgs
-import compiling.JVMClassFileReader.ReadParams
-import jvm.{ExecuteParams, JVM}
+import jvm.JVMByteCode.JVMOpCodeWithArgs
+import jvm.JVMClassFileReader.ReadParams
+import jvm._
 import parsing._
 import pprint.PPrinter
 

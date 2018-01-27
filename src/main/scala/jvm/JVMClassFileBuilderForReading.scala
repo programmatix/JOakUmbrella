@@ -1,6 +1,6 @@
-package compiling
+package jvm
 
-import compiling.JVMClassFileTypes.{Constant, ConstantUtf8, MethodInfo}
+import jvm.JVMClassFileTypes._
 
 import scala.collection.mutable.ArrayBuffer
 

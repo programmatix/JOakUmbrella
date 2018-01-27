@@ -2,10 +2,9 @@ package jvm
 
 import java.io.{ByteArrayInputStream, File, FileInputStream}
 
-import compiling.JVMByteCode._
-import compiling.JVMClassFileReader.ReadParams
-import compiling.JVMClassFileTypes.{Constant, ConstantFloat, ConstantInteger}
-import compiling.{JVMClassFileBuilderForReading, JVMClassFileReader}
+import jvm.JVMByteCode._
+import jvm.JVMClassFileReader.ReadParams
+import jvm.JVMClassFileTypes._
 
 import scala.collection.mutable
 
@@ -267,7 +266,27 @@ class JVM(cf: JVMClassFileBuilderForReading) {
         case 0xb4 => // getfield
           JVM.err("Cannot handle opcode getfield yet")
         case 0xb2 => // getstatic
-          JVM.err("Cannot handle opcode getstatic yet")
+          // getstatic pops objectref (a reference to an object) from the stack, retrieves the value of the static field
+          // (also known as a class field) identified by <field-spec> from objectref, and pushes the one-word or two-word
+          // value onto the operand stack.
+          val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
+          val fieldRef = cf.getConstant(index).asInstanceOf[ConstantFieldref]
+          val cls = cf.getConstant(fieldRef.classIndex).asInstanceOf[ConstantClass]
+          //  java/lang/System
+          val className = cf.getString(cls.nameIndex)
+          val nameAndType = cf.getConstant(fieldRef.nameAndTypeIndex).asInstanceOf[ConstantNameAndType]
+          // out
+          val name = cf.getString(nameAndType.nameIndex)
+          // Ljava/io/PrintStream;
+          val typ = cf.getString(nameAndType.descriptorIndex)
+//          val field = ClassLoader.getSystemClassLoader.loadClass("java.lang.System").getField("out")
+//          ClassLoader.getSystemClassLoader.loadClass("java.lang.System").getField("out").get(classOf[java.io.PrintStream])
+
+          val clsRef = ClassLoader.getSystemClassLoader.loadClass("java.lang.System")
+          val fieldRef2 = clsRef.getField(name)
+          val fieldType = fieldRef2.getType
+          val fieldInstance = fieldRef2.get(fieldType)
+          sf.stack.push(JVMVarObject(fieldInstance))
         case 0xa7 => // goto
           JVM.err("Cannot handle opcode goto yet")
         case 0xc8 => // goto_w
@@ -387,7 +406,38 @@ class JVM(cf: JVMClassFileBuilderForReading) {
         case 0xb8 => // invokestatic
           JVM.err("Cannot handle opcode invokestatic yet")
         case 0xb6 => // invokevirtual
-          JVM.err("Cannot handle opcode invokevirtual yet")
+          // invoke virtual method on object objectref and puts the result on the stack (might be void); the method is
+          // identified by method reference index in constant pool (indexbyte1 << 8 + indexbyte2)
+          val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
+          val fieldRef = cf.getConstant(index).asInstanceOf[ConstantMethodref]
+          val cls = cf.getConstant(fieldRef.classIndex).asInstanceOf[ConstantClass]
+          //  java/io/PrintStream
+          val className = cf.getString(cls.nameIndex)
+          val nameAndType = cf.getConstant(fieldRef.nameAndTypeIndex).asInstanceOf[ConstantNameAndType]
+          // println
+          val methodName = cf.getString(nameAndType.nameIndex)
+          // (Ljava/lang/String;)V
+          val methodDescriptor = cf.getString(nameAndType.descriptorIndex)
+
+//          val qualifiedMethodName = className.replace("/", ".") + "." + methodName
+
+          val methodTypes = JVMMethodDescriptors.methodDescriptorToTypes(methodDescriptor)
+
+          val args: Seq[JVMVar] = methodTypes.args.map(arg => {
+            stack.head.pop()
+//            arg match {
+//              case v: JVMTypeObjectStr => stack.head.pop().asInstanceOf[JVMVarObject]
+//            }
+//            val arg1 = stack.head.pop().asInstanceOf[JVMVarString].
+          })
+          val objectRef = stack.head.pop().asInstanceOf[JVMVarObject].o
+
+//          val loadedCls = ClassLoader.getSystemClassLoader.loadClass(qualifiedMethodName)
+
+          val clsRef = ClassLoader.getSystemClassLoader.loadClass(className.replace("/", "."))
+          val methodRef = clsRef.getMethod("println", classOf[String])
+          methodRef.invoke(objectRef, args)
+
         case 0x80 => // ior
           JVM.err("Cannot handle opcode ior yet")
         case 0x70 => // irem
@@ -454,6 +504,9 @@ class JVM(cf: JVMClassFileBuilderForReading) {
           c match {
             case v: ConstantFloat   => sf.push(JVMVarFloat(v.value))
             case v: ConstantInteger => sf.push(JVMVarInt(v.value))
+            case v: ConstantString  =>
+              val str = cf.getString(v.stringIndex)
+              sf.push(JVMVarString(str))
             case _                  => JVM.err(s"Can't handle constant ${c} in ldc yet")
           }
 
@@ -558,6 +611,8 @@ object JVM {
     println("Error: " + message)
     assert(false)
   }
+
+
 
   def main(args: Array[String]): Unit = {
     if (args.length != 1) {

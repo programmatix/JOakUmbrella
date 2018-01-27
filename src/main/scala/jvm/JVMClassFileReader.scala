@@ -1,11 +1,12 @@
-package compiling
+package jvm
 
 import java.io._
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 
-import compiling.JVMByteCode.{JVMOpCodeWithArgs, JVMVarInt}
-import compiling.JVMClassFileTypes._
+import compiling.JVMOpCodes
+import jvm.JVMByteCode.{JVMOpCodeWithArgs, JVMVarInt}
+import jvm.JVMClassFileTypes._
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -124,7 +125,7 @@ object JVMClassFileReader {
         args += value
       }
 
-      out += JVMOpCodeWithArgs(opcode, args.map(v => JVMVarInt(v)).toArray)
+      out += JVMByteCode.JVMOpCodeWithArgs(opcode, args.map(v => JVMVarInt(v)).toArray)
 
       idx += opcode.lengthInBytes
 
