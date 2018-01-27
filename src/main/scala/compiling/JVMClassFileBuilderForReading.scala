@@ -1,30 +1,45 @@
 package compiling
 
-import compiling.JVMClassFileTypes.{CONSTANT, CONSTANT_Utf8_info, method_info}
+import compiling.JVMClassFileTypes.{Constant, ConstantUtf8, MethodInfo}
 
 import scala.collection.mutable.ArrayBuffer
 
 
 trait JVMClassFileBuilder {
-  def addConstant(constant: CONSTANT): Int = {
-    constantPool += constant
+  def addConstant(constant: Constant): Int = {
+    constants += constant
     // constant indexing is 1-based
-    constantPool.length
+    constants.length
   }
 
-  def getConstant(idx: Int): CONSTANT = {
-    // constant indexing is 1-based
-    constantPool(idx - 1)
+  def addMethod(method: MethodInfo): Unit = {
+    methods += method
   }
 
-  protected val constantPool = ArrayBuffer.empty[CONSTANT]
-  protected val methods = ArrayBuffer.empty[method_info]
+  def getConstant(idx: Int): Constant = {
+    // constant indexing is 1-based
+    constants(idx - 1)
+  }
+
+  val constants = ArrayBuffer.empty[Constant]
+  val methods = ArrayBuffer.empty[MethodInfo]
 
   def addUTF8(value: String): Int = {
-    constantPool += CONSTANT_Utf8_info(value)
-    constantPool.length
+    constants += ConstantUtf8(value)
+    constants.length
   }
 
+  def getString(idx: Int): String = {
+    getConstant(idx).asInstanceOf[ConstantUtf8].value
+  }
+
+  def getMethod(name: String): Option[MethodInfo] = {
+    methods.find(v => getString(v.nameIndex) == name)
+  }
+
+  def getMainMethod(): Option[MethodInfo] = {
+    methods.find(v => getString(v.nameIndex) == "main")
+  }
 }
 
 class JVMClassFileBuilderForReading (

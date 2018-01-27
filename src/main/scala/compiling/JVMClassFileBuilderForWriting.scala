@@ -3,7 +3,7 @@ package compiling
 import java.io.{ByteArrayOutputStream, Writer}
 import java.nio.charset.Charset
 
-import compiling.JVMByteCode.{ByteCode, GenParams, JVMType}
+import compiling.JVMByteCode.{GenParams, JVMOpCodeWithArgs, JVMType}
 import compiling.JVMClassFileTypes._
 import parsing.Identifier
 
@@ -34,15 +34,15 @@ class JVMClassFileBuilderForWriting(
     case _       => className
   }
 
-  private val thisConstantIdx = addConstant(CONSTANT_Class_info(addUTF8(fullClassName)))
+  private val thisConstantIdx = addConstant(ConstantClass(addUTF8(fullClassName)))
 
   // Subclass Object
-  private val superClassConstantIdx = addConstant(CONSTANT_Class_info(addUTF8("java/lang/Object")))
+  private val superClassConstantIdx = addConstant(ConstantClass(addUTF8("java/lang/Object")))
 
 
   def addFunction(name: Identifier, variables: Seq[JVMByteCode.DeclareVariable], ret: JVMType, definitionRaw: Seq[JVMByteCode.Generated]): Int = {
     // Get rid of any strings or other junk
-    val definition: Seq[JVMByteCode.Generated] = definitionRaw filter(_.isInstanceOf[ByteCode])
+    val definition: Seq[JVMByteCode.JVMOpCodeWithArgs] = definitionRaw.filter(_.isInstanceOf[JVMOpCodeWithArgs]).map(_.asInstanceOf[JVMOpCodeWithArgs])
     val genParams = GenParams()
     val codeBuffer = new ByteArrayOutputStream()
     val charset = StandardCharsets.UTF_8
@@ -51,7 +51,7 @@ class JVMClassFileBuilderForWriting(
     assert(codeLength < 65536)
     val codeBytes = codeBuffer.toByteArray
 
-    val code = Code_attribute(
+    val code = CodeAttribute(
       STRING_CODE,
       // TODO calc this properly
       maxStack = 100,
@@ -65,7 +65,7 @@ class JVMClassFileBuilderForWriting(
 
     val nameIdx = addUTF8(name.v)
     val methodDescriptorIdx = addUTF8(methodDescriptor)
-    val method = method_info(
+    val method = MethodInfo(
       1 | 8, // Public static
         // https://docs.oracle.com/javase/specs/jvms/se6/html/Concepts.doc.html#21410
       nameIdx,
@@ -75,8 +75,8 @@ class JVMClassFileBuilderForWriting(
 
     methods += method
 
-    val nameAndTypeIdx = addConstant(CONSTANT_NameAndType_info(nameIdx, methodDescriptorIdx))
-    addConstant(CONSTANT_Methodref_info(thisConstantIdx, nameAndTypeIdx))
+    val nameAndTypeIdx = addConstant(ConstantNameAndType(nameIdx, methodDescriptorIdx))
+    addConstant(ConstantMethodref(thisConstantIdx, nameAndTypeIdx))
   }
 
   def write(out: Writer, charset: Charset): Unit = {
@@ -102,11 +102,11 @@ class JVMClassFileBuilderForWriting(
     JVMClassFileBuilderUtils.writeShort(out, jvmMajorVersion)
 
     //      u2 constant_pool_count;
-    JVMClassFileBuilderUtils.writeShort(out, constantPool.length + 1)
+    JVMClassFileBuilderUtils.writeShort(out, constants.length + 1)
     //    JVMClassFileBuilderUtils.writeShort(out, 2)
 
     //      cp_info constant_pool[constant_pool_count-1];
-    constantPool.foreach(_.write(out, charset))
+    constants.foreach(_.write(out, charset))
     //    constantPool.head.write(out, charset)
 
     //      u2 access_flags;

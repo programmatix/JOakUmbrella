@@ -1,13 +1,13 @@
 package compiling
 
 import compiling.JVMByteCode._
+import compiling.JVMOpCodes._
 import parsing.{BlockItem, TranslationUnit, _}
 
 import scala.collection.mutable.ArrayBuffer
-import JVMOpCodes._
 
 // Converts a C AST into JVM bytecode.  It returns a Seq[JVMByteCode.Generated]
-class JVMByteCodeGenerator {
+class JVMByteCodeGenerator(cf: JVMClassFileBuilderForWriting) {
   @Deprecated
   private val newlineIndent: Seq[Generated] = Seq()
   @Deprecated
@@ -16,11 +16,20 @@ class JVMByteCodeGenerator {
   // Helpers to turn Seq[String] into Generated
   import scala.language.implicitConversions
 
-  private implicit def stringsToGenerated(x: Seq[String]): Seq[Generated] = Seq(GenStrings(x))
+  private implicit def stringsToGenerated(x: Seq[String]): Seq[Generated] = {
+    throw unsupported(s"doing something with ${x}")
+    Seq(GenStrings(x))
+  }
 
-  private def GS(v: String) = Seq(GenString(v))
+  private def GS(v: String) = {
+    throw unsupported(s"doing something with ${v}")
+    Seq(GenString(v))
+  }
 
-  private def GS(v: String*) = Seq(GenStrings(v))
+  private def GS(v: String*) = {
+    throw unsupported(s"doing something with ${v}")
+    Seq(GenStrings(v))
+  }
 
   def generateBlockItem(in: BlockItem): Seq[Generated] = {
     in match {
@@ -41,11 +50,21 @@ class JVMByteCodeGenerator {
       throw JVMGenUnsupportedCurrently("handle pointers while trying to create identifier")
     }
     in.v match {
-      case v: DDBracketed          => throw JVMGenUnsupportedCurrently("handle DDBracketed while trying to create identifier")
+      case v: DDBracketed          =>
+        throw JVMGenUnsupportedCurrently("handle DDBracketed while trying to create identifier")
       case v: DirectDeclaratorOnly => v.v
-      case v: FunctionDeclaration  => throw JVMGenUnsupportedCurrently("handle FunctionDeclaration while trying to create identifier")
+      case v: FunctionDeclaration  =>
+        throw JVMGenUnsupportedCurrently("handle FunctionDeclaration while trying to create identifier")
     }
 
+  }
+
+  def resolveExpressionToIdentifier(in: Expression): Identifier = {
+    in match {
+      case v: Identifier => v
+      case _ =>
+        throw JVMGenUnsupportedCurrently(s"could not get identifier from $in")
+    }
   }
 
   // >>int hello = "world"<<;
@@ -101,7 +120,7 @@ class JVMByteCodeGenerator {
     }
   }
 
-  def generateSeqBlockItem(in: Seq[BlockItem], cf: JVMClassFileBuilderForWriting): Seq[Generated] = {
+  def generateSeqBlockItem(in: Seq[BlockItem]): Seq[Generated] = {
     val out = in.flatMap(v => {
       generateBlockItem(v)
     })
@@ -111,7 +130,7 @@ class JVMByteCodeGenerator {
     out
   }
 
-  def generateTranslationUnit(in: TranslationUnit, cf: JVMClassFileBuilderForWriting): Unit = in.v.foreach(v => generateTop(v, cf))
+  def generateTranslationUnit(in: TranslationUnit): Unit = in.v.foreach(v => generateTop(v))
 
   def resolveDeclarationSpecifiersToType(in: DeclarationSpecifiers): JVMType = {
     var out: Option[JVMType] = None
@@ -261,10 +280,10 @@ class JVMByteCodeGenerator {
           case Some(exp) =>
             val simple = convertExpressionToSimple(exp).toShort
             if (simple < 256) {
-              Seq(make(bipush,simple), make(ireturn))
+              Seq(makeInt(bipush, simple), make(ireturn))
             }
             else {
-              Seq(make(sipush,simple), make(ireturn))
+              Seq(makeInt(sipush, simple), make(ireturn))
             }
 
           case _ => Seq(make(ret))
@@ -319,16 +338,16 @@ class JVMByteCodeGenerator {
     GS(in.v)
   }
 
-  def generateExternalDeclaration(in: ExternalDeclaration, cf: JVMClassFileBuilderForWriting): Unit = {
+  def generateExternalDeclaration(in: ExternalDeclaration): Unit = {
     in match {
-      case v: FunctionDefinition => generateFunctionDefinition(v, cf)
+      case v: FunctionDefinition => generateFunctionDefinition(v)
       case v: Declaration        =>
         throw unsupported("Declaration at ExternalDeclaration")
         generateDeclaration(v)
     }
   }
 
-  def generateFunctionDefinition(in: FunctionDefinition, cf: JVMClassFileBuilderForWriting): Unit = {
+  def generateFunctionDefinition(in: FunctionDefinition): Unit = {
     val typ = resolveDeclarationSpecifiersToType(in.spec)
     //    val varName = resolveDeclaratorToIdentifier(in.dec).v
 
@@ -353,12 +372,12 @@ class JVMByteCodeGenerator {
           val methodRefIdx = cf.addFunction(Identifier("__" + name.v + "Original"), variables, ret, definition)
 
           cf.addFunction(Identifier("main"),
-//            Seq(DeclareVariable(Identifier("args"), JVMTypeInt())),
+            //            Seq(DeclareVariable(Identifier("args"), JVMTypeInt())),
             Seq(DeclareVariable(Identifier("args"), JVMTypeArray(JVMTypeString()))),
             JVMTypeVoid(),
             Seq(
-              generic(invokestatic, Array(methodRefIdx)),
-              generic(return_)
+              makeInt(invokestatic, methodRefIdx),
+              JVMOpCodeWithArgs(return_)
             )
           )
         }
@@ -469,8 +488,8 @@ class JVMByteCodeGenerator {
       case v: EnumerationConstant          => GS(v.v)
       case v: CharacterConstant            => GS(v.v)
       case v: IntConstant                  =>
-        if (v.v <= Byte.MaxValue && v.v >= Byte.MinValue) Seq(make(bipush, v.v))
-        else if (v.v <= Short.MaxValue && v.v >= Short.MinValue) Seq(make(sipush,v.v))
+        if (v.v <= Byte.MaxValue && v.v >= Byte.MinValue) Seq(makeInt(bipush, v.v))
+        else if (v.v <= Short.MaxValue && v.v >= Short.MinValue) Seq(makeInt(sipush, v.v))
         else {
           // TODO longer ints
           assert(false)
@@ -484,7 +503,13 @@ class JVMByteCodeGenerator {
       case v: PostfixExpressionPlusPlus    => generateExpression(v.v1) ++ GS("++")
       case v: PostfixExpressionDot         => generateExpression(v.v1) ++ GS("->") ++ generateExpression(v.v2)
       case v: PostfixExpressionArrow       => generateExpression(v.v1) ++ GS("->") ++ generateExpression(v.v2)
-      case v: PostfixExpressionArgs        => generateExpression(v.v1) ++ GS("(") ++ v.v2.map(generateExpression).getOrElse(Seq()) ++ GS(")")
+      case v: PostfixExpressionArgs        =>
+        val funcName = resolveExpressionToIdentifier(v.v1)
+        if (funcName == "printf") {
+
+        }
+//        make(invokestatic, )
+        generateExpression(v.v1) ++ GS("(") ++ v.v2.map(generateExpression).getOrElse(Seq()) ++ GS(")")
       case v: PostfixExpressionSimple      => generateExpression(v.v1)
       case v: CastExpression               => GS("(") ++ generateTypeName(v.v) ++ GS(")") ++ generateExpression(v.v2)
       case v: UnaryExpressionPlusPlus      => GS("++") ++ generateExpression(v.v)
@@ -570,9 +595,9 @@ class JVMByteCodeGenerator {
     GS(if (v.angularBrackets) "<" else "\"", v.v, if (v.angularBrackets) ">" else "\"")
   }
 
-  def generateTop(x: Top, cf: JVMClassFileBuilderForWriting): Unit = {
+  def generateTop(x: Top): Unit = {
     x match {
-      case v: ExternalDeclaration => generateExternalDeclaration(v, cf)
+      case v: ExternalDeclaration => generateExternalDeclaration(v)
       case v: PreprocessingFile   => generateGroup(v.v)
     }
   }

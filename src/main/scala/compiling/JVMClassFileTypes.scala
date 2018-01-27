@@ -13,7 +13,7 @@ object JVMClassFileTypes {
     u1 info[];
   }
   */
-  sealed trait CONSTANT {
+  sealed trait Constant {
     def tag(): Int
     def write(out: ByteArrayOutputStream, charset: Charset): Unit
   }
@@ -23,7 +23,7 @@ object JVMClassFileTypes {
         u2 name_index;
       }
    */
-  case class CONSTANT_Class_info(nameIndex: Int) extends CONSTANT {
+  case class ConstantClass(nameIndex: Int) extends Constant {
     override def tag() = 7
     override def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
       JVMClassFileBuilderUtils.writeByte(out, tag())
@@ -37,7 +37,7 @@ object JVMClassFileTypes {
         u1 bytes[length];
       }
    */
-  case class CONSTANT_Utf8_info(value: String) extends CONSTANT {
+  case class ConstantUtf8(value: String) extends Constant {
     override def tag() = 1
     override def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
       JVMClassFileBuilderUtils.writeByte(out, tag())
@@ -52,7 +52,7 @@ object JVMClassFileTypes {
         u2 name_and_type_index;
       }
    */
-  case class CONSTANT_Fieldref_info(classIndex: Int, nameAndTypeIndex: Int) extends CONSTANT {
+  case class ConstantFieldref(classIndex: Int, nameAndTypeIndex: Int) extends Constant {
     override def tag() = 9
     override def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
       JVMClassFileBuilderUtils.writeByte(out, tag())
@@ -60,7 +60,7 @@ object JVMClassFileTypes {
       JVMClassFileBuilderUtils.writeShort(out, nameAndTypeIndex)
     }
   }
-  case class CONSTANT_Methodref_info(classIndex: Int, nameAndTypeIndex: Int) extends CONSTANT {
+  case class ConstantMethodref(classIndex: Int, nameAndTypeIndex: Int) extends Constant {
     override def tag() = 10
     override def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
       JVMClassFileBuilderUtils.writeByte(out, tag())
@@ -68,7 +68,7 @@ object JVMClassFileTypes {
       JVMClassFileBuilderUtils.writeShort(out, nameAndTypeIndex)
     }
   }
-  case class CONSTANT_InterfaceMethodref_info(classIndex: Int, nameAndTypeIndex: Int) extends CONSTANT {
+  case class ConstantInterfaceMethodref(classIndex: Int, nameAndTypeIndex: Int) extends Constant {
     override def tag() = 11
     override def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
       JVMClassFileBuilderUtils.writeByte(out, tag())
@@ -82,7 +82,7 @@ object JVMClassFileTypes {
         u2 string_index;
       }
    */
-  case class CONSTANT_String_info(stringIndex: Int) extends CONSTANT {
+  case class ConstantString(stringIndex: Int) extends Constant {
     override def tag() = 8
     override def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
       JVMClassFileBuilderUtils.writeByte(out, tag())
@@ -95,14 +95,14 @@ object JVMClassFileTypes {
         u4 bytes;
       }
    */
-  case class CONSTANT_Integer_info(value: Int) extends CONSTANT {
+  case class ConstantInteger(value: Int) extends Constant {
     override def tag() = 3
     override def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
       JVMClassFileBuilderUtils.writeByte(out, tag())
       JVMClassFileBuilderUtils.writeInt(out, value)
     }
   }
-  case class CONSTANT_Float_info(value: Float) extends CONSTANT {
+  case class ConstantFloat(value: Float) extends Constant {
     override def tag() = 4
     override def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
       JVMClassFileBuilderUtils.writeByte(out, tag())
@@ -116,14 +116,14 @@ object JVMClassFileTypes {
         u4 low_bytes;
       }
    */
-  case class CONSTANT_Long_info(value: Long) extends CONSTANT {
+  case class ConstantLong(value: Long) extends Constant {
     override def tag() = 5
     override def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
       JVMClassFileBuilderUtils.writeByte(out, tag())
       JVMClassFileBuilderUtils.writeLong(out, value)
     }
   }
-  case class CONSTANT_Double_info(value: Double) extends CONSTANT {
+  case class ConstantDouble(value: Double) extends Constant {
     override def tag() = 6
     override def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
       JVMClassFileBuilderUtils.writeByte(out, tag())
@@ -138,7 +138,7 @@ object JVMClassFileTypes {
       }
 
    */
-  case class CONSTANT_NameAndType_info(nameIndex: Int, descriptorIndex: Int) extends CONSTANT {
+  case class ConstantNameAndType(nameIndex: Int, descriptorIndex: Int) extends Constant {
     override def tag() = 12
     override def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
       JVMClassFileBuilderUtils.writeByte(out, tag())
@@ -248,21 +248,26 @@ object JVMClassFileTypes {
         attribute_info attributes[attributes_count];
       }
    */
-  case class method_info(accessFlags: Int,
-                         nameIndex: Int,
-                         descriptorIndex: Int,
-//                         attributes: Seq[attribute_info]) {
-                         attributes: Seq[Attribute]) {
+  case class MethodInfo(accessFlags: Int,
+                        nameIndex: Int,
+                        descriptorIndex: Int,
+                        //                         attributes: Seq[attribute_info]) {
+                        attributes: Seq[Attribute]) {
     def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
       JVMClassFileBuilderUtils.writeShort(out, accessFlags)
       JVMClassFileBuilderUtils.writeShort(out, nameIndex)
       JVMClassFileBuilderUtils.writeShort(out, descriptorIndex)
       JVMClassFileBuilderUtils.writeShort(out, attributes.length)
+
       attributes.foreach(_.write(out, charset))
     }
 
     def write(out: Writer, charset: Charset): Unit = {
       attributes.foreach(_.write(out, charset))
+    }
+
+    def getCode(): CodeAttribute = {
+      attributes.head.asInstanceOf[CodeAttribute]
     }
   }
 
@@ -281,8 +286,8 @@ object JVMClassFileTypes {
 
       // Attributes are essentially unions, with the name indicating the type
    */
-  case class attribute_info(attributeNameIndex: Int,
-                            info: Attribute) {
+  case class AttributeInfo(attributeNameIndex: Int,
+                           info: Attribute) {
     def lengthBytes(): Int = info.lengthBytes()
 
     def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
@@ -303,6 +308,7 @@ object JVMClassFileTypes {
   case class ConstantValue_attribute(attributeNameIndex: Int,
                                      valueIndex: Int) extends Attribute {
     override def lengthBytes(): Int = 2+4+2
+
     def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
       JVMClassFileBuilderUtils.writeShort(out, attributeNameIndex)
       JVMClassFileBuilderUtils.writeInt(out, 2)
@@ -334,12 +340,12 @@ object JVMClassFileTypes {
 
   Contains the code for a single method
  */
-  case class Code_attribute(attributeNameIndex: Int,
-                            maxStack: Int,
-                            maxLocals: Int,
-                            codeOrig: Seq[JVMByteCode.Generated],
-                            code: Array[Byte],
-                            attributes: Seq[attribute_info]) extends Attribute {
+  case class CodeAttribute(attributeNameIndex: Int,
+                           maxStack: Int,
+                           maxLocals: Int,
+                           codeOrig: Seq[JVMOpCodeWithArgs],
+                           code: Array[Byte],
+                           attributes: Seq[AttributeInfo]) extends Attribute {
 
 
     def write(out: ByteArrayOutputStream, charset: Charset): Unit = {

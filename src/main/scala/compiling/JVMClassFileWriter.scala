@@ -184,7 +184,6 @@ object JVMClassFileWriter {
     }
     else {
       val p = new CParser
-      val g = new JVMByteCodeGenerator
 //      val i = new JVMClassFileGenerator
 //      val cw = new JVMClassFileWriter
       val cFilename = args(0)
@@ -194,16 +193,18 @@ object JVMClassFileWriter {
       val in = Source.fromFile(cFilename, "UTF-8").getLines().mkString("\n")
       p.parse(in) match {
         case CParseSuccess(v) =>
+          PPrinter.Color.log(v)
+
           val className = (new File(cFilename)).getName.stripSuffix(".c")
           val cf = new JVMClassFileBuilderForWriting(50, 0, None, className)
-          g.generateTranslationUnit(v, cf)
+          val g = new JVMByteCodeGenerator(cf)
+          g.generateTranslationUnit(v)
 //          val generated = i.parse(interim)
           val byteCode = new ByteArrayOutputStream()
           cf.write(byteCode, StandardCharsets.UTF_8)
 
 //          val byteCode = cw.process(generated)
 
-          PPrinter.Color.log(v)
 //          PPrinter.Color.log(interim)
 //          PPrinter.Color.log(generated)
           PPrinter.Color.log(byteCode)
