@@ -7,6 +7,7 @@ import jvm.JVMClassFileReader.ReadParams
 import jvm.JVMClassFileTypes._
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 class ProgramCounterRegister {
 
@@ -45,6 +46,79 @@ case class ExecuteParams(
 // A Java Virtual Machine implementation, just for learning purposes
 class JVM(cf: JVMClassFileBuilderForReading) {
   val stack = mutable.Stack[StackFrame]()
+
+
+  def getMethodStuff(methodTypes: JVMMethodDescriptors.MethodDescriptor): (Seq[Object], Seq[Class[_]]) = {
+    val args = ArrayBuffer.empty[Object]
+    val argTypes = ArrayBuffer.empty[Class[_]]
+
+    methodTypes.args.foreach(arg => {
+      val next = stack.head.pop()
+      arg match {
+        case v: JVMTypeObjectStr =>
+          if (v.clsRaw == "java/lang/String") {
+            args += next.asInstanceOf[JVMVarString].v.asInstanceOf[Object]
+            argTypes += classOf[java.lang.String]
+          }
+          else {
+            JVM.err(s"Cannot handle $v yet")
+            null
+          }
+        case v: JVMTypeVoid      =>
+          JVM.err(s"not expecting void here")
+          null
+        case v: JVMTypeBoolean   =>
+          args += next.asInstanceOf[JVMVarBoolean].v.asInstanceOf[Object]
+          argTypes += Boolean.getClass
+        //              case v @ (_: JVMTypeInt | _: JVMTypeShort | _: JVMTypeByte) => next.asInstanceOf[JVMVarInteger].asInt.asInstanceOf[Object]
+        case v: JVMTypeInt    =>
+          args += next.asInstanceOf[JVMVarInt].v.asInstanceOf[Object]
+          argTypes += Int.getClass
+        case v: JVMTypeShort  =>
+          args += next.asInstanceOf[JVMVarShort].v.asInstanceOf[Object]
+          argTypes += Short.getClass
+        case v: JVMTypeByte   =>
+          args += next.asInstanceOf[JVMVarByte].v.asInstanceOf[Object]
+          argTypes += Byte.getClass
+        case v: JVMTypeChar   =>
+          args += next.asInstanceOf[JVMVarChar].v.asInstanceOf[Object]
+          argTypes += Char.getClass
+        case v: JVMTypeFloat  =>
+          args += next.asInstanceOf[JVMVarFloat].v.asInstanceOf[Object]
+          argTypes += Float.getClass
+        case v: JVMTypeDouble =>
+          args += next.asInstanceOf[JVMVarDouble].v.asInstanceOf[Object]
+          argTypes += Double.getClass
+        case v: JVMTypeLong   =>
+          args += next.asInstanceOf[JVMVarLong].v.asInstanceOf[Object]
+          argTypes += Long.getClass
+      }
+    })
+
+    (args.toVector, argTypes.toVector)
+  }
+
+  private def resolveMethodRef(index: Int) = {
+    val fieldRef = cf.getConstant(index).asInstanceOf[ConstantMethodref]
+    val cls = cf.getConstant(fieldRef.classIndex).asInstanceOf[ConstantClass]
+    //  java/io/PrintStream
+    val className = cf.getString(cls.nameIndex)
+    val nameAndType = cf.getConstant(fieldRef.nameAndTypeIndex).asInstanceOf[ConstantNameAndType]
+    // println
+    val methodName = cf.getString(nameAndType.nameIndex)
+    // (Ljava/lang/String;)V
+    val methodDescriptor = cf.getString(nameAndType.descriptorIndex)
+
+    val methodTypes = JVMMethodDescriptors.methodDescriptorToTypes(methodDescriptor)
+
+    val (args, argTypes) = getMethodStuff(methodTypes)
+
+
+    val clsRef = ClassLoader.getSystemClassLoader.loadClass(className.replace("/", "."))
+    val methodRef = clsRef.getMethod(methodName, argTypes: _*)
+
+    (methodRef, args)
+  }
 
   def callFunction(code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Unit = {
     val sf = new StackFrame
@@ -279,8 +353,8 @@ class JVM(cf: JVMClassFileBuilderForReading) {
           val name = cf.getString(nameAndType.nameIndex)
           // Ljava/io/PrintStream;
           val typ = cf.getString(nameAndType.descriptorIndex)
-//          val field = ClassLoader.getSystemClassLoader.loadClass("java.lang.System").getField("out")
-//          ClassLoader.getSystemClassLoader.loadClass("java.lang.System").getField("out").get(classOf[java.io.PrintStream])
+          //          val field = ClassLoader.getSystemClassLoader.loadClass("java.lang.System").getField("out")
+          //          ClassLoader.getSystemClassLoader.loadClass("java.lang.System").getField("out").get(classOf[java.io.PrintStream])
 
           val clsRef = ClassLoader.getSystemClassLoader.loadClass("java.lang.System")
           val fieldRef2 = clsRef.getField(name)
@@ -404,53 +478,26 @@ class JVM(cf: JVMClassFileBuilderForReading) {
         case 0xb7 => // invokespecial
           JVM.err("Cannot handle opcode invokespecial yet")
         case 0xb8 => // invokestatic
-          JVM.err("Cannot handle opcode invokestatic yet")
+          val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
+
+          val (methodRef, args) = resolveMethodRef(index)
+
+          if (args.length == 0) {
+            methodRef.invoke(null)
+          }
+          else {
+            methodRef.invoke(null, args)
+          }
+
         case 0xb6 => // invokevirtual
           // invoke virtual method on object objectref and puts the result on the stack (might be void); the method is
           // identified by method reference index in constant pool (indexbyte1 << 8 + indexbyte2)
           val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
-          val fieldRef = cf.getConstant(index).asInstanceOf[ConstantMethodref]
-          val cls = cf.getConstant(fieldRef.classIndex).asInstanceOf[ConstantClass]
-          //  java/io/PrintStream
-          val className = cf.getString(cls.nameIndex)
-          val nameAndType = cf.getConstant(fieldRef.nameAndTypeIndex).asInstanceOf[ConstantNameAndType]
-          // println
-          val methodName = cf.getString(nameAndType.nameIndex)
-          // (Ljava/lang/String;)V
-          val methodDescriptor = cf.getString(nameAndType.descriptorIndex)
 
-//          val qualifiedMethodName = className.replace("/", ".") + "." + methodName
-
-          val methodTypes = JVMMethodDescriptors.methodDescriptorToTypes(methodDescriptor)
-
-          val args: Seq[Object] = methodTypes.args.map(arg => {
-            val next = stack.head.pop()
-            val out: Object = arg match {
-              case v: JVMTypeObjectStr =>
-                if (v.clsRaw == "java/lang/String") next.asInstanceOf[JVMVarString].v
-                else {
-                  JVM.err(s"Cannot handle $v yet")
-                  null
-                }
-              case v: JVMTypeVoid =>
-                JVM.err(s"not expecting void here")
-                null
-              case v: JVMTypeBoolean => next.asInstanceOf[JVMVarBoolean].v.asInstanceOf[Object]
-              case v @ (_: JVMTypeInt | _: JVMTypeShort | _: JVMTypeByte) => next.asInstanceOf[JVMVarInteger].asInt.asInstanceOf[Object]
-              case v: JVMTypeChar => next.asInstanceOf[JVMVarChar].v.asInstanceOf[Object]
-              case v: JVMTypeFloat => next.asInstanceOf[JVMVarFloat].v.asInstanceOf[Object]
-              case v: JVMTypeDouble => next.asInstanceOf[JVMVarDouble].v.asInstanceOf[Object]
-              case v: JVMTypeLong => next.asInstanceOf[JVMVarLong].v.asInstanceOf[Object]
-            }
-            out
-          })
+          val (methodRef, args) = resolveMethodRef(index)
           val objectRef = stack.head.pop().asInstanceOf[JVMVarObject].o
 
-//          val loadedCls = ClassLoader.getSystemClassLoader.loadClass(qualifiedMethodName)
-
-          val clsRef = ClassLoader.getSystemClassLoader.loadClass(className.replace("/", "."))
-          val methodRef = clsRef.getMethod("println", classOf[String])
-          methodRef.invoke(objectRef, args:_*) // :_* is the hint to expand the Seq to varargs
+          methodRef.invoke(objectRef, args: _*) // :_* is the hint to expand the Seq to varargs
 
         case 0x80 => // ior
           JVM.err("Cannot handle opcode ior yet")
@@ -625,7 +672,6 @@ object JVM {
     println("Error: " + message)
     assert(false)
   }
-
 
 
   def main(args: Array[String]): Unit = {

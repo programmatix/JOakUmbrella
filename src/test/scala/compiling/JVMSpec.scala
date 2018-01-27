@@ -12,8 +12,13 @@ class JVMSpec extends FunSuite with BeforeAndAfter {
   }
 
   test("PrintHelloWorld") {
-    val jvm = CompilingTestUtils.compileAndExecuteJavaFile("PrintHelloWorld.java", "main").jvm
-    assert(1 == 1)
+    val jvm = CompilingTestUtils.compileAndExecuteJavaFile("PrintHelloWorld.java").jvm
+    assert (jvm.stack.last.stack.isEmpty)
+  }
+
+  test("CallFunc") {
+    val jvm = CompilingTestUtils.compileAndExecuteJavaFile("CallFunc.java").jvm
+    assert (jvm.stack.last.stack.isEmpty)
   }
 
   ignore("Sample10fPlus33f") {
