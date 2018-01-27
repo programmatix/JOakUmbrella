@@ -423,12 +423,26 @@ class JVM(cf: JVMClassFileBuilderForReading) {
 
           val methodTypes = JVMMethodDescriptors.methodDescriptorToTypes(methodDescriptor)
 
-          val args: Seq[JVMVar] = methodTypes.args.map(arg => {
-            stack.head.pop()
-//            arg match {
-//              case v: JVMTypeObjectStr => stack.head.pop().asInstanceOf[JVMVarObject]
-//            }
-//            val arg1 = stack.head.pop().asInstanceOf[JVMVarString].
+          val args: Seq[Object] = methodTypes.args.map(arg => {
+            val next = stack.head.pop()
+            val out: Object = arg match {
+              case v: JVMTypeObjectStr =>
+                if (v.clsRaw == "java/lang/String") next.asInstanceOf[JVMVarString].v
+                else {
+                  JVM.err(s"Cannot handle $v yet")
+                  null
+                }
+              case v: JVMTypeVoid =>
+                JVM.err(s"not expecting void here")
+                null
+              case v: JVMTypeBoolean => next.asInstanceOf[JVMVarBoolean].v.asInstanceOf[Object]
+              case v @ (_: JVMTypeInt | _: JVMTypeShort | _: JVMTypeByte) => next.asInstanceOf[JVMVarInteger].asInt.asInstanceOf[Object]
+              case v: JVMTypeChar => next.asInstanceOf[JVMVarChar].v.asInstanceOf[Object]
+              case v: JVMTypeFloat => next.asInstanceOf[JVMVarFloat].v.asInstanceOf[Object]
+              case v: JVMTypeDouble => next.asInstanceOf[JVMVarDouble].v.asInstanceOf[Object]
+              case v: JVMTypeLong => next.asInstanceOf[JVMVarLong].v.asInstanceOf[Object]
+            }
+            out
           })
           val objectRef = stack.head.pop().asInstanceOf[JVMVarObject].o
 
@@ -436,7 +450,7 @@ class JVM(cf: JVMClassFileBuilderForReading) {
 
           val clsRef = ClassLoader.getSystemClassLoader.loadClass(className.replace("/", "."))
           val methodRef = clsRef.getMethod("println", classOf[String])
-          methodRef.invoke(objectRef, args)
+          methodRef.invoke(objectRef, args:_*) // :_* is the hint to expand the Seq to varargs
 
         case 0x80 => // ior
           JVM.err("Cannot handle opcode ior yet")

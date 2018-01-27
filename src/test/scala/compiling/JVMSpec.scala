@@ -5,9 +5,6 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 
 class JVMSpec extends FunSuite with BeforeAndAfter {
 
-  test("method descriptors") {
-
-  }
 
   test("Sample10Plus33") {
     val jvm = CompilingTestUtils.compileAndExecuteJavaFile("Sample10Plus33.java", "test").jvm
