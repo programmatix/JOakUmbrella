@@ -44,7 +44,7 @@ case class ExecuteParams(
                         )
 
 // A Java Virtual Machine implementation, just for learning purposes
-class JVM(cf: JVMClassFileBuilderForReading) {
+class JVM(cf: JVMClassFileBuilderForReading, classLoader: ClassLoader = ClassLoader.getSystemClassLoader) {
   val stack = mutable.Stack[StackFrame]()
 
 
@@ -114,7 +114,7 @@ class JVM(cf: JVMClassFileBuilderForReading) {
     val (args, argTypes) = getMethodStuff(methodTypes)
 
 
-    val clsRef = ClassLoader.getSystemClassLoader.loadClass(className.replace("/", "."))
+    val clsRef = classLoader.loadClass(className.replace("/", "."))
     val methodRef = clsRef.getMethod(methodName, argTypes: _*)
 
     (methodRef, args)
@@ -679,15 +679,19 @@ object JVM {
       println("usage: program <.class file>")
     }
     else {
-      val file = new File(args(0))
+      val file = new File(args(0) + ".class")
       val fileContent = new Array[Byte](file.length.asInstanceOf[Int])
       new FileInputStream(file).read(fileContent)
       val lines = new ByteArrayInputStream(fileContent)
+
       JVMClassFileReader.read(lines, ReadParams()) match {
         case Some(classFile) =>
           classFile.getMainMethod() match {
             case Some(main) =>
-              val jvm = new JVM(classFile)
+              val classLoader = ClassLoader.getSystemClassLoader
+
+              val jvm = new JVM(classFile, classLoader)
+
               val mainCode = main.getCode().codeOrig
               jvm.execute(mainCode)
 

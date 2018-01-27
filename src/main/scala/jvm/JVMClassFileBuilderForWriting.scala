@@ -1,13 +1,12 @@
 package jvm
 
 import java.io.{ByteArrayOutputStream, Writer}
-import java.nio.charset.Charset
+import java.nio.charset.{Charset, StandardCharsets}
 
 import jvm.JVMByteCode.{GenParams, JVMOpCodeWithArgs, JVMType}
 import jvm.JVMClassFileTypes._
-import parsing.Identifier
 
-import scala.scalajs.niocharset.StandardCharsets
+
 
 
 class JVMClassFileBuilderForWriting(
@@ -40,7 +39,7 @@ class JVMClassFileBuilderForWriting(
   private val superClassConstantIdx = addConstant(ConstantClass(addUTF8("java/lang/Object")))
 
 
-  def addFunction(name: Identifier, variables: Seq[JVMByteCode.DeclareVariable], ret: JVMType, definitionRaw: Seq[JVMByteCode.Generated]): Int = {
+  def addFunction(name: String, variables: Seq[JVMByteCode.DeclareVariable], ret: JVMType, definitionRaw: Seq[JVMByteCode.Generated]): Int = {
     // Get rid of any strings or other junk
     val definition: Seq[JVMByteCode.JVMOpCodeWithArgs] = definitionRaw.filter(_.isInstanceOf[JVMOpCodeWithArgs]).map(_.asInstanceOf[JVMOpCodeWithArgs])
     val genParams = GenParams()
@@ -63,7 +62,7 @@ class JVMClassFileBuilderForWriting(
 
     val methodDescriptor = JVMClassFileBuilderUtils.createMethodDescriptor(ret, variables.map(_.typ))
 
-    val nameIdx = addUTF8(name.v)
+    val nameIdx = addUTF8(name)
     val methodDescriptorIdx = addUTF8(methodDescriptor)
     val method = MethodInfo(
       1 | 8, // Public static

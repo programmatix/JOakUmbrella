@@ -1,21 +1,44 @@
-enablePlugins(ScalaJSPlugin)
+//enablePlugins(ScalaJSPlugin)
+enablePlugins(JavaAppPackaging)
 
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.4"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % "test"
-libraryDependencies += "com.lihaoyi" %%% "pprint" % "0.5.3"
-libraryDependencies += "com.lihaoyi" %%% "fastparse" % "1.0.0"
+//libraryDependencies += "com.lihaoyi" %%% "pprint" % "0.5.3"
+//libraryDependencies += "com.lihaoyi" %%% "fastparse" % "1.0.0"
+libraryDependencies += "com.lihaoyi" %% "pprint" % "0.5.3"
+libraryDependencies += "com.lihaoyi" %% "fastparse" % "1.0.0"
 
-import scala.sys.process._
-val copy = taskKey[Unit]("")
-val copyProd = taskKey[Unit]("")
-copy := { "cp target\\scala-2.12\\ctranspiler-fastopt.js ..\\www\\hugo\\static\\js" ! }
-copyProd := { "cp target\\scala-2.12\\ctranspiler-opt.js ..\\www\\hugo\\static\\js" ! }
+
+//mainClass in Compile := Some("jvm.JVM")
+
+exportJars := true
+
 
 //lazy val CParser = ProjectRef(file("CParser"), "CParser")
-lazy val CParser = (project in file("CParser"))
+//lazy val CParser = ProjectRef(file("CParser"), "cparser")
+//lazy val CParserWebDemo = ProjectRef(file("CParserWebDemo"), "CParserWebDemo")
+//
+//lazy val CParserJS = LocalProject("CParserJS")
+//lazy val CParserJVM = LocalProject("CParserJVM")
+
+//lazy val CTranspiler = (project in file("."))
+//  .settings(
+//    name := "CTranspiler",
+//    scalaVersion := "2.12.4",
+//    test in assembly := {}
+//  ).dependsOn(CParser)
+
 lazy val CTranspiler = (project in file("."))
   .settings(
     name := "CTranspiler",
-    scalaVersion := "2.12.4"
-  ).dependsOn(CParser)
+    scalaVersion := "2.12.4",
+    test in assembly := {}
+  )
 
+//val CTranspilerJS = CTranspiler.js.dependsOn(CParser)
+//val CTranspilerJVM = CTranspiler.jvm.settings(
+////  (resources in Compile) += {
+////    (fastOptJS in (exampleJS, Compile)).value
+////    (artifactPath in (exampleJS, Compile, fastOptJS)).value
+////  }
+//).dependsOn(CParser)

@@ -5,7 +5,6 @@ import java.nio.charset.Charset
 
 import compiling.JVMOpCode
 import jvm.JVMClassFileTypes.JVMClassFileBuilderUtils
-import parsing._
 
 object JVMByteCode {
 
@@ -198,23 +197,23 @@ object JVMByteCode {
 
   def unsupported(err: String) = JVMGenUnsupportedCurrently(err)
 
-  private def makeTypes(in: Types): String = {
-    val mapped = in.types.map {
-      case v: TypeSpecifierVoid     => "void"
-      case v: TypeSpecifierChar     => "char"
-      case v: TypeSpecifierShort    => "short"
-      case v: TypeSpecifierInt      => "int"
-      case v: TypeSpecifierLong     => "long"
-      case v: TypeSpecifierFloat    => "float"
-      case v: TypeSpecifierDouble   => "double"
-      case v: TypeSpecifierSigned   => "signed"
-      case v: TypeSpecifierUnsigned => "unsigned"
-      case v: TypeSpecifierBool     => "boolean"
-      case v: TypeSpecifierComplex  => throw unsupported("_Complex type")
-      case _                        => throw unsupported("unhandled type")
-    }
-    mapped.mkString(" ")
-  }
+//  private def makeTypes(in: Types): String = {
+//    val mapped = in.types.map {
+//      case v: TypeSpecifierVoid     => "void"
+//      case v: TypeSpecifierChar     => "char"
+//      case v: TypeSpecifierShort    => "short"
+//      case v: TypeSpecifierInt      => "int"
+//      case v: TypeSpecifierLong     => "long"
+//      case v: TypeSpecifierFloat    => "float"
+//      case v: TypeSpecifierDouble   => "double"
+//      case v: TypeSpecifierSigned   => "signed"
+//      case v: TypeSpecifierUnsigned => "unsigned"
+//      case v: TypeSpecifierBool     => "boolean"
+//      case v: TypeSpecifierComplex  => throw unsupported("_Complex type")
+//      case _                        => throw unsupported("unhandled type")
+//    }
+//    mapped.mkString(" ")
+//  }
 
   //  private def makeIdentifier(in: Identifier): String = in.v
   //
@@ -235,7 +234,7 @@ object JVMByteCode {
 
 
   // Most of the time this will just be one type like "int"
-  case class Types(types: Seq[TypeSpecifier])
+//  case class Types(types: Seq[TypeSpecifier])
 
   sealed trait JVMType
   sealed trait JVMTypePrimitive extends JVMType
@@ -315,7 +314,9 @@ object JVMByteCode {
   case class JVMVarObject(o: Object) extends JVMVar
 
   //  case class DefineFunction(name: Identifier, types: Types, passedVariables: Seq[DeclareVariable]) extends Command
-  case class DeclareVariable(name: Identifier, typ: JVMType) extends Command
+//  case class DeclareVariable(name: Identifier, typ: JVMType) extends Command
+
+  case class DeclareVariable(name: String, typ: JVMType)
 
   //  case class StoreExpressionInCurrentVar() extends Command
 

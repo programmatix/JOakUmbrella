@@ -352,7 +352,7 @@ object JVMClassFileReader {
     }
   }
 
-  def main(args: Array[String]): Unit = {
+  def mainReader(args: Array[String]): Unit = {
     if (args.length != 1) {
       println("usage: program <.class file>")
     }
