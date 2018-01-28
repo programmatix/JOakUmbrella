@@ -1,9 +1,9 @@
 package compiling
 
 import jvm.JVMByteCode.{JVMVarFloat, JVMVarInt}
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.FunSuite
 
-class JVMSpec extends FunSuite with BeforeAndAfter {
+class JVMSpec extends FunSuite {
 
 
   test("Sample10Plus33") {
@@ -19,6 +19,16 @@ class JVMSpec extends FunSuite with BeforeAndAfter {
   test("CallFunc") {
     val jvm = CompilingTestUtils.compileAndExecuteJavaFile("CallFunc.java").jvm
     assert (jvm.stack.last.stack.isEmpty)
+  }
+
+  test("ForLoop100") {
+    val jvm = CompilingTestUtils.compileAndExecuteJavaFile("ForLoop100.java").jvm
+    assert(CompilingTestUtils.containsVar(jvm.stack.head, JVMVarInt(100)))
+  }
+
+  test("SimpleIf") {
+    val jvm = CompilingTestUtils.compileAndExecuteJavaFile("SimpleIf.java").jvm
+    assert (jvm.stack.last.locals.values.last == JVMVarInt(40))
   }
 
   ignore("Sample10fPlus33f") {

@@ -145,7 +145,7 @@ object JVMByteCode {
 
 
   case class JVMOpCodeWithArgs(oc: JVMOpCode, args: Array[JVMVar] = Array()) extends ByteCode {
-    assert(oc.args.length == args.length)
+    assert(oc.args.length == args.length, s"For opcode ${oc.name} expected args ${oc.args.mkString(",")} but got ${args.mkString(",")}")
 
     override def toString(): String = gen(GenParams()).trim()
 

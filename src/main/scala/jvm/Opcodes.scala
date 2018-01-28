@@ -19,13 +19,13 @@ case class JVMOpCodeArg(lengthBytes: Int, name: String) {
   def gen(in: ByteArrayInputStream): String = {
     lengthBytes match {
       case 1 =>
-        val value = JVMClassFileReaderUtils.readByte(in)
+        val value = JVMClassFileReaderUtils.readByteTwosComplement(in)
         value.toString
       case 2 =>
-        val value = JVMClassFileReaderUtils.readShort(in)
+        val value = JVMClassFileReaderUtils.readShortTwosComplement(in)
         value.toString
       case 4 =>
-        val value = JVMClassFileReaderUtils.readInt(in)
+        val value = JVMClassFileReaderUtils.readIntTwosComplement(in)
         value.toString
     }
   }

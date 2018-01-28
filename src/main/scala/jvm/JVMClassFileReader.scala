@@ -12,29 +12,90 @@ import scala.collection.mutable.ArrayBuffer
 
 // Java doesn't support unsigned bytes
 object JVMClassFileReaderUtils {
-  def readShort(in: ByteArrayInputStream): Int = {
-    (readByte(in) << 8) | readByte(in)
+  // Quick two's complement refresher:
+  // Way of representing integers in binary.  For a 4 bit number:
+  // 0000 = 0, 0001 = 1, 0010 = 2 etc.
+  // 1111 = -1, 1110 = -2, 1101 = -3
+  // Avoids using a sign bit, which also avoids pain of having two zeros - 0000 (+0) and 1000 (-0)
+  // Makes the maths easier:
+  // E.g. on a 4bit number,  2 (0010) and -2 (1110) = 10000, but the top bit is overflow, so it leaves 0 : -2+2=0
+  // For an 8 bit number, twos complement is (2^8 - number)
+  // Negating a number (reversing the sign) is performed by taking its twos complement
+  @Deprecated
+  def twosComplementRepresentation(in: Int, bits: Int): Int = {
+    if (in == 0) 0
+    else if (in > 0) {
+      // The top bit can't be set
+      assert ((in & (2 ^ bits)) == 0)
+      in
+    }
+    else {
+      0
+    }
   }
 
-  def readByte(in: ByteArrayInputStream): Int = {
+  // Takes a raw byte (say, read from an input stream), and returns it as a 4-byte int in twos complement representation
+//  def extendByteAsTwosComplement(in: Byte): Int = {
+//    val topBitSet = (in & 0x80) != 0
+//    if (topBitSet) {
+//      val out = 0xffffff00 | in
+//      out
+//    }
+//    else in
+//  }
+
+  def extendByteAsTwosComplement(in: Int): Int = {
+    val topBitSet = (in & 0x80) != 0
+    if (topBitSet) {
+      val out = 0xffffff00 | in
+      out
+    }
+    else in
+  }
+
+  def extendShortAsTwosComplement(in: Int): Int = {
+    val topBitSet = (in & 0x8000) != 0
+    if (topBitSet) {
+      val out = 0xffff0000 | in
+      out
+    }
+    else in
+  }
+
+  // Java and bytes:
+  // Integer.parseInt("11110111", 2) == 247, not -9, e.g. it doesn't do the twos complement.  Use extendByteAsTwosComplement
+  // Raw file is 0xffff -> in.read() is 255
+
+  def readByteUnsigned(in: ByteArrayInputStream): Int = {
+    // Returns 0-255, or -1 if end of stream reached
     val rawByte = in.read()
-    rawByte & 0xFF
+    rawByte
   }
 
-  def readInt(in: ByteArrayInputStream): Int = {
-    (readByte(in) << 24) | (readByte(in) << 16) | (readByte(in) << 8) | readByte(in)
+  def readByteTwosComplement(in: ByteArrayInputStream): Int = {
+    // Returns 0-255, or -1 if end of stream reached
+    val rawByte = in.read()
+    extendByteAsTwosComplement(rawByte)
   }
 
-  def readFloat(in: ByteArrayInputStream): Float = {
-    (readByte(in) << 24) | (readByte(in) << 16) | (readByte(in) << 8) | readByte(in)
+  def readShortTwosComplement(in: ByteArrayInputStream): Int = {
+    extendShortAsTwosComplement(readByteTwosComplement(in) << 8) | readByteTwosComplement(in)
   }
 
-  def readDouble(in: ByteArrayInputStream): Double = {
-    (readByte(in) << 56) | (readByte(in) << 48) | (readByte(in) << 40) | (readByte(in) << 32) | (readByte(in) << 24) | (readByte(in) << 16) | (readByte(in) << 8) | readByte(in)
+  def readIntTwosComplement(in: ByteArrayInputStream): Int = {
+    (readByteUnsigned(in) << 24) | (readByteUnsigned(in) << 16) | (readByteUnsigned(in) << 8) | readByteUnsigned(in)
   }
 
-  def readLong(in: ByteArrayInputStream): Long = {
-    (readByte(in) << 56) | (readByte(in) << 48) | (readByte(in) << 40) | (readByte(in) << 32) | (readByte(in) << 24) | (readByte(in) << 16) | (readByte(in) << 8) | readByte(in)
+  def readFloatTwosComplement(in: ByteArrayInputStream): Float = {
+    (readByteUnsigned(in) << 24) | (readByteUnsigned(in) << 16) | (readByteUnsigned(in) << 8) | readByteUnsigned(in)
+  }
+
+  def readDoubleTwosComplement(in: ByteArrayInputStream): Double = {
+    (readByteUnsigned(in) << 56) | (readByteUnsigned(in) << 48) | (readByteUnsigned(in) << 40) | (readByteUnsigned(in) << 32) | (readByteUnsigned(in) << 24) | (readByteUnsigned(in) << 16) | (readByteUnsigned(in) << 8) | readByteUnsigned(in)
+  }
+
+  def readLongTwosComplements(in: ByteArrayInputStream): Long = {
+    (readByteUnsigned(in) << 56) | (readByteUnsigned(in) << 48) | (readByteUnsigned(in) << 40) | (readByteUnsigned(in) << 32) | (readByteUnsigned(in) << 24) | (readByteUnsigned(in) << 16) | (readByteUnsigned(in) << 8) | readByteUnsigned(in)
   }
 
 
@@ -47,17 +108,17 @@ object JVMClassFileReader {
     throw new RuntimeException()
   }
 
-  private def readShort(in: ByteArrayInputStream): Int = JVMClassFileReaderUtils.readShort(in)
+  private def readShort(in: ByteArrayInputStream): Int = JVMClassFileReaderUtils.readShortTwosComplement(in)
 
-  private def readByte(in: ByteArrayInputStream): Int = JVMClassFileReaderUtils.readByte(in)
+  private def readByte(in: ByteArrayInputStream): Int = JVMClassFileReaderUtils.readByteTwosComplement(in)
 
-  private def readInt(in: ByteArrayInputStream): Int = JVMClassFileReaderUtils.readInt(in)
+  private def readInt(in: ByteArrayInputStream): Int = JVMClassFileReaderUtils.readIntTwosComplement(in)
 
-  private def readFloat(in: ByteArrayInputStream): Float = JVMClassFileReaderUtils.readFloat(in)
+  private def readFloat(in: ByteArrayInputStream): Float = JVMClassFileReaderUtils.readFloatTwosComplement(in)
 
-  private def readDouble(in: ByteArrayInputStream): Double = JVMClassFileReaderUtils.readDouble(in)
+  private def readDouble(in: ByteArrayInputStream): Double = JVMClassFileReaderUtils.readDoubleTwosComplement(in)
 
-  private def readLong(in: ByteArrayInputStream): Long = JVMClassFileReaderUtils.readLong(in)
+  private def readLong(in: ByteArrayInputStream): Long = JVMClassFileReaderUtils.readLongTwosComplements(in)
 
   private def good(in: ByteArrayInputStream, msg: String): Unit = {
     println(msg)
@@ -90,7 +151,8 @@ object JVMClassFileReader {
 
     while (idx < code.length) {
 
-      val opcodehex = JVMClassFileReaderUtils.readByte(stream)
+      // Can't find where this is documented, but opcode is unsigned rather than usual signed bytes
+      val opcodehex = JVMClassFileReaderUtils.readByteUnsigned(stream)
 
       val opcode = JVMOpCodes.getOpcode(opcodehex)
       println((" " * indent * 2) + opcode.gen(stream))
@@ -105,7 +167,8 @@ object JVMClassFileReader {
 
     while (idx < code.length) {
 
-      val opcodehex = JVMClassFileReaderUtils.readByte(stream)
+      // Can't find where this is documented, but opcode is unsigned rather than usual signed bytes
+      val opcodehex = JVMClassFileReaderUtils.readByteUnsigned(stream)
 
       val opcode = JVMOpCodes.getOpcode(opcodehex)
 
@@ -118,9 +181,9 @@ object JVMClassFileReader {
       val args = ArrayBuffer.empty[Int]
       for (argIdx <- opcode.args.indices) {
         val value = opcode.args(argIdx).lengthBytes match {
-          case 1 => JVMClassFileReaderUtils.readByte(stream)
-          case 2 => JVMClassFileReaderUtils.readShort(stream)
-          case 4 => JVMClassFileReaderUtils.readInt(stream)
+          case 1 => JVMClassFileReaderUtils.readByteTwosComplement(stream)
+          case 2 => JVMClassFileReaderUtils.readShortTwosComplement(stream)
+          case 4 => JVMClassFileReaderUtils.readIntTwosComplement(stream)
         }
         args += value
       }

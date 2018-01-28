@@ -48,7 +48,7 @@ class JVM(cf: JVMClassFileBuilderForReading, classLoader: ClassLoader = ClassLoa
   val stack = mutable.Stack[StackFrame]()
 
 
-  def getMethodStuff(methodTypes: JVMMethodDescriptors.MethodDescriptor): (Seq[Object], Seq[Class[_]]) = {
+  private def getMethodStuff(methodTypes: JVMMethodDescriptors.MethodDescriptor): (Seq[Object], Seq[Class[_]]) = {
     val args = ArrayBuffer.empty[Object]
     val argTypes = ArrayBuffer.empty[Class[_]]
 
@@ -120,9 +120,12 @@ class JVM(cf: JVMClassFileBuilderForReading, classLoader: ClassLoader = ClassLoa
     (methodRef, args)
   }
 
+
   def callFunction(code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Unit = {
     val sf = new StackFrame
     stack.push(sf)
+
+    def popInt(): Int = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
 
     def store(index: Int): Unit = {
       val v1 = sf.stack.pop()
@@ -134,8 +137,46 @@ class JVM(cf: JVMClassFileBuilderForReading, classLoader: ClassLoader = ClassLoa
       sf.push(stored)
     }
 
-    for (op <- code) {
-      //      val op = code(idx)
+    var opcodeAddress = 0
+    var opcodeIdx = 0
+
+    def jumpToOffset(offset: Int): Unit = {
+      val targetAddress = opcodeAddress + offset
+      var tempOpCodeIdx = opcodeIdx
+      var tempOpCodeAddress = opcodeAddress
+      if (offset >= 0) {
+        while (tempOpCodeAddress < targetAddress) {
+          val op = code(tempOpCodeIdx)
+          tempOpCodeIdx += 1
+          tempOpCodeAddress += op.oc.lengthInBytes
+        }
+      }
+      else {
+        while (tempOpCodeAddress > targetAddress) {
+          tempOpCodeIdx -= 1
+          val op = code(tempOpCodeIdx)
+          tempOpCodeAddress -= op.oc.lengthInBytes
+        }
+      }
+      if (tempOpCodeAddress != targetAddress) {
+        JVM.err(s"failed to jump exactly to instruction ${targetAddress}")
+      }
+      opcodeIdx = tempOpCodeIdx
+      opcodeAddress = tempOpCodeAddress
+    }
+
+    var done = false
+    while (opcodeIdx < code.length && !done) {
+
+      var incOpCode = true
+
+      def handleJumpOpcode(op: JVMOpCodeWithArgs): Unit = {
+        val offset = op.args.head.asInstanceOf[JVMVarInteger].asInt
+        jumpToOffset(offset)
+        incOpCode = false
+      }
+
+      val op = code(opcodeIdx)
       op.oc.hexcode match {
         case 0x32 => // aaload
           JVM.err("Cannot handle opcode aaload yet")
@@ -361,8 +402,12 @@ class JVM(cf: JVMClassFileBuilderForReading, classLoader: ClassLoader = ClassLoa
           val fieldType = fieldRef2.getType
           val fieldInstance = fieldRef2.get(fieldType)
           sf.stack.push(JVMVarObject(fieldInstance))
+
         case 0xa7 => // goto
-          JVM.err("Cannot handle opcode goto yet")
+          val offset = op.args.head.asInstanceOf[JVMVarInteger].asInt
+          jumpToOffset(offset)
+          incOpCode = false
+
         case 0xc8 => // goto_w
           JVM.err("Cannot handle opcode goto_w yet")
         case 0x91 => // i2b
@@ -418,11 +463,26 @@ class JVM(cf: JVMClassFileBuilderForReading, classLoader: ClassLoader = ClassLoa
         case 0x9f => // if_icmpeq
           JVM.err("Cannot handle opcode if_icmpeq yet")
         case 0xa2 => // if_icmpge
-          JVM.err("Cannot handle opcode if_icmpge yet")
+          val v2 = popInt()
+          val v1 = popInt()
+          if (v1 >= v2) {
+            handleJumpOpcode(op)
+          }
+
         case 0xa3 => // if_icmpgt
-          JVM.err("Cannot handle opcode if_icmpgt yet")
+          val v2 = popInt()
+          val v1 = popInt()
+          if (v1 > v2) {
+            handleJumpOpcode(op)
+          }
+
         case 0xa4 => // if_icmple
-          JVM.err("Cannot handle opcode if_icmple yet")
+          val v2 = popInt()
+          val v1 = popInt()
+          if (v1 <= v2) {
+            handleJumpOpcode(op)
+          }
+
         case 0xa1 => // if_icmplt
           JVM.err("Cannot handle opcode if_icmplt yet")
         case 0xa0 => // if_icmpne
@@ -444,7 +504,11 @@ class JVM(cf: JVMClassFileBuilderForReading, classLoader: ClassLoader = ClassLoa
         case 0xc6 => // ifnull
           JVM.err("Cannot handle opcode ifnull yet")
         case 0x84 => // iinc
-          JVM.err("Cannot handle opcode iinc yet")
+          val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
+          val const = op.args.last.asInstanceOf[JVMVarInteger].asInt
+          val variable = stack.head.locals(index).asInstanceOf[JVMVarInt]
+          stack.head.locals(index) = JVMVarInt(variable.v + const)
+
         case 0x15 => // iload
           val index = op.args.head.asInstanceOf[JVMVarByte].asInt
           load(index)
@@ -645,6 +709,9 @@ class JVM(cf: JVMClassFileBuilderForReading, classLoader: ClassLoader = ClassLoa
           if (!parms.stopBeforeFinalReturn) {
             stack.pop()
           }
+          else {
+            done = true
+          }
         case 0x35 => // saload
           JVM.err("Cannot handle opcode saload yet")
         case 0x56 => // sastore
@@ -659,6 +726,11 @@ class JVM(cf: JVMClassFileBuilderForReading, classLoader: ClassLoader = ClassLoa
         case _ =>
           JVM.err(s"Cannot yet handle opcode ${op}")
       }
+
+      if (incOpCode) {
+        opcodeAddress += op.oc.lengthInBytes
+        opcodeIdx += 1
+      }
     }
   }
 
@@ -670,7 +742,7 @@ class JVM(cf: JVMClassFileBuilderForReading, classLoader: ClassLoader = ClassLoa
 object JVM {
   def err(message: String): Unit = {
     println("Error: " + message)
-    assert(false)
+    throw new InternalError(message)
   }
 
 
