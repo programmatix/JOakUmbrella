@@ -274,6 +274,7 @@ object JVMByteCode {
   case class JVMTypeDummy() extends JVMTypeInternal
   // java/lang/String
   case class JVMTypeObjectStr(clsRaw: String) extends JVMTypeInternal
+  case class JVMTypeObjectRef(obj: Object) extends JVMTypeInternal
 
 //  case class JVMTypeReturnAddress() extends JVMTypeInternal
 //  case class JVMTypeReference() extends JVMTypeInternal

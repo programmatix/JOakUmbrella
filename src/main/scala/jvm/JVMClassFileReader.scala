@@ -6,7 +6,7 @@ import java.nio.file.Files
 
 import compiling.JVMOpCodes
 import jvm.JVMByteCode.{JVMOpCodeWithArgs, JVMVarInt}
-import jvm.JVMClassFileTypes._
+import jvm.JVMClassFileTypes.{ConstantValueAttribute, _}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -26,7 +26,7 @@ object JVMClassFileReaderUtils {
     if (in == 0) 0
     else if (in > 0) {
       // The top bit can't be set
-      assert ((in & (2 ^ bits)) == 0)
+      assert((in & (2 ^ bits)) == 0)
       in
     }
     else {
@@ -35,14 +35,14 @@ object JVMClassFileReaderUtils {
   }
 
   // Takes a raw byte (say, read from an input stream), and returns it as a 4-byte int in twos complement representation
-//  def extendByteAsTwosComplement(in: Byte): Int = {
-//    val topBitSet = (in & 0x80) != 0
-//    if (topBitSet) {
-//      val out = 0xffffff00 | in
-//      out
-//    }
-//    else in
-//  }
+  //  def extendByteAsTwosComplement(in: Byte): Int = {
+  //    val topBitSet = (in & 0x80) != 0
+  //    if (topBitSet) {
+  //      val out = 0xffffff00 | in
+  //      out
+  //    }
+  //    else in
+  //  }
 
   def extendByteAsTwosComplement(in: Int): Int = {
     val topBitSet = (in & 0x80) != 0
@@ -199,7 +199,7 @@ object JVMClassFileReader {
   }
 
 
-  private def readAttribute(params: ReadParams, in: ByteArrayInputStream, cf: JVMClassFileBuilderForReading, indent: Int): CodeAttribute = {
+  private def readCodeAttribute(params: ReadParams, in: ByteArrayInputStream, cf: JVMClassFileBuilderForReading, indent: Int): CodeAttribute = {
     val attribute_name_index = readShort(in)
     if (params.verbose) goodConstant(in, indent, cf, "attribute_name_index", attribute_name_index)
 
@@ -253,6 +253,51 @@ object JVMClassFileReader {
     )
   }
 
+  private def readConstantValueAttribute(params: ReadParams, in: ByteArrayInputStream, cf: JVMClassFileBuilderForReading, indent: Int): ConstantValueAttribute = {
+    val attribute_name_index = readShort(in)
+    if (params.verbose) goodConstant(in, indent, cf, "attribute_name_index", attribute_name_index)
+
+    val attribute_length = readInt(in)
+    if (params.verbose) good(in, indent, s"attribute_length = $attribute_length")
+
+    val constantvalue_index = readShort(in)
+    if (params.verbose) good(in, indent, s"constantvalue_index = $constantvalue_index")
+
+    ConstantValueAttribute(attribute_name_index,
+      constantvalue_index
+    )
+  }
+
+  private def readField(params: ReadParams, in: ByteArrayInputStream, cf: JVMClassFileBuilderForReading, indentIn: Int): FieldInfo = {
+    if (params.verbose) good(in, indentIn, "Method:")
+    val indent = indentIn + 1
+
+    val access_flags = readShort(in)
+    if (params.verbose) good(in, indent, s"access_flags = $access_flags")
+
+    val name_index = readShort(in)
+    if (params.verbose) good(in, indent, s"name_index = $name_index (${cf.getConstant(name_index)})")
+
+    val descriptor_index = readShort(in)
+    if (params.verbose) good(in, indent, s"descriptor_index = $descriptor_index (${cf.getConstant(descriptor_index)})")
+
+    val attributes_count = readShort(in)
+    if (params.verbose) good(in, indent, s"attributes_count = $attributes_count")
+
+    val attributes = ArrayBuffer.empty[Attribute]
+    for (idx <- Range(0, attributes_count)) {
+      if (params.verbose) good(in, indent, s"Field Attribute $idx")
+      attributes += readConstantValueAttribute(params: ReadParams, in, cf, indent + 1)
+    }
+
+    FieldInfo(
+      access_flags,
+      name_index,
+      descriptor_index,
+      attributes
+    )
+  }
+
   private def readMethod(params: ReadParams, in: ByteArrayInputStream, cf: JVMClassFileBuilderForReading, indentIn: Int): MethodInfo = {
     if (params.verbose) good(in, indentIn, "Method:")
     val indent = indentIn + 1
@@ -272,7 +317,7 @@ object JVMClassFileReader {
     val attributes = ArrayBuffer.empty[CodeAttribute]
     for (idx <- Range(0, attributes_count)) {
       if (params.verbose) good(in, indent, s"Method Attribute $idx")
-      attributes += readAttribute(params: ReadParams, in, cf, indent + 1)
+      attributes += readCodeAttribute(params: ReadParams, in, cf, indent + 1)
     }
 
     MethodInfo(
@@ -380,10 +425,10 @@ object JVMClassFileReader {
 
       val fields_count = readShort(in)
       if (params.verbose) good(in, s"fields_count = $fields_count")
-      assert(fields_count == 0)
 
       for (idx <- Range(0, fields_count)) {
-
+        val field = readField(params, in, cf, 0)
+        cf.addField(field)
       }
 
       val methods_count = readShort(in)
@@ -411,7 +456,9 @@ object JVMClassFileReader {
       Some(cf.makeImmutable())
     }
     catch {
-      case e: Throwable => None
+      case e: Throwable =>
+        JVM.err(s"Failed to read classfile: ${e}")
+        None
     }
   }
 

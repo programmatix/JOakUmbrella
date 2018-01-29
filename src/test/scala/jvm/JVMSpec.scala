@@ -45,6 +45,18 @@ class JVMSpec extends FunSuite {
 
   }
 
+  test("CreateString") {
+    val jvm = CompilingTestUtils.compileAndExecuteJavaFile("CreateString.java", (sf) => {
+      assert (sf.locals.values.last == JVMVarInt(40))
+    }).jvm
+  }
+
+  test("CreateOwnClass") {
+    val jvm = CompilingTestUtils.compileAndExecuteJavaFile("CreateOwnClass.java", (sf) => {
+      assert (sf.locals.values.last == JVMVarInt(40))
+    }).jvm
+  }
+
   ignore("Sample10fPlus33f") {
     val jvm = CompilingTestUtils.compileAndExecuteJavaFile("Sample10fPlus33f.java").jvm
 //    assert (jvm.stack.last.stack.length == 1)

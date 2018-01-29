@@ -279,6 +279,34 @@ object JVMClassFileTypes {
     }
   }
 
+  /*
+
+    field_info {
+    	u2 access_flags;
+    	u2 name_index;
+    	u2 descriptor_index;
+    	u2 attributes_count;
+    	attribute_info attributes[attributes_count];
+    }
+   */
+  case class FieldInfo(accessFlags: Int,
+                       nameIndex: Int,
+                       descriptorIndex: Int,
+                       attributes: Seq[Attribute]) {
+    def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
+      JVMClassFileBuilderUtils.writeShort(out, accessFlags)
+      JVMClassFileBuilderUtils.writeShort(out, nameIndex)
+      JVMClassFileBuilderUtils.writeShort(out, descriptorIndex)
+      JVMClassFileBuilderUtils.writeShort(out, attributes.length)
+
+      attributes.foreach(_.write(out, charset))
+    }
+
+    def write(out: Writer, charset: Charset): Unit = {
+      attributes.foreach(_.write(out, charset))
+    }
+  }
+
   sealed trait Attribute {
     def lengthBytes(): Int
 
@@ -315,9 +343,9 @@ object JVMClassFileTypes {
     	u2 constantvalue_index;
     }
    */
-  case class ConstantValue_attribute(attributeNameIndex: Int,
-                                     valueIndex: Int) extends Attribute {
-    override def lengthBytes(): Int = 2 + 4 + 2
+  case class ConstantValueAttribute(attributeNameIndex: Int,
+                                    valueIndex: Int) extends Attribute {
+    override def lengthBytes(): Int = 2
 
     def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
       JVMClassFileBuilderUtils.writeShort(out, attributeNameIndex)
@@ -326,7 +354,7 @@ object JVMClassFileTypes {
     }
 
     override def write(out: Writer, charset: Charset): Unit = {
-
+      out.write(s"constant=$valueIndex")
     }
   }
 

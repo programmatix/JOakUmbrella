@@ -34,6 +34,9 @@ This is a toy JVM running on top of a real JVM, so some parts are left to the re
 * Loading and execution of core Java libraries, like String, or any jars passed to the standard Java classloader.
 * Threading.
 
+Unlikely to be supported:
+* synchronized keyword.
+* native keyword.
 
 
 Release Process

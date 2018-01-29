@@ -5,14 +5,6 @@ import jvm.JVMClassFileTypes._
 
 import scala.collection.mutable
 
-class ProgramCounterRegister {
-
-}
-
-class Thread {
-  val pc = new ProgramCounterRegister()
-}
-
 class StackFrame(val cf: JVMClassFile) {
   val locals = mutable.Map[Int, JVMVar]()
 
@@ -47,20 +39,39 @@ case class ExecuteParams(
 // See 'JVMClassLoader' for a discussion over why two classloaders are provided (rather than standard chaining)
 class JVM(classLoader: JVMClassLoader,
           systemClassLoader: ClassLoader = ClassLoader.getSystemClassLoader) {
-//  private[jvm] val stack = mutable.Stack[StackFrame]()
 
 
+  private def createNewInstance(sf: StackFrame, cls: ConstantClass, params: ExecuteParams): JVMVarObject = {
+    val cf = sf.cf
+    //  java/io/PrintStream
+    val className = cf.getString(cls.nameIndex)
+
+    val resolvedClassName = className.replace("/", ".")
+
+    // See JVMClassLoader for a description of what's going on here
+    classLoader.loadClass(resolvedClassName) match {
+
+      case Some(clsRef) =>
+        JVM.err("cannot create own classes yet")
+        null
+      //        clsRef.
+      //        val newInstance = clsRef.newInstance().asInstanceOf[Object]
+      //        JVMVarObject(newInstance)
+      case _ =>
+        val clsRef = systemClassLoader.loadClass(resolvedClassName)
+        // Class.getDeclaredConstructor(String.class).newInstance("HERESMYARG");
+        val newInstance = clsRef.newInstance().asInstanceOf[Object]
+        JVMVarObject(newInstance)
+    }
+  }
 
 
-  private def invokeMethodRef(sf: StackFrame, index: Int, getObjectRef: Boolean, params: ExecuteParams): Unit = {
+  private def invokeMethodRef(sf: StackFrame, index: Int, getObjectRef: Boolean, params: ExecuteParams, isSpecial: Boolean = false): Unit = {
     val cf = sf.cf
     val fieldRef = cf.getConstant(index).asInstanceOf[ConstantMethodref]
     val cls = cf.getConstant(fieldRef.classIndex).asInstanceOf[ConstantClass]
     //  java/io/PrintStream
     val className = cf.getString(cls.nameIndex)
-
-    // Only a limited number of classes are allowed to be loaded with the standard java classloader - otherwise java ends up
-    // running all the code!
 
     val nameAndType = cf.getConstant(fieldRef.nameAndTypeIndex).asInstanceOf[ConstantNameAndType]
     // println
@@ -85,6 +96,7 @@ class JVM(classLoader: JVMClassLoader,
             val args = JVMStackFrame.getMethodArgs(sf, methodTypes)
 
             val objectRef = if (getObjectRef) {
+              JVM.err("Cannot handle objectref yet")
               sf.stack.pop().asInstanceOf[JVMVarObject].o
             }
             else null
@@ -93,27 +105,10 @@ class JVM(classLoader: JVMClassLoader,
 
             executeFrame(sfNew, code, params) match {
               case Some(ret) => sf.stack.push(ret)
-              case _ =>
+              case _         =>
             }
           case _            => JVM.err(s"Unable to find method $methodName in class ${clsRef.className}")
         }
-
-
-
-
-
-
-//        clsRef.getMethod(methodName) match {
-//
-//          case Some(method) =>
-//            if (objectRef != null) JVM.err("cannot handle objectRef")
-//
-//            val code = method.getCode().codeOrig
-//            val sf = new StackFrame(clsRef)
-//            executeFrame(sf, code, params)
-//
-//          case _            => JVM.err(s"Unable to find $methodName in class ${resolvedClassName}")
-//        }
 
       case _ =>
         val clsRef = systemClassLoader.loadClass(resolvedClassName)
@@ -128,7 +123,12 @@ class JVM(classLoader: JVMClassLoader,
 
         val methodRef = clsRef.getMethod(methodName, argTypes: _*)
 
-        methodRef.invoke(objectRef, args: _*) // :_* is the hint to expand the Seq to varargs
+        if (isSpecial) {
+          // TODO. Generally a call to <init> which I think newInstance does for us
+        }
+        else {
+          methodRef.invoke(objectRef, args: _*) // :_* is the hint to expand the Seq to varargs
+        }
     }
   }
 
@@ -293,7 +293,8 @@ class JVM(classLoader: JVMClassLoader,
         case 0x67 => // dsub
           JVM.err("Cannot handle opcode dsub yet")
         case 0x59 => // dup
-          JVM.err("Cannot handle opcode dup yet")
+          sf.stack.push(sf.stack.head)
+
         case 0x5a => // dup_x1
           JVM.err("Cannot handle opcode dup_x1 yet")
         case 0x5b => // dup_x2
@@ -553,7 +554,10 @@ class JVM(classLoader: JVMClassLoader,
         case 0xb9 => // invokeinterface
           JVM.err("Cannot handle opcode invokeinterface yet")
         case 0xb7 => // invokespecial
-          JVM.err("Cannot handle opcode invokespecial yet")
+          // https://cs.au.dk/~mis/dOvs/jvmspec/ref--33.html
+          val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
+          invokeMethodRef(sf, index, false, parms)
+
         case 0xb8 => // invokestatic
           val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
           invokeMethodRef(sf, index, false, parms)
@@ -562,8 +566,8 @@ class JVM(classLoader: JVMClassLoader,
           // invoke virtual method on object objectref and puts the result on the stack (might be void); the method is
           // identified by method reference index in constant pool (indexbyte1 << 8 + indexbyte2)
           val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
-
-          invokeMethodRef(sf, index, true, parms)
+          // TODO there are some rules to do with choosing the method here that we don't follow
+          invokeMethodRef(sf, index, true, parms, true)
 
         case 0x80 => // ior
           JVM.err("Cannot handle opcode ior yet")
@@ -692,7 +696,11 @@ class JVM(classLoader: JVMClassLoader,
         case 0xc5 => // multianewarray
           JVM.err("Cannot handle opcode multianewarray yet")
         case 0xbb => // new
-          JVM.err("Cannot handle opcode new yet")
+          val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
+          val cls = cf.getConstant(index).asInstanceOf[ConstantClass]
+          val newInstance = createNewInstance(sf, cls, parms)
+          sf.stack.push(newInstance)
+
         case 0xbc => // newarray
           JVM.err("Cannot handle opcode newarray yet")
         case 0x00 => // nop
