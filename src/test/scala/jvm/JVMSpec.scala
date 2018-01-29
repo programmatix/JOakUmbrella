@@ -12,6 +12,29 @@ class JVMSpec extends FunSuite {
     }).jvm
   }
 
+  test("IntMaths") {
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "add", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarInt(43))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "multiply", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarInt(30))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "divide", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarInt(3))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "minus", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarInt(7))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "neg", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarInt(-10))))
+    })
+
+  }
+
   test("PrintHelloWorld") {
     val jvm = CompilingTestUtils.compileAndExecuteJavaFile("PrintHelloWorld.java").jvm
   }

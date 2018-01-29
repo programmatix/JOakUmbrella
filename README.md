@@ -39,6 +39,7 @@ This is a toy JVM running on top of a real JVM, so some parts are left to the re
 * Threading.
 
 Unlikely to be supported:
+* Jar files.
 * synchronized keyword.
 * native keyword.
 

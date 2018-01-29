@@ -509,7 +509,11 @@ class JVM(classLoader: JVMClassLoader,
           sf.stack.push(JVMVarInt(5))
 
         case 0x6c => // idiv
-          JVM.err("Cannot handle opcode idiv yet")
+          val v1 = sf.stack.pop().asInstanceOf[JVMVarInteger]
+          val v2 = sf.stack.pop().asInstanceOf[JVMVarInteger]
+          val v3 = JVMVarInt(v2.asInt / v1.asInt)
+          sf.stack.push(v3)
+
         case 0xa5 => // if_acmpeq
           JVM.err("Cannot handle opcode if_acmpeq yet")
         case 0xa6 => // if_acmpne
@@ -538,9 +542,19 @@ class JVM(classLoader: JVMClassLoader,
           }
 
         case 0xa1 => // if_icmplt
-          JVM.err("Cannot handle opcode if_icmplt yet")
+          val v2 = popInt()
+          val v1 = popInt()
+          if (v1 < v2) {
+            handleJumpOpcode(op)
+          }
+
         case 0xa0 => // if_icmpne
-          JVM.err("Cannot handle opcode if_icmpne yet")
+          val v2 = popInt()
+          val v1 = popInt()
+          if (v1 != v2) {
+            handleJumpOpcode(op)
+          }
+
         case 0x99 => // ifeq
           JVM.err("Cannot handle opcode ifeq yet")
         case 0x9c => // ifge
@@ -584,9 +598,16 @@ class JVM(classLoader: JVMClassLoader,
         case 0xff => // impdep2
           JVM.err("Cannot handle opcode impdep2 yet")
         case 0x68 => // imul
-          JVM.err("Cannot handle opcode imul yet")
+          val v1 = sf.stack.pop().asInstanceOf[JVMVarInteger]
+          val v2 = sf.stack.pop().asInstanceOf[JVMVarInteger]
+          val v3 = JVMVarInt(v1.asInt * v2.asInt)
+          sf.stack.push(v3)
+
         case 0x74 => // ineg
-          JVM.err("Cannot handle opcode ineg yet")
+          val v1 = sf.stack.pop().asInstanceOf[JVMVarInteger]
+          val v3 = JVMVarInt(v1.asInt * -1)
+          sf.stack.push(v3)
+
         case 0xc1 => // instanceof
           JVM.err("Cannot handle opcode instanceof yet")
         case 0xba => // invokedynamic
@@ -647,7 +668,11 @@ class JVM(classLoader: JVMClassLoader,
           store(3)
 
         case 0x64 => // isub
-          JVM.err("Cannot handle opcode isub yet")
+          val v1 = sf.stack.pop().asInstanceOf[JVMVarInteger]
+          val v2 = sf.stack.pop().asInstanceOf[JVMVarInteger]
+          val v3 = JVMVarInt(v2.asInt - v1.asInt)
+          sf.stack.push(v3)
+
         case 0x7c => // iushr
           JVM.err("Cannot handle opcode iushr yet")
         case 0x82 => // ixor

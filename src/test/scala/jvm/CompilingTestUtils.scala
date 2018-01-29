@@ -8,6 +8,12 @@ import jvm.JVMByteCode.{JVMOpCodeWithArgs, JVMVar, JVMVarObjectRefManaged}
 
 
 object CompilingTestUtils {
+  def compareStack(sf: StackFrame, expected: Array[JVMByteCode.JVMVarInt]): Boolean = {
+    val real = sf.stack.toArray
+    assert (real sameElements  expected, s"${real.mkString(",")} != ${expected.mkString(",")}")
+    real sameElements  expected
+  }
+
 
   def containsVar(in: StackFrame, value: JVMVar): Boolean = {
     in.locals.find(_._2 == value).nonEmpty
@@ -104,10 +110,6 @@ object CompilingTestUtils {
         jvm.execute(classToExecute, funcToExecute, ExecuteParams(onReturn = Some(onReturn)))
 
         CompileResults(jvm)
-
-      case _ =>
-        assert(false, "Failed to find main in compiled file")
-        null
 
       case _ =>
         assert(false, s"Failed to compile ${javaFile}")
