@@ -7,7 +7,7 @@ class JVMSpec extends FunSuite {
 
 
   test("Sample10Plus33") {
-    val jvm = CompilingTestUtils.compileAndExecuteJavaFile("Sample10Plus33.java", "test").jvm
+    val jvm = CompilingTestUtils.compileAndExecuteJavaFileX("Sample10Plus33.java", "Sample10Plus33", "test").jvm
     assert (jvm.stack.last.stack.toArray sameElements Array(JVMVarInt(43)))
   }
 
@@ -29,6 +29,11 @@ class JVMSpec extends FunSuite {
   test("SimpleIf") {
     val jvm = CompilingTestUtils.compileAndExecuteJavaFile("SimpleIf.java").jvm
     assert (jvm.stack.last.locals.values.last == JVMVarInt(40))
+  }
+
+  test("ReturnValFromFunc") {
+    val jvm = CompilingTestUtils.compileAndExecuteJavaFile("ReturnValFromFunc.java").jvm
+    assert(CompilingTestUtils.containsVar(jvm.stack.head, JVMVarInt(7)))
   }
 
   ignore("Sample10fPlus33f") {

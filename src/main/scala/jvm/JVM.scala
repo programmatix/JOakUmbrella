@@ -1,9 +1,6 @@
 package jvm
 
-import java.io.{ByteArrayInputStream, File, FileInputStream}
-
 import jvm.JVMByteCode._
-import jvm.JVMClassFileReader.ReadParams
 import jvm.JVMClassFileTypes._
 
 import scala.collection.mutable
@@ -24,7 +21,12 @@ class StackFrame {
     locals(idx) = value
   }
 
-  def getLocal(idx: Int): JVMVar = locals(idx)
+  def getLocal(idx: Int): JVMVar = {
+    if (!locals.contains(idx)) {
+      JVM.err(s"Do not have local variable ${idx}")
+    }
+      locals(idx)
+  }
 
   // Only bytes, shorts and ints can be pushed directly onto the stack.  Other types get stored as locals.
   // Nope, fconst can push a float
@@ -44,7 +46,9 @@ case class ExecuteParams(
                         )
 
 // A Java Virtual Machine implementation, just for learning purposes
-class JVM(cf: JVMClassFileBuilderForReading, classLoader: ClassLoader = ClassLoader.getSystemClassLoader) {
+// See 'JVMClassLoader' for a discussion over why two classloaders are provided (rather than standard chaining)
+class JVM(classLoader: JVMClassLoader,
+          systemClassLoader: ClassLoader = ClassLoader.getSystemClassLoader) {
   val stack = mutable.Stack[StackFrame]()
 
 
@@ -98,11 +102,15 @@ class JVM(cf: JVMClassFileBuilderForReading, classLoader: ClassLoader = ClassLoa
     (args.toVector, argTypes.toVector)
   }
 
-  private def resolveMethodRef(index: Int) = {
+  private def invokeMethodRef(index: Int, getObjectRef: Boolean, cf: JVMClassFileBuilderForReading, params: ExecuteParams): Unit = {
     val fieldRef = cf.getConstant(index).asInstanceOf[ConstantMethodref]
     val cls = cf.getConstant(fieldRef.classIndex).asInstanceOf[ConstantClass]
     //  java/io/PrintStream
     val className = cf.getString(cls.nameIndex)
+
+    // Only a limited number of classes are allowed to be loaded with the standard java classloader - otherwise java ends up
+    // running all the code!
+
     val nameAndType = cf.getConstant(fieldRef.nameAndTypeIndex).asInstanceOf[ConstantNameAndType]
     // println
     val methodName = cf.getString(nameAndType.nameIndex)
@@ -113,15 +121,35 @@ class JVM(cf: JVMClassFileBuilderForReading, classLoader: ClassLoader = ClassLoa
 
     val (args, argTypes) = getMethodStuff(methodTypes)
 
+    val objectRef = if (getObjectRef) {
+      stack.head.pop().asInstanceOf[JVMVarObject].o
+    }
+    else null
 
-    val clsRef = classLoader.loadClass(className.replace("/", "."))
-    val methodRef = clsRef.getMethod(methodName, argTypes: _*)
+    val resolvedClassName = className.replace("/", ".")
 
-    (methodRef, args)
+    classLoader.loadClass(resolvedClassName) match {
+      case Some(clsRef) =>
+        clsRef.getMethod(methodName) match {
+          case Some(method) =>
+            if (objectRef != null) JVM.err("cannot handle objectRef")
+
+            val code = method.getCode().codeOrig
+            executeOpcodes(clsRef, code, params)
+          case _ => JVM.err(s"Unable to find $methodName in class ${resolvedClassName}")
+        }
+
+      case _            =>
+        val clsRef = systemClassLoader.loadClass(resolvedClassName)
+
+        val methodRef = clsRef.getMethod(methodName, argTypes: _*)
+
+        methodRef.invoke(objectRef, args: _*) // :_* is the hint to expand the Seq to varargs
+    }
   }
 
 
-  def callFunction(code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Unit = {
+  def executeOpcodes(cf: JVMClassFileBuilderForReading, code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Unit = {
     val sf = new StackFrame
     stack.push(sf)
 
@@ -543,25 +571,14 @@ class JVM(cf: JVMClassFileBuilderForReading, classLoader: ClassLoader = ClassLoa
           JVM.err("Cannot handle opcode invokespecial yet")
         case 0xb8 => // invokestatic
           val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
-
-          val (methodRef, args) = resolveMethodRef(index)
-
-          if (args.length == 0) {
-            methodRef.invoke(null)
-          }
-          else {
-            methodRef.invoke(null, args)
-          }
+          invokeMethodRef(index, false, cf, parms)
 
         case 0xb6 => // invokevirtual
           // invoke virtual method on object objectref and puts the result on the stack (might be void); the method is
           // identified by method reference index in constant pool (indexbyte1 << 8 + indexbyte2)
           val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
 
-          val (methodRef, args) = resolveMethodRef(index)
-          val objectRef = stack.head.pop().asInstanceOf[JVMVarObject].o
-
-          methodRef.invoke(objectRef, args: _*) // :_* is the hint to expand the Seq to varargs
+          invokeMethodRef(index, true, cf, parms)
 
         case 0x80 => // ior
           JVM.err("Cannot handle opcode ior yet")
@@ -734,8 +751,21 @@ class JVM(cf: JVMClassFileBuilderForReading, classLoader: ClassLoader = ClassLoa
     }
   }
 
-  def execute(code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Unit = {
-    callFunction(code, parms)
+//  private def execute(cf: JVMClassFileBuilderForReading, code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Unit = {
+//    executeOpcodes(cf, code, parms)
+//  }
+
+  def execute(className: String, functionName: String, parms: ExecuteParams = ExecuteParams()): Unit = {
+    classLoader.loadClass(className) match {
+      case Some(clsFound) =>
+        clsFound.getMethod(functionName) match {
+          case Some(method) =>
+            val code = method.getCode().codeOrig
+            executeOpcodes(clsFound, code, parms)
+          case _ => JVM.err(s"Unable to find method $functionName in class $className")
+        }
+      case _ => JVM.err(s"Unable to find class $className")
+    }
   }
 }
 
@@ -744,34 +774,37 @@ object JVM {
     println("Error: " + message)
     throw new InternalError(message)
   }
-
-
-  def main(args: Array[String]): Unit = {
-    if (args.length != 1) {
-      println("usage: program <.class file>")
-    }
-    else {
-      val file = new File(args(0) + ".class")
-      val fileContent = new Array[Byte](file.length.asInstanceOf[Int])
-      new FileInputStream(file).read(fileContent)
-      val lines = new ByteArrayInputStream(fileContent)
-
-      JVMClassFileReader.read(lines, ReadParams()) match {
-        case Some(classFile) =>
-          classFile.getMainMethod() match {
-            case Some(main) =>
-              val classLoader = ClassLoader.getSystemClassLoader
-
-              val jvm = new JVM(classFile, classLoader)
-
-              val mainCode = main.getCode().codeOrig
-              jvm.execute(mainCode)
-
-            case _ =>
-              err("No main method found")
-          }
-        case _               => err("Could not read input class file")
-      }
-    }
-  }
 }
+//
+//
+//  def main(args: Array[String]): Unit = {
+//    if (args.length != 1) {
+//      println("usage: program <.class file>")
+//    }
+//    else {
+//      val file = new File(args(0) + ".class")
+//      val fileContent = new Array[Byte](file.length.asInstanceOf[Int])
+//      new FileInputStream(file).read(fileContent)
+//      val lines = new ByteArrayInputStream(fileContent)
+//
+//      JVMClassFileReader.read(lines, ReadParams()) match {
+//        case Some(classFile) =>
+//          classFile.getMainMethod() match {
+//            case Some(main) =>
+//              val classLoader = new JVMClassLoader(Seq())
+//              val systemClassLoader = ClassLoader.getSystemClassLoader
+//
+//              val jvm = new JVM(classLoader, systemClassLoader)
+//
+//              val mainCode = main.getCode().codeOrig
+//              jvm.execute(mainCode)
+//
+//            case _ =>
+//              err("No main method found")
+//          }
+//        case _               => err("Could not read input class file")
+//      }
+//    }
+//  }
+//
+//}

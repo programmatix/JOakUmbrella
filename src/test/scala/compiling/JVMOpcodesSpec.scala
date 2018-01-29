@@ -1,9 +1,8 @@
 package compiling
 
-import org.scalatest.FunSuite
-import JVMOpCodes._
-import jvm.JVM
+import compiling.JVMOpCodes._
 import jvm.JVMByteCode._
+import org.scalatest.FunSuite
 
 class JVMOpcodesSpec extends FunSuite {
   test("if_icmpge 0 >= 1") {
@@ -14,8 +13,7 @@ class JVMOpcodesSpec extends FunSuite {
       makeInt(bipush, 10),
       makeInt(bipush, 20)
     )
-    val jvm = new JVM(null)
-    jvm.execute(opcodes)
+    val jvm = CompilingTestUtils.executeOpcode(opcodes)
     assert (jvm.stack.head.stack.length == 2)
   }
 
@@ -27,8 +25,7 @@ class JVMOpcodesSpec extends FunSuite {
       makeInt(bipush, 10),
       makeInt(bipush, 20)
     )
-    val jvm = new JVM(null)
-    jvm.execute(opcodes)
+    val jvm = CompilingTestUtils.executeOpcode(opcodes)
     assert (jvm.stack.head.stack.length == 1)
   }
 
@@ -40,8 +37,7 @@ class JVMOpcodesSpec extends FunSuite {
       makeInt(bipush, 10),
       makeInt(bipush, 20)
     )
-    val jvm = new JVM(null)
-    jvm.execute(opcodes)
+    val jvm = CompilingTestUtils.executeOpcode(opcodes)
     assert (jvm.stack.head.stack.length == 1)
   }
 
