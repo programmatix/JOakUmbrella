@@ -35,6 +35,16 @@ object JVMMethodDescriptors {
     }
   }
 
+  // java/lang/String; -> JVMTypeClass(classOf[java.lang.String])
+  def fieldDescriptorToTypes(in: String): JVMType = {
+    (parameterDescriptor ~ End).parse(in) match {
+      case Parsed.Success(v, x) => v
+      case _ =>
+        assert(false, s"Could not parse field descriptor $in")
+        null
+    }
+  }
+
   def createMethodDescriptor(ret: JVMType, params: Seq[JVMType]): String = {
     s"(${params.map(typesToStr).mkString("")})${typesToStr(ret)}"
   }

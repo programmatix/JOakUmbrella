@@ -27,6 +27,10 @@ sbt assembly
 launch4j to produce exe
 
 # JVM
+
+## Terms
+Managed code/class - Handled by this JVM, vs unmanaged which is handled by the standard Java JVM we're running upon.
+
 ## Limitations
 This is a toy JVM running on top of a real JVM, so some parts are left to the real JVM, including:
 

@@ -314,6 +314,11 @@ object JVMByteCode {
 //  case class JVMVarField(field: Field) extends JVMVar
   case class JVMVarObject(o: Object) extends JVMVar
 
+  sealed trait JVMObjectRef extends JVMVar
+
+  case class JVMVarObjectRefUnmanaged(o: Object) extends JVMObjectRef
+  case class JVMVarObjectRefManaged(klass: JVMClassInstance) extends JVMObjectRef
+
   //  case class DefineFunction(name: Identifier, types: Types, passedVariables: Seq[DeclareVariable]) extends Command
 //  case class DeclareVariable(name: Identifier, typ: JVMType) extends Command
 

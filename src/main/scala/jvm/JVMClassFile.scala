@@ -24,6 +24,10 @@ case class JVMClassFile(fullPath: String,
     methods.find(v => getString(v.nameIndex) == name)
   }
 
+  def getField(idx: Int): FieldInfo = {
+    fields(idx)
+  }
+
   def getMainMethod(): Option[MethodInfo] = {
     methods.find(v => getString(v.nameIndex) == "main")
   }

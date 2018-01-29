@@ -330,13 +330,13 @@ object JVMClassFileReader {
 
   case class ReadParams(verbose: Boolean = false)
 
-  def read(file: File, params: ReadParams): Option[JVMClassFile] = {
+  def read(packageName: Option[String], clsName: String, file: File, params: ReadParams): Option[JVMClassFile] = {
     val bytes = Files.readAllBytes(file.toPath)
     val in = new ByteArrayInputStream(bytes)
-    read(file.getCanonicalPath, in, params)
+    read(packageName, clsName, file.getCanonicalPath, in, params)
   }
 
-  def read(fullPath: String, in: ByteArrayInputStream, params: ReadParams): Option[JVMClassFile] = {
+  def read(packageName: Option[String], clsName: String, fullPath: String, in: ByteArrayInputStream, params: ReadParams): Option[JVMClassFile] = {
     try {
       if (in.read != 0xca) badParse(in, "Initial bytes are not 'cafebabe'")
       if (in.read != 0xfe) badParse(in, "Initial bytes are not 'cafebabe'")
@@ -354,7 +354,7 @@ object JVMClassFileReader {
 
       if (params.verbose) good(in, s"Constant pool count = $constantPoolCount")
 
-      val cf = new JVMClassFileBuilderForReading(fullPath, major_version, minor_version, Some("test"), "test")
+      val cf = new JVMClassFileBuilderForReading(fullPath, major_version, minor_version, packageName, clsName)
 
       for (idx <- Range(1, constantPoolCount)) {
         val tag = readByte(in)
@@ -462,17 +462,17 @@ object JVMClassFileReader {
     }
   }
 
-  def mainReader(args: Array[String]): Unit = {
-    if (args.length != 1) {
-      println("usage: program <.class file>")
-    }
-    else {
-      val file = new File(args(0))
-      val fileContent = new Array[Byte](file.length.asInstanceOf[Int])
-      new FileInputStream(file).read(fileContent)
-      val lines = new ByteArrayInputStream(fileContent)
-      read(file.getCanonicalPath, lines, ReadParams(verbose = true))
-    }
-  }
+//  def mainReader(args: Array[String]): Unit = {
+//    if (args.length != 1) {
+//      println("usage: program <.class file>")
+//    }
+//    else {
+//      val file = new File(args(0))
+//      val fileContent = new Array[Byte](file.length.asInstanceOf[Int])
+//      new FileInputStream(file).read(fileContent)
+//      val lines = new ByteArrayInputStream(fileContent)
+//      read(file.getCanonicalPath, lines, ReadParams(verbose = true))
+//    }
+//  }
 
 }

@@ -70,7 +70,7 @@ class JVMClassLoader(paths: Seq[String], params: JVMClassLoaderParams = JVMClass
           println(s"Classloader: [${dir.getCanonicalPath}] found ${javaFiles.size} files matching required class $clsName")
         }
         javaFiles.foreach(javaFile => {
-          JVMClassFileReader.read(javaFile, params.classfileRead) match {
+          JVMClassFileReader.read(packageName, clsName, javaFile, params.classfileRead) match {
             case Some(cf) =>
               classFiles += cf
               out = Some(cf)

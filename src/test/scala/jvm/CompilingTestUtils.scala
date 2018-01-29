@@ -4,7 +4,7 @@ import java.io.{File, IOException}
 import java.util
 import javax.tools.{DiagnosticCollector, JavaFileObject, ToolProvider}
 
-import jvm.JVMByteCode.{JVMOpCodeWithArgs, JVMVar}
+import jvm.JVMByteCode.{JVMOpCodeWithArgs, JVMVar, JVMVarObjectRefManaged}
 
 
 object CompilingTestUtils {
@@ -13,12 +13,17 @@ object CompilingTestUtils {
     in.locals.find(_._2 == value).nonEmpty
   }
 
+  def getKlassInstanceLocal(in: StackFrame): JVMClassInstance = {
+    in.locals.find(_._2.isInstanceOf[JVMVarObjectRefManaged]).get._2.asInstanceOf[JVMVarObjectRefManaged].klass
+  }
+
+
   case class ExecuteOpcodeResult(jvm: JVM, sf: StackFrame)
 
   def executeOpcode(opcodes: Seq[JVMOpCodeWithArgs], params: ExecuteParams = ExecuteParams()): ExecuteOpcodeResult = {
     val classLoader = new JVMClassLoader(Seq())
     val jvm = new JVM(classLoader)
-    val sf = new StackFrame(null)
+    val sf = new StackFrame(null, "fake")
     jvm.executeFrame(sf, opcodes, params)
     ExecuteOpcodeResult(jvm, sf)
   }
