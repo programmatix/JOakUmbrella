@@ -35,8 +35,12 @@ class JVMSpec extends FunSuite {
   }
 
   test("ReturnValFromFunc") {
+    var retIdx = 0
     val jvm = CompilingTestUtils.compileAndExecuteJavaFile("ReturnValFromFunc.java", (sf) => {
-      assert(CompilingTestUtils.containsVar(sf, JVMVarInt(7)))
+      if (retIdx == 1) {
+        assert(CompilingTestUtils.containsVar(sf, JVMVarInt(8)))
+      }
+      retIdx += 1
     }).jvm
 
   }

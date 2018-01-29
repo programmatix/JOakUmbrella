@@ -4,7 +4,6 @@ import jvm.JVMByteCode._
 import jvm.JVMClassFileTypes._
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 class ProgramCounterRegister {
 
@@ -51,54 +50,7 @@ class JVM(classLoader: JVMClassLoader,
 //  private[jvm] val stack = mutable.Stack[StackFrame]()
 
 
-  private def getMethodStuff(sf: StackFrame, methodTypes: JVMMethodDescriptors.MethodDescriptor): (Seq[Object], Seq[Class[_]]) = {
-    val args = ArrayBuffer.empty[Object]
-    val argTypes = ArrayBuffer.empty[Class[_]]
 
-    methodTypes.args.foreach(arg => {
-      val next = sf.pop()
-      arg match {
-        case v: JVMTypeObjectStr =>
-          if (v.clsRaw == "java/lang/String") {
-            args += next.asInstanceOf[JVMVarString].v.asInstanceOf[Object]
-            argTypes += classOf[java.lang.String]
-          }
-          else {
-            JVM.err(s"Cannot handle $v yet")
-            null
-          }
-        case v: JVMTypeVoid      =>
-          JVM.err(s"not expecting void here")
-          null
-        case v: JVMTypeBoolean   =>
-          args += next.asInstanceOf[JVMVarBoolean].v.asInstanceOf[Object]
-          argTypes += Boolean.getClass
-        case v: JVMTypeInt    =>
-          args += next.asInstanceOf[JVMVarInt].v.asInstanceOf[Object]
-          argTypes += Int.getClass
-        case v: JVMTypeShort  =>
-          args += next.asInstanceOf[JVMVarShort].v.asInstanceOf[Object]
-          argTypes += Short.getClass
-        case v: JVMTypeByte   =>
-          args += next.asInstanceOf[JVMVarByte].v.asInstanceOf[Object]
-          argTypes += Byte.getClass
-        case v: JVMTypeChar   =>
-          args += next.asInstanceOf[JVMVarChar].v.asInstanceOf[Object]
-          argTypes += Char.getClass
-        case v: JVMTypeFloat  =>
-          args += next.asInstanceOf[JVMVarFloat].v.asInstanceOf[Object]
-          argTypes += Float.getClass
-        case v: JVMTypeDouble =>
-          args += next.asInstanceOf[JVMVarDouble].v.asInstanceOf[Object]
-          argTypes += Double.getClass
-        case v: JVMTypeLong   =>
-          args += next.asInstanceOf[JVMVarLong].v.asInstanceOf[Object]
-          argTypes += Long.getClass
-      }
-    })
-
-    (args.toVector, argTypes.toVector)
-  }
 
   private def invokeMethodRef(sf: StackFrame, index: Int, getObjectRef: Boolean, params: ExecuteParams): Unit = {
     val cf = sf.cf
@@ -118,20 +70,38 @@ class JVM(classLoader: JVMClassLoader,
 
     val methodTypes = JVMMethodDescriptors.methodDescriptorToTypes(methodDescriptor)
 
-    val (args, argTypes) = getMethodStuff(sf, methodTypes)
-
-    val objectRef = if (getObjectRef) {
-      sf.stack.pop().asInstanceOf[JVMVarObject].o
-    }
-    else null
-
     val resolvedClassName = className.replace("/", ".")
 
     // See JVMClassLoader for a description of what's going on here
     classLoader.loadClass(resolvedClassName) match {
 
       case Some(clsRef) =>
-        createStackFrame(clsRef, methodName, params)
+        clsRef.getMethod(methodName) match {
+          case Some(method) =>
+            val code = method.getCode().codeOrig
+            val sfNew = new StackFrame(clsRef)
+
+            // This pops from the stack
+            val args = JVMStackFrame.getMethodArgs(sf, methodTypes)
+
+            val objectRef = if (getObjectRef) {
+              sf.stack.pop().asInstanceOf[JVMVarObject].o
+            }
+            else null
+
+            sfNew.locals ++= args.zipWithIndex.map(arg => arg._2 -> arg._1).toMap
+
+            executeFrame(sfNew, code, params) match {
+              case Some(ret) => sf.stack.push(ret)
+              case _ =>
+            }
+          case _            => JVM.err(s"Unable to find method $methodName in class ${clsRef.className}")
+        }
+
+
+
+
+
 
 //        clsRef.getMethod(methodName) match {
 //
@@ -148,6 +118,14 @@ class JVM(classLoader: JVMClassLoader,
       case _ =>
         val clsRef = systemClassLoader.loadClass(resolvedClassName)
 
+        // This pops from the stack
+        val (args, argTypes) = JVMStackFrame.getMethodArgsAsObjects(sf, methodTypes)
+
+        val objectRef = if (getObjectRef) {
+          sf.stack.pop().asInstanceOf[JVMVarObject].o
+        }
+        else null
+
         val methodRef = clsRef.getMethod(methodName, argTypes: _*)
 
         methodRef.invoke(objectRef, args: _*) // :_* is the hint to expand the Seq to varargs
@@ -155,7 +133,7 @@ class JVM(classLoader: JVMClassLoader,
   }
 
 
-  private[jvm] def executeFrame(sf: StackFrame, code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Unit = {
+  private[jvm] def executeFrame(sf: StackFrame, code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Option[JVMVar] = {
     val cf = sf.cf
 
     def popInt(): Int = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
@@ -199,6 +177,8 @@ class JVM(classLoader: JVMClassLoader,
     }
 
     var done = false
+    var out: Option[JVMVar] = None
+
     while (opcodeIdx < code.length && !done) {
 
       var incOpCode = true
@@ -592,6 +572,7 @@ class JVM(classLoader: JVMClassLoader,
         case 0xac => // ireturn
           if (parms.onReturn.isDefined) parms.onReturn.get(sf)
           done = true
+          out = Some(sf.stack.pop())
 
         case 0x78 => // ishl
           JVM.err("Cannot handle opcode ishl yet")
@@ -749,9 +730,11 @@ class JVM(classLoader: JVMClassLoader,
         opcodeIdx += 1
       }
     }
+
+    out
   }
 
-  private[jvm] def createStackFrame(cls: JVMClassFile, functionName: String, parms: ExecuteParams): Unit = {
+  private[jvm] def createEmptyStackFrame(cls: JVMClassFile, functionName: String, parms: ExecuteParams): Unit = {
     cls.getMethod(functionName) match {
       case Some(method) =>
         val code = method.getCode().codeOrig
@@ -764,7 +747,7 @@ class JVM(classLoader: JVMClassLoader,
   def execute(className: String, functionName: String, parms: ExecuteParams = ExecuteParams()): Unit = {
     classLoader.loadClass(className) match {
       case Some(clsFound) =>
-        createStackFrame(clsFound, functionName, parms)
+        createEmptyStackFrame(clsFound, functionName, parms)
       case _              => JVM.err(s"Unable to find class $className")
     }
   }
