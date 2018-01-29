@@ -102,7 +102,7 @@ class JVM(classLoader: JVMClassLoader,
     (args.toVector, argTypes.toVector)
   }
 
-  private def invokeMethodRef(index: Int, getObjectRef: Boolean, cf: JVMClassFileBuilderForReading, params: ExecuteParams): Unit = {
+  private def invokeMethodRef(index: Int, getObjectRef: Boolean, cf: JVMClassFile, params: ExecuteParams): Unit = {
     val fieldRef = cf.getConstant(index).asInstanceOf[ConstantMethodref]
     val cls = cf.getConstant(fieldRef.classIndex).asInstanceOf[ConstantClass]
     //  java/io/PrintStream
@@ -149,7 +149,7 @@ class JVM(classLoader: JVMClassLoader,
   }
 
 
-  def executeOpcodes(cf: JVMClassFileBuilderForReading, code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Unit = {
+  def executeOpcodes(cf: JVMClassFile, code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Unit = {
     val sf = new StackFrame
     stack.push(sf)
 
@@ -751,7 +751,7 @@ class JVM(classLoader: JVMClassLoader,
     }
   }
 
-//  private def execute(cf: JVMClassFileBuilderForReading, code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Unit = {
+//  private def execute(cf: JVMClassFile, code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Unit = {
 //    executeOpcodes(cf, code, parms)
 //  }
 

@@ -42,21 +42,34 @@ trait JVMClassFileBuilder {
   }
 }
 
-class JVMClassFileBuilderForReading (
-                           /*
-                              Java 1.2 uses major version 46
-                              Java 1.3 uses major version 47
-                              Java 1.4 uses major version 48
-                              Java 5 uses major version 49
-                              Java 6 uses major version 50
-                              Java 7 uses major version 51
-                              Java 8 uses major version 52
-                              Java 9 uses major version 53
-                            */
-                           val jvmMajorVersion: Int,
-                           val jvmMinorVersion: Int,
-                           val packageName: Option[String],
-                           val className: String
+class JVMClassFileBuilderForReading(
+                                   // The .class file
+                                     val fullPath: String,
+                                     /*
+                                        Java 1.2 uses major version 46
+                                        Java 1.3 uses major version 47
+                                        Java 1.4 uses major version 48
+                                        Java 5 uses major version 49
+                                        Java 6 uses major version 50
+                                        Java 7 uses major version 51
+                                        Java 8 uses major version 52
+                                        Java 9 uses major version 53
+                                      */
+                                     val jvmMajorVersion: Int,
+                                     val jvmMinorVersion: Int,
+                                     val packageName: Option[String],
+                                     val className: String
 
-                         ) extends JVMClassFileBuilder  {
+                                   ) extends JVMClassFileBuilder {
+  def makeImmutable(): JVMClassFile = {
+    JVMClassFile(fullPath,
+      jvmMajorVersion,
+      jvmMinorVersion,
+      packageName,
+      className,
+      constants.toVector,
+      methods.toVector)
+  }
 }
+
+

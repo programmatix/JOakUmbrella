@@ -285,13 +285,13 @@ object JVMClassFileReader {
 
   case class ReadParams(verbose: Boolean = false)
 
-  def read(file: File, params: ReadParams): Option[JVMClassFileBuilderForReading] = {
+  def read(file: File, params: ReadParams): Option[JVMClassFile] = {
     val bytes = Files.readAllBytes(file.toPath)
     val in = new ByteArrayInputStream(bytes)
-    read(in, params)
+    read(file.getCanonicalPath, in, params)
   }
 
-  def read(in: ByteArrayInputStream, params: ReadParams): Option[JVMClassFileBuilderForReading] = {
+  def read(fullPath: String, in: ByteArrayInputStream, params: ReadParams): Option[JVMClassFile] = {
     try {
       if (in.read != 0xca) badParse(in, "Initial bytes are not 'cafebabe'")
       if (in.read != 0xfe) badParse(in, "Initial bytes are not 'cafebabe'")
@@ -309,7 +309,7 @@ object JVMClassFileReader {
 
       if (params.verbose) good(in, s"Constant pool count = $constantPoolCount")
 
-      val cf = new JVMClassFileBuilderForReading(major_version, minor_version, Some("test"), "test")
+      val cf = new JVMClassFileBuilderForReading(fullPath, major_version, minor_version, Some("test"), "test")
 
       for (idx <- Range(1, constantPoolCount)) {
         val tag = readByte(in)
@@ -408,7 +408,7 @@ object JVMClassFileReader {
 
       assert(in.read() == -1)
 
-      Some(cf)
+      Some(cf.makeImmutable())
     }
     catch {
       case e: Throwable => None
@@ -424,7 +424,7 @@ object JVMClassFileReader {
       val fileContent = new Array[Byte](file.length.asInstanceOf[Int])
       new FileInputStream(file).read(fileContent)
       val lines = new ByteArrayInputStream(fileContent)
-      read(lines, ReadParams(verbose = true))
+      read(file.getCanonicalPath, lines, ReadParams(verbose = true))
     }
   }
 

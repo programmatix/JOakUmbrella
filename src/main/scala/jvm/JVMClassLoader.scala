@@ -43,32 +43,43 @@ case class JVMClassLoaderParams(verbose: Boolean = false,
                                 classfileRead: ReadParams = ReadParams())
 
 class JVMClassLoader(paths: Seq[String], params: JVMClassLoaderParams = JVMClassLoaderParams()) {
-  private[jvm] val classFiles = ArrayBuffer.empty[JVMClassFileBuilderForReading]
+  private[jvm] val classFiles = ArrayBuffer.empty[JVMClassFile]
 
-  def loadClass(name: String): Option[JVMClassFileBuilderForReading] = {
-    var out: Option[JVMClassFileBuilderForReading] = None
+  def loadClass(name: String): Option[JVMClassFile] = {
+    var out: Option[JVMClassFile] = None
+
+    val (clsName: String, packageName: Option[String]) = if (name.contains(".")) {
+      val splits = name.split(".")
+      (splits.last, Some(splits.take(splits.length - 1).mkString(".")))
+    }
+    else {
+      (name, None)
+    }
 
     if (params.verbose && paths.isEmpty) println(s"Classloader: no paths configured")
 
-    paths.foreach(path => {
-      val dir = new File(path)
-      val javaFiles = dir.listFiles(new FileFilter {
-        override def accept(pathname: File): Boolean = pathname.getName.stripSuffix(".class") == name
-      })
-      if (params.verbose) {
-        println(s"Classloader: [${dir.getCanonicalPath}] found ${javaFiles.size} files matching required class $name")
-      }
-      javaFiles.foreach(javaFile => {
-        JVMClassFileReader.read(javaFile, params.classfileRead) match {
-          case Some(cf) =>
-            classFiles += cf
-            out = Some(cf)
+    out = classFiles.find(cf => cf.packageName == packageName && cf.className == clsName)
 
-          case _ => JVM.err(s"unable to read classfile ${javaFile.getCanonicalPath}")
+    if (out.isEmpty) {
+      paths.foreach(path => {
+        val dir = new File(path)
+        val javaFiles = dir.listFiles(new FileFilter {
+          override def accept(pathname: File): Boolean = pathname.getName.stripSuffix(".class") == clsName
+        })
+        if (params.verbose) {
+          println(s"Classloader: [${dir.getCanonicalPath}] found ${javaFiles.size} files matching required class $clsName")
         }
+        javaFiles.foreach(javaFile => {
+          JVMClassFileReader.read(javaFile, params.classfileRead) match {
+            case Some(cf) =>
+              classFiles += cf
+              out = Some(cf)
 
+            case _ => JVM.err(s"unable to read classfile ${javaFile.getCanonicalPath}")
+          }
+        })
       })
-    })
+    }
 
     out
   }
