@@ -1,6 +1,7 @@
 package jvm
 
 import jvm.JVMByteCode._
+import jvm.JVMClassFileReader.ReadParams
 import jvm.JVMClassFileTypes._
 
 import scala.collection.mutable
@@ -42,7 +43,6 @@ class JVM(classLoader: JVMClassLoader,
 
 
   private def createNewInstance(sf: StackFrame, cls: ConstantClass, params: ExecuteParams) = JVMStackFrame.createNewInstance(sf, cls, classLoader, systemClassLoader, params)
-
 
   private def invokeMethodRef(sf: StackFrame, index: Int, getObjectRef: Boolean, params: ExecuteParams, specialNewInstanceMode: Boolean = false): Unit = {
     val cf = sf.cf
@@ -146,7 +146,7 @@ class JVM(classLoader: JVMClassLoader,
 
     val clsRef = systemClassLoader.loadClass(resolvedClassName)
     val ctor = clsRef.getDeclaredConstructor(argTypes: _*)
-    ctor.newInstance(args : _*).asInstanceOf[Object]
+    ctor.newInstance(args: _*).asInstanceOf[Object]
   }
 
   private[jvm] def executeFrame(sf: StackFrame, code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Option[JVMVar] = {
@@ -196,6 +196,12 @@ class JVM(classLoader: JVMClassLoader,
     var out: Option[JVMVar] = None
     // (NEWINST1)
     var specialNewInstanceMode = false
+
+    def doReturn(): Unit = {
+      if (parms.onReturn.isDefined) parms.onReturn.get(sf)
+      done = true
+      out = Some(sf.stack.pop())
+    }
 
     while (opcodeIdx < code.length && !done) {
 
@@ -315,7 +321,8 @@ class JVM(classLoader: JVMClassLoader,
         case 0x73 => // drem
           JVM.err("Cannot handle opcode drem yet")
         case 0xaf => // dreturn
-          JVM.err("Cannot handle opcode dreturn yet")
+          doReturn()
+
         case 0x39 => // dstore
           JVM.err("Cannot handle opcode dstore yet")
         case 0x47 => // dstore_0
@@ -381,7 +388,7 @@ class JVM(classLoader: JVMClassLoader,
           JVM.err("Cannot handle opcode fdiv yet")
 
         case 0x17 => // fload
-          val index = op.args.head.asInstanceOf[JVMVarByte].asInt
+          val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
           val stored = sf.getLocal(index)
           sf.push(stored)
 
@@ -408,10 +415,11 @@ class JVM(classLoader: JVMClassLoader,
         case 0x72 => // frem
           JVM.err("Cannot handle opcode frem yet")
         case 0xae => // freturn
-          JVM.err("Cannot handle opcode freturn yet")
+          doReturn()
+
         case 0x38 => // fstore
           val v1 = sf.stack.pop().asInstanceOf[JVMVarFloat]
-          val index = op.args.head.asInstanceOf[JVMVarByte].asInt
+          val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
           sf.addLocal(index, v1)
 
         case 0x43 => // fstore_0
@@ -465,17 +473,32 @@ class JVM(classLoader: JVMClassLoader,
         case 0xc8 => // goto_w
           JVM.err("Cannot handle opcode goto_w yet")
         case 0x91 => // i2b
-          JVM.err("Cannot handle opcode i2b yet")
+          val value = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val raw = value.toByte
+          val extended = JVMClassFileReaderUtils.extendByteAsTwosComplement(raw)
+          sf.stack.push(JVMVarInt(extended))
+
         case 0x92 => // i2c
-          JVM.err("Cannot handle opcode i2c yet")
+          val value = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val raw = value.toChar
+          //          val extended = JVMClassFileReaderUtils.extendShortAsTwosComplement(raw)
+          sf.stack.push(JVMVarInt(raw))
+
         case 0x87 => // i2d
           JVM.err("Cannot handle opcode i2d yet")
         case 0x86 => // i2f
           JVM.err("Cannot handle opcode i2f yet")
         case 0x85 => // i2l
-          JVM.err("Cannot handle opcode i2l yet")
+          val value = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val extended = JVMClassFileReaderUtils.extendIntAsTwosComplement(value)
+          sf.stack.push(JVMVarLong(extended))
+
         case 0x93 => // i2s
-          JVM.err("Cannot handle opcode i2s yet")
+          val value = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val raw = value.toShort
+          val extended = JVMClassFileReaderUtils.extendShortAsTwosComplement(raw)
+          sf.stack.push(JVMVarLong(extended))
+
         case 0x60 => // iadd
           val v1 = sf.stack.pop().asInstanceOf[JVMVarInteger]
           val v2 = sf.stack.pop().asInstanceOf[JVMVarInteger]
@@ -485,11 +508,16 @@ class JVM(classLoader: JVMClassLoader,
         case 0x2e => // iaload
           JVM.err("Cannot handle opcode iaload yet")
         case 0x7e => // iand
-          JVM.err("Cannot handle opcode iand yet")
+          val v1 = sf.stack.pop().asInstanceOf[JVMVarInteger]
+          val v2 = sf.stack.pop().asInstanceOf[JVMVarInteger]
+          val v3 = JVMVarInt(v1.asInt & v2.asInt)
+          sf.stack.push(v3)
+
         case 0x4f => // iastore
           JVM.err("Cannot handle opcode iastore yet")
         case 0x02 => // iconst_m1
-          JVM.err("Cannot handle opcode iconst_m1 yet")
+          sf.stack.push(JVMVarInt(-1))
+
         case 0x03 => // iconst_0
           sf.stack.push(JVMVarInt(0))
 
@@ -578,7 +606,7 @@ class JVM(classLoader: JVMClassLoader,
           sf.locals(index) = JVMVarInt(variable.v + const)
 
         case 0x15 => // iload
-          val index = op.args.head.asInstanceOf[JVMVarByte].asInt
+          val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
           load(index)
 
         case 0x1a => // iload_0
@@ -638,18 +666,35 @@ class JVM(classLoader: JVMClassLoader,
           invokeMethodRef(sf, index, true, parms)
 
         case 0x80 => // ior
-          JVM.err("Cannot handle opcode ior yet")
+          val v1 = sf.stack.pop().asInstanceOf[JVMVarInteger]
+          val v2 = sf.stack.pop().asInstanceOf[JVMVarInteger]
+          val v3 = JVMVarInt(v1.asInt | v2.asInt)
+          sf.stack.push(v3)
+
         case 0x70 => // irem
-          JVM.err("Cannot handle opcode irem yet")
+          val v1 = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val v2 = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val calc = v1 - (v1 / v2) * v2
+          val v3 = JVMVarInt(calc)
+          sf.stack.push(v3)
+
         case 0xac => // ireturn
-          if (parms.onReturn.isDefined) parms.onReturn.get(sf)
-          done = true
-          out = Some(sf.stack.pop())
+          doReturn()
 
         case 0x78 => // ishl
-          JVM.err("Cannot handle opcode ishl yet")
+          val v1 = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val v2 = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val bottom = v1 & 0x1f // bottom 5 bits
+        val v3 = JVMVarInt(v2 << bottom)
+          sf.stack.push(v3)
+
         case 0x7a => // ishr
-          JVM.err("Cannot handle opcode ishr yet")
+          val v1 = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val v2 = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val bottom = v1 & 0x1f // bottom 5 bits
+        val v3 = JVMVarInt(v2 >> bottom)
+          sf.stack.push(v3)
+
         case 0x36 => // istore
           val v1 = sf.stack.pop()
           val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
@@ -676,7 +721,11 @@ class JVM(classLoader: JVMClassLoader,
         case 0x7c => // iushr
           JVM.err("Cannot handle opcode iushr yet")
         case 0x82 => // ixor
-          JVM.err("Cannot handle opcode ixor yet")
+          val v1 = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val v2 = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val v3 = JVMVarInt(v1 ^ v2)
+          sf.stack.push(v3)
+
         case 0xa8 => // jsr
           JVM.err("Cannot handle opcode jsr yet")
         case 0xc9 => // jsr_w
@@ -740,7 +789,8 @@ class JVM(classLoader: JVMClassLoader,
         case 0x71 => // lrem
           JVM.err("Cannot handle opcode lrem yet")
         case 0xad => // lreturn
-          JVM.err("Cannot handle opcode lreturn yet")
+          doReturn()
+
         case 0x79 => // lshl
           JVM.err("Cannot handle opcode lshl yet")
         case 0x7b => // lshr
@@ -809,7 +859,8 @@ class JVM(classLoader: JVMClassLoader,
         case 0x56 => // sastore
           JVM.err("Cannot handle opcode sastore yet")
         case 0x11 => // sipush
-          JVM.err("Cannot handle opcode sipush yet")
+          sf.stack.push(op.args.head)
+
         case 0x5f => // swap
           JVM.err("Cannot handle opcode swap yet")
         case 0xaa => // tableswitch
@@ -857,38 +908,24 @@ object JVM {
     println(s"Error ${sf.cf.className}.${sf.methodName}: " + message)
     throw new InternalError(message)
   }
+
+  def main(args: Array[String]): Unit = {
+    if (args.length != 2) {
+      println("usage: program <managed class path> <function>")
+    }
+    else {
+      val managedClassPath = args(0).split(";")
+
+      val name = args(1)
+
+      val classLoader = new JVMClassLoader(managedClassPath, JVMClassLoaderParams(true, ReadParams(true)))
+      val systemClassLoader = ClassLoader.getSystemClassLoader
+
+      val jvm = new JVM(classLoader, systemClassLoader)
+
+      jvm.execute(name, "main", ExecuteParams())
+    }
+  }
 }
 
-//
-//
-//  def main(args: Array[String]): Unit = {
-//    if (args.length != 1) {
-//      println("usage: program <.class file>")
-//    }
-//    else {
-//      val file = new File(args(0) + ".class")
-//      val fileContent = new Array[Byte](file.length.asInstanceOf[Int])
-//      new FileInputStream(file).read(fileContent)
-//      val lines = new ByteArrayInputStream(fileContent)
-//
-//      JVMClassFileReader.read(lines, ReadParams()) match {
-//        case Some(classFile) =>
-//          classFile.getMainMethod() match {
-//            case Some(main) =>
-//              val classLoader = new JVMClassLoader(Seq())
-//              val systemClassLoader = ClassLoader.getSystemClassLoader
-//
-//              val jvm = new JVM(classLoader, systemClassLoader)
-//
-//              val mainCode = main.getCode().codeOrig
-//              jvm.execute(mainCode)
-//
-//            case _ =>
-//              err("No main method found")
-//          }
-//        case _               => err("Could not read input class file")
-//      }
-//    }
-//  }
-//
-//}
+

@@ -1,6 +1,6 @@
 package jvm
 
-import jvm.JVMByteCode.{JVMVarInt, JVMVarObjectRefUnmanaged, JVMVarString}
+import jvm.JVMByteCode.{JVMVarInt, JVMVarLong, JVMVarObjectRefUnmanaged, JVMVarString}
 import org.scalatest.FunSuite
 
 class JVMSpec extends FunSuite {
@@ -33,6 +33,62 @@ class JVMSpec extends FunSuite {
       assert(CompilingTestUtils.compareStack(sf, Array(JVMVarInt(-10))))
     })
 
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "i2b", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarInt(10))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "i2bNeg", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarInt(-10))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "i2bLimitMax", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarInt(127))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "i2bLimitMin", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarInt(-128))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "i2c", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarInt(10))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "i2cLimitMax", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarInt(65535))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "i2cNeg", (sf) => {
+      // It's going to overflow
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarInt(65526))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "i2l", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarLong(10))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "i2lNeg", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarLong(-10))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "i2lLimitMax", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarLong(2147483647))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "i2lLimitMin", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarLong(-2147483648))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "ishl", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarInt(4))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "ishr", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarInt(1))))
+    })
+
+    CompilingTestUtils.compileAndExecuteJavaFileX("IntMaths.java", "IntMaths", "ixor", (sf) => {
+      assert(CompilingTestUtils.compareStack(sf, Array(JVMVarInt(3))))
+    })
   }
 
   test("PrintHelloWorld") {

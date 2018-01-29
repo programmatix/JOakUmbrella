@@ -18,5 +18,18 @@ class JVMClassFileReaderUtilsSpec extends FunSuite {
     assert(JVMClassFileReaderUtils.extendByteAsTwosComplement(0x1.toByte).toBinaryString == "1".replace(" ", ""))
   }
 
+  test("int twos complement extended to long") {
+    assert(JVMClassFileReaderUtils.extendIntAsTwosComplement(-10) == -10L)
+
+    assert(JVMClassFileReaderUtils.extendIntAsTwosComplement(1).toBinaryString == "1")
+    assert(JVMClassFileReaderUtils.extendIntAsTwosComplement(1) == 1L)
+    assert(JVMClassFileReaderUtils.extendIntAsTwosComplement(0).toBinaryString == "0")
+    assert(JVMClassFileReaderUtils.extendIntAsTwosComplement(0) == 0L)
+
+    assert(JVMClassFileReaderUtils.extendIntAsTwosComplement(-1).toBinaryString == ("1111" * 16).replace(" ", ""))
+    assert(JVMClassFileReaderUtils.extendIntAsTwosComplement(-1) == -1L)
+
+  }
+
 
 }

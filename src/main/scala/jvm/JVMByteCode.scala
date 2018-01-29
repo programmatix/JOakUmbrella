@@ -39,104 +39,11 @@ object JVMByteCode {
     override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = 0
   }
 
-  // push a short onto the stack as an integer value
-  //  case class sipush(v: Short) extends ByteCode {
-  //    override def gen(implicit params: GenParams): String = s"sipush $v"
-  //    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
-  //      JVMClassFileBuilderUtils.writeByte(out, 0x11)
-  //      JVMClassFileBuilderUtils.writeByte(out, v)
-  //      2
-  //    }
-  //  }
-
-  // push a byte onto the stack as an integer value
-  //  case class bipush(v: Short) extends ByteCode {
-  //    assert (v < 256)
-  //
-  //    override def gen(implicit params: GenParams): String = s"bipush $v"
-  //    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
-  //      JVMClassFileBuilderUtils.writeByte(out, 0x10)
-  //      JVMClassFileBuilderUtils.writeByte(out, v)
-  //      2
-  //    }
-  //  }
-  //
-  //  // return an integer from a method
-  //  case class ireturn() extends ByteCode {
-  //    override def gen(implicit params: GenParams): String = "ireturn"
-  //    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
-  //      JVMClassFileBuilderUtils.writeByte(out, 0xac)
-  //      1
-  //    }
-  //  }
-
-  // store int value into variable #index
-  //  case class istore(variable: Int) extends ByteCode {
-  //    override def gen(implicit params: GenParams): String = {
-  //      variable match {
-  //        case 0|1|2|3 => s"istore_$variable"
-  //        case _ => s"istore $variable"
-  //      }
-  //    }
-  //    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
-  //      variable match {
-  //        case 0 =>
-  //          JVMClassFileBuilderUtils.writeByte(out, 0x3b)
-  //          1
-  //        case 1 =>
-  //          JVMClassFileBuilderUtils.writeByte(out, 0x3c)
-  //          1
-  //        case 2 =>
-  //          JVMClassFileBuilderUtils.writeByte(out, 0x3d)
-  //          1
-  //        case 3 =>
-  //          JVMClassFileBuilderUtils.writeByte(out, 0x3e)
-  //          1
-  //        case _ =>
-  //          JVMClassFileBuilderUtils.writeByte(out, 0x36)
-  //          JVMClassFileBuilderUtils.writeByte(out, variable)
-  //          2
-  //      }
-  //
-  //    }
-  //  }
-
-  // multiply two integers
-  //  case class imul() extends ByteCode {
-  //    override def gen(implicit params: GenParams): String = "imul"
-  //    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
-  //      JVMClassFileBuilderUtils.writeByte(out, 0x68)
-  //      1
-  //    }
-  //  }
-  //
-  //  // add two integers
-  //  case class iadd() extends ByteCode {
-  //    override def gen(implicit params: GenParams): String = "iadd"
-  //    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
-  //      JVMClassFileBuilderUtils.writeByte(out, 0x60)
-  //      1
-  //    }
-  //  }
-  //
-  //  // return void from method
-  //  case class ret() extends ByteCode {
-  //    override def gen(implicit params: GenParams): String = "return"
-  //    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
-  //      JVMClassFileBuilderUtils.writeByte(out, 0xa9)
-  //      1
-  //    }
-  //  }
 
   def make(oc: JVMOpCode) = JVMOpCodeWithArgs(oc, Array())
 
 
   def makeFloat(oc: JVMOpCode, args: Float*) = JVMOpCodeWithArgs(oc, args.map(v => JVMVarFloat(v)).toArray)
-
-
-  // JVM bytes and shorts introduce signed oddness so keep stuff as ints
-  //  def makeByte(oc: JVMOpCode, args: Byte*) = JVMOpCodeWithArgs(oc, args.map(v => JVMVarByte(v)).toArray)
-//  def makeShort(oc: JVMOpCode, args: Short*) = JVMOpCodeWithArgs(oc, args.map(v => JVMVarShort(v)).toArray)
 
   def makeInt(oc: JVMOpCode, args: Int*) = JVMOpCodeWithArgs(oc, args.map(v => JVMVarInt(v)).toArray)
 
@@ -175,66 +82,7 @@ object JVMByteCode {
     }
   }
 
-  //  case class label(symbol: String) extends ByteCode {
-  //    override def gen(implicit params: GenParams): String = symbol + ":"
-  //    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
-  //      assert(false) // ???
-  //      0
-  //    }
-  //  }
-
-  //  case class movl(constant: String, register: String) extends ByteCode {
-  //    override def gen(implicit params: GenParams): String = s"movl $constant,%$register"
-  //  }
-
-  // 3 -> -3
-  //  case class neg(register: String) extends ByteCode {
-  //    override def gen(implicit params: GenParams): String = s"neg %$register"
-  //    override def write(out: ByteArrayOutputStream, charset: Charset, genParams: GenParams): Int = {
-  //      JVMClassFileBuilderUtils.writeByte(out, 0xac)
-  //    }
-  //  }
-
   def unsupported(err: String) = JVMGenUnsupportedCurrently(err)
-
-//  private def makeTypes(in: Types): String = {
-//    val mapped = in.types.map {
-//      case v: TypeSpecifierVoid     => "void"
-//      case v: TypeSpecifierChar     => "char"
-//      case v: TypeSpecifierShort    => "short"
-//      case v: TypeSpecifierInt      => "int"
-//      case v: TypeSpecifierLong     => "long"
-//      case v: TypeSpecifierFloat    => "float"
-//      case v: TypeSpecifierDouble   => "double"
-//      case v: TypeSpecifierSigned   => "signed"
-//      case v: TypeSpecifierUnsigned => "unsigned"
-//      case v: TypeSpecifierBool     => "boolean"
-//      case v: TypeSpecifierComplex  => throw unsupported("_Complex type")
-//      case _                        => throw unsupported("unhandled type")
-//    }
-//    mapped.mkString(" ")
-//  }
-
-  //  private def makeIdentifier(in: Identifier): String = in.v
-  //
-  //  private def makePassedVariables(in: Seq[DeclareVariable]): String = {
-  //    ""
-  //  }
-
-  //  sealed trait ByteCodeComplex
-  //
-  //  // public static void main(java.lang.String[]);
-  //  // Code:
-  //  case class Function(in: DefineFunction) extends ByteCodeComplex {
-  //    override def gen(implicit params: GenParams): String = {
-  //      s"public static ${makeTypes(in.types)} ${makeIdentifier(in.name)}(${makePassedVariables(in.passedVariables)});\nCode:"
-  //    }
-  //
-  //  }
-
-
-  // Most of the time this will just be one type like "int"
-//  case class Types(types: Seq[TypeSpecifier])
 
   sealed trait JVMType
   sealed trait JVMTypePrimitive extends JVMType
@@ -292,12 +140,14 @@ object JVMByteCode {
     def asInt: Int = v
   }
 
+  @Deprecated // currently using JVMVarInt to avoid weirdness
   case class JVMVarShort(v: Short) extends JVMVar with JVMVarInteger {
     def asInt: Int = v
   }
 
   case class JVMVarChar(v: Char) extends JVMVar
 
+  @Deprecated // currently using JVMVarInt to avoid weirdness
   case class JVMVarByte(v: Byte) extends JVMVar with JVMVarInteger {
     def asInt: Int = v
   }

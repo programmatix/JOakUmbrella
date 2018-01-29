@@ -20,6 +20,10 @@ trait JVMClassFileBuilder {
     fields += field
   }
 
+  def addInterface(interface: ConstantClass): Unit = {
+    interfaces += interface
+  }
+
   def getConstant(idx: Int): Constant = {
     // constant indexing is 1-based
     constants(idx - 1)
@@ -28,6 +32,7 @@ trait JVMClassFileBuilder {
   val constants = ArrayBuffer.empty[Constant]
   val methods = ArrayBuffer.empty[MethodInfo]
   val fields = ArrayBuffer.empty[FieldInfo]
+  val interfaces = ArrayBuffer.empty[ConstantClass]
 
   def addUTF8(value: String): Int = {
     constants += ConstantUtf8(value)
@@ -74,7 +79,8 @@ class JVMClassFileBuilderForReading(
       className,
       constants.toVector,
       methods.toVector,
-      fields.toVector)
+      fields.toVector,
+      interfaces.toVector)
   }
 }
 

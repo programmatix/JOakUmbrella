@@ -52,6 +52,10 @@ class JVMClassLoader(paths: Seq[String], params: JVMClassLoaderParams = JVMClass
       val splits = name.split("\\.")
       (splits.last, Some(splits.take(splits.length - 1).mkString(".")))
     }
+    else if (name.contains("/")) {
+      val splits = name.split("/")
+      (splits.last, Some(splits.take(splits.length - 1).mkString(".")))
+    }
     else {
       (name, None)
     }
@@ -62,22 +66,25 @@ class JVMClassLoader(paths: Seq[String], params: JVMClassLoaderParams = JVMClass
 
     if (out.isEmpty) {
       paths.foreach(path => {
-        val dir = new File(path)
+        val pathName = packageName.map(pn => path + "/" + pn.replace('.','/')).getOrElse(path)
+        val dir = new File(pathName)
         val javaFiles = dir.listFiles(new FileFilter {
           override def accept(pathname: File): Boolean = pathname.getName.stripSuffix(".class") == clsName
         })
-        if (params.verbose) {
-          println(s"Classloader: [${dir.getCanonicalPath}] found ${javaFiles.size} files matching required class $clsName")
-        }
-        javaFiles.foreach(javaFile => {
-          JVMClassFileReader.read(packageName, clsName, javaFile, params.classfileRead) match {
-            case Some(cf) =>
-              classFiles += cf
-              out = Some(cf)
-
-            case _ => JVM.err(s"unable to read classfile ${javaFile.getCanonicalPath}")
+        if (javaFiles != null) {
+          if (params.verbose) {
+            println(s"Classloader: [${dir.getCanonicalPath}] found ${javaFiles.size} files matching required class $clsName")
           }
-        })
+          javaFiles.foreach(javaFile => {
+            JVMClassFileReader.read(packageName, clsName, javaFile, params.classfileRead) match {
+              case Some(cf) =>
+                classFiles += cf
+                out = Some(cf)
+
+              case _ => JVM.err(s"unable to read classfile ${javaFile.getCanonicalPath}")
+            }
+          })
+        }
       })
     }
 

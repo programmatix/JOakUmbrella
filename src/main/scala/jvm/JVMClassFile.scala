@@ -1,6 +1,6 @@
 package jvm
 
-import jvm.JVMClassFileTypes.{Constant, ConstantUtf8, FieldInfo, MethodInfo}
+import jvm.JVMClassFileTypes._
 
 case class JVMClassFile(fullPath: String,
                         jvmMajorVersion: Int,
@@ -9,7 +9,8 @@ case class JVMClassFile(fullPath: String,
                         className: String,
                         constants: Seq[Constant],
                         methods: Seq[MethodInfo],
-                        fields: Seq[FieldInfo]) {
+                        fields: Seq[FieldInfo],
+                        interfaces: Seq[ConstantClass]) {
 
   def getConstant(idx: Int): Constant = {
     // constant indexing is 1-based

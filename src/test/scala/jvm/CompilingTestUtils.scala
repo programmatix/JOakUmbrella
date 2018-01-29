@@ -8,7 +8,7 @@ import jvm.JVMByteCode.{JVMOpCodeWithArgs, JVMVar, JVMVarObjectRefManaged}
 
 
 object CompilingTestUtils {
-  def compareStack(sf: StackFrame, expected: Array[JVMByteCode.JVMVarInt]): Boolean = {
+  def compareStack(sf: StackFrame, expected: Array[JVMByteCode.JVMVar]): Boolean = {
     val real = sf.stack.toArray
     assert (real sameElements  expected, s"${real.mkString(",")} != ${expected.mkString(",")}")
     real sameElements  expected
@@ -35,16 +35,20 @@ object CompilingTestUtils {
   }
 
   // Compiles a .java file to .class and returns the .class filename, if successful
-  def compileJavaFile(javaFile: File): Option[File] = {
+  def compileJavaFile(javaFile: File, classPathDir: File): Option[File] = {
 
     try {
       // https://stackoverflow.com/questions/21544446/how-do-you-dynamically-compile-and-load-external-java-classes
       val diagnostics = new DiagnosticCollector[JavaFileObject]()
+      // Not ideal as it doesn't get a fixed version of the compiler, so someone else running the same tests could get different results.  Don't really know how to change...
       val compiler = ToolProvider.getSystemJavaCompiler()
       val fileManager = compiler.getStandardFileManager(diagnostics, null, null)
+
       val optionList = new util.ArrayList[String]()
-      //      optionList.add("-classpath");
-      //      optionList.add(System.getProperty("java.class.path") + ";dist/InlineCompiler.jar");
+
+      val classPath = classPathDir.getAbsolutePath.replace("\\.\\", "\\") + ";" + System.getProperty("java.class.path")
+      optionList.add("-classpath");
+      optionList.add(classPath)
 
       val compilationUnit = fileManager.getJavaFileObjectsFromFiles(util.Arrays.asList(javaFile))
       val task = compiler.getTask(
@@ -102,8 +106,9 @@ object CompilingTestUtils {
     val javaFilename = sampleDir + resource
     val javaFile = new File(javaFilename)
     assert(javaFile.exists())
+val classPathDir = new File(sampleDir)
 
-    CompilingTestUtils.compileJavaFile(javaFile) match {
+    CompilingTestUtils.compileJavaFile(javaFile, classPathDir) match {
       case Some(classFile) =>
         val classLoader = new JVMClassLoader(Seq(sampleDir), JVMClassLoaderParams(verbose = true))
         val jvm = new JVM(classLoader)
