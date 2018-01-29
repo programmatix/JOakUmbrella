@@ -49,7 +49,7 @@ class JVMClassLoader(paths: Seq[String], params: JVMClassLoaderParams = JVMClass
     var out: Option[JVMClassFile] = None
 
     val (clsName: String, packageName: Option[String]) = if (name.contains(".")) {
-      val splits = name.split(".")
+      val splits = name.split("\\.")
       (splits.last, Some(splits.take(splits.length - 1).mkString(".")))
     }
     else {

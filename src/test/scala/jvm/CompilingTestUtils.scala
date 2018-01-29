@@ -1,11 +1,10 @@
-package compiling
+package jvm
 
 import java.io.{File, IOException}
 import java.util
 import javax.tools.{DiagnosticCollector, JavaFileObject, ToolProvider}
 
 import jvm.JVMByteCode.{JVMOpCodeWithArgs, JVMVar}
-import jvm.{ExecuteParams, _}
 
 
 object CompilingTestUtils {
@@ -14,11 +13,14 @@ object CompilingTestUtils {
     in.locals.find(_._2 == value).nonEmpty
   }
 
-  def executeOpcode(opcodes: Seq[JVMOpCodeWithArgs], params: ExecuteParams = ExecuteParams(true)): JVM = {
+  case class ExecuteOpcodeResult(jvm: JVM, sf: StackFrame)
+
+  def executeOpcode(opcodes: Seq[JVMOpCodeWithArgs], params: ExecuteParams = ExecuteParams()): ExecuteOpcodeResult = {
     val classLoader = new JVMClassLoader(Seq())
     val jvm = new JVM(classLoader)
-    jvm.executeOpcodes(null, opcodes, params)
-    jvm
+    val sf = new StackFrame(null)
+    jvm.executeFrame(sf, opcodes, params)
+    ExecuteOpcodeResult(jvm, sf)
   }
 
   // Compiles a .java file to .class and returns the .class filename, if successful
@@ -74,12 +76,16 @@ object CompilingTestUtils {
 
   case class CompileResults(jvm: JVM)
 
-  def compileAndExecuteJavaFile(resource: String): CompileResults = {
-    compileAndExecuteJavaFileX(resource, resource.stripSuffix(".java"), "main")
+  def compileAndExecuteJavaFile(resource: String, onReturn: (StackFrame) => Unit = (sf) => {
+    assert (sf.stack.isEmpty)
+  }): CompileResults = {
+    compileAndExecuteJavaFileX(resource, resource.stripSuffix(".java"), "main", onReturn)
   }
 
 
-    def compileAndExecuteJavaFileX(resource: String, classToExecute: String, funcToExecute: String = "main"): CompileResults = {
+    def compileAndExecuteJavaFileX(resource: String, classToExecute: String, funcToExecute: String = "main", onReturn: (StackFrame) => Unit = (sf) => {
+      assert (sf.stack.isEmpty)
+    }): CompileResults = {
     //    val javaFilename = Thread.currentThread().getContextClassLoader().getResource(resource)
     val sampleDir = "./src/test/java/"
     val javaFilename = sampleDir + resource
@@ -90,7 +96,7 @@ object CompilingTestUtils {
       case Some(classFile) =>
         val classLoader = new JVMClassLoader(Seq(sampleDir), JVMClassLoaderParams(verbose = true))
         val jvm = new JVM(classLoader)
-        jvm.execute(classToExecute, funcToExecute, ExecuteParams(stopBeforeFinalReturn = true))
+        jvm.execute(classToExecute, funcToExecute, ExecuteParams(onReturn = Some(onReturn)))
 
         CompileResults(jvm)
 

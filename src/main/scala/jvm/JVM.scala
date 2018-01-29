@@ -14,8 +14,12 @@ class Thread {
   val pc = new ProgramCounterRegister()
 }
 
-class StackFrame {
+class StackFrame(val cf: JVMClassFile) {
   val locals = mutable.Map[Int, JVMVar]()
+
+  // Only bytes, shorts and ints can be pushed directly onto the stack.  Other types get stored as locals.
+  // Nope, fconst can push a float
+  val stack = mutable.Stack[JVMVar]()
 
   def addLocal(idx: Int, value: JVMVar) = {
     locals(idx) = value
@@ -25,12 +29,8 @@ class StackFrame {
     if (!locals.contains(idx)) {
       JVM.err(s"Do not have local variable ${idx}")
     }
-      locals(idx)
+    locals(idx)
   }
-
-  // Only bytes, shorts and ints can be pushed directly onto the stack.  Other types get stored as locals.
-  // Nope, fconst can push a float
-  val stack = mutable.Stack[JVMVar]()
 
   def push(value: JVMVar) = stack.push(value)
 
@@ -40,24 +40,23 @@ class StackFrame {
 }
 
 case class ExecuteParams(
-                          // For testing: stops execution just before the last return
-                          stopBeforeFinalReturn: Boolean = false
-
+                          // For testing: called just before a return
+                          onReturn: Option[(StackFrame) => Unit] = None
                         )
 
 // A Java Virtual Machine implementation, just for learning purposes
 // See 'JVMClassLoader' for a discussion over why two classloaders are provided (rather than standard chaining)
 class JVM(classLoader: JVMClassLoader,
           systemClassLoader: ClassLoader = ClassLoader.getSystemClassLoader) {
-  val stack = mutable.Stack[StackFrame]()
+//  private[jvm] val stack = mutable.Stack[StackFrame]()
 
 
-  private def getMethodStuff(methodTypes: JVMMethodDescriptors.MethodDescriptor): (Seq[Object], Seq[Class[_]]) = {
+  private def getMethodStuff(sf: StackFrame, methodTypes: JVMMethodDescriptors.MethodDescriptor): (Seq[Object], Seq[Class[_]]) = {
     val args = ArrayBuffer.empty[Object]
     val argTypes = ArrayBuffer.empty[Class[_]]
 
     methodTypes.args.foreach(arg => {
-      val next = stack.head.pop()
+      val next = sf.pop()
       arg match {
         case v: JVMTypeObjectStr =>
           if (v.clsRaw == "java/lang/String") {
@@ -74,7 +73,6 @@ class JVM(classLoader: JVMClassLoader,
         case v: JVMTypeBoolean   =>
           args += next.asInstanceOf[JVMVarBoolean].v.asInstanceOf[Object]
           argTypes += Boolean.getClass
-        //              case v @ (_: JVMTypeInt | _: JVMTypeShort | _: JVMTypeByte) => next.asInstanceOf[JVMVarInteger].asInt.asInstanceOf[Object]
         case v: JVMTypeInt    =>
           args += next.asInstanceOf[JVMVarInt].v.asInstanceOf[Object]
           argTypes += Int.getClass
@@ -102,7 +100,8 @@ class JVM(classLoader: JVMClassLoader,
     (args.toVector, argTypes.toVector)
   }
 
-  private def invokeMethodRef(index: Int, getObjectRef: Boolean, cf: JVMClassFile, params: ExecuteParams): Unit = {
+  private def invokeMethodRef(sf: StackFrame, index: Int, getObjectRef: Boolean, params: ExecuteParams): Unit = {
+    val cf = sf.cf
     val fieldRef = cf.getConstant(index).asInstanceOf[ConstantMethodref]
     val cls = cf.getConstant(fieldRef.classIndex).asInstanceOf[ConstantClass]
     //  java/io/PrintStream
@@ -119,27 +118,34 @@ class JVM(classLoader: JVMClassLoader,
 
     val methodTypes = JVMMethodDescriptors.methodDescriptorToTypes(methodDescriptor)
 
-    val (args, argTypes) = getMethodStuff(methodTypes)
+    val (args, argTypes) = getMethodStuff(sf, methodTypes)
 
     val objectRef = if (getObjectRef) {
-      stack.head.pop().asInstanceOf[JVMVarObject].o
+      sf.stack.pop().asInstanceOf[JVMVarObject].o
     }
     else null
 
     val resolvedClassName = className.replace("/", ".")
 
+    // See JVMClassLoader for a description of what's going on here
     classLoader.loadClass(resolvedClassName) match {
+
       case Some(clsRef) =>
-        clsRef.getMethod(methodName) match {
-          case Some(method) =>
-            if (objectRef != null) JVM.err("cannot handle objectRef")
+        createStackFrame(clsRef, methodName, params)
 
-            val code = method.getCode().codeOrig
-            executeOpcodes(clsRef, code, params)
-          case _ => JVM.err(s"Unable to find $methodName in class ${resolvedClassName}")
-        }
+//        clsRef.getMethod(methodName) match {
+//
+//          case Some(method) =>
+//            if (objectRef != null) JVM.err("cannot handle objectRef")
+//
+//            val code = method.getCode().codeOrig
+//            val sf = new StackFrame(clsRef)
+//            executeFrame(sf, code, params)
+//
+//          case _            => JVM.err(s"Unable to find $methodName in class ${resolvedClassName}")
+//        }
 
-      case _            =>
+      case _ =>
         val clsRef = systemClassLoader.loadClass(resolvedClassName)
 
         val methodRef = clsRef.getMethod(methodName, argTypes: _*)
@@ -149,9 +155,8 @@ class JVM(classLoader: JVMClassLoader,
   }
 
 
-  def executeOpcodes(cf: JVMClassFile, code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Unit = {
-    val sf = new StackFrame
-    stack.push(sf)
+  private[jvm] def executeFrame(sf: StackFrame, code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Unit = {
+    val cf = sf.cf
 
     def popInt(): Int = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
 
@@ -534,8 +539,8 @@ class JVM(classLoader: JVMClassLoader,
         case 0x84 => // iinc
           val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
           val const = op.args.last.asInstanceOf[JVMVarInteger].asInt
-          val variable = stack.head.locals(index).asInstanceOf[JVMVarInt]
-          stack.head.locals(index) = JVMVarInt(variable.v + const)
+          val variable = sf.locals(index).asInstanceOf[JVMVarInt]
+          sf.locals(index) = JVMVarInt(variable.v + const)
 
         case 0x15 => // iload
           val index = op.args.head.asInstanceOf[JVMVarByte].asInt
@@ -571,23 +576,22 @@ class JVM(classLoader: JVMClassLoader,
           JVM.err("Cannot handle opcode invokespecial yet")
         case 0xb8 => // invokestatic
           val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
-          invokeMethodRef(index, false, cf, parms)
+          invokeMethodRef(sf, index, false, parms)
 
         case 0xb6 => // invokevirtual
           // invoke virtual method on object objectref and puts the result on the stack (might be void); the method is
           // identified by method reference index in constant pool (indexbyte1 << 8 + indexbyte2)
           val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
 
-          invokeMethodRef(index, true, cf, parms)
+          invokeMethodRef(sf, index, true, parms)
 
         case 0x80 => // ior
           JVM.err("Cannot handle opcode ior yet")
         case 0x70 => // irem
           JVM.err("Cannot handle opcode irem yet")
         case 0xac => // ireturn
-          if (!parms.stopBeforeFinalReturn) {
-            stack.pop()
-          }
+          if (parms.onReturn.isDefined) parms.onReturn.get(sf)
+          done = true
 
         case 0x78 => // ishl
           JVM.err("Cannot handle opcode ishl yet")
@@ -723,12 +727,8 @@ class JVM(classLoader: JVMClassLoader,
         case 0xa9 => // ret
           JVM.err("Cannot handle opcode ret yet")
         case 0xb1 => // return
-          if (!parms.stopBeforeFinalReturn) {
-            stack.pop()
-          }
-          else {
-            done = true
-          }
+          if (parms.onReturn.isDefined) parms.onReturn.get(sf)
+          done = true
         case 0x35 => // saload
           JVM.err("Cannot handle opcode saload yet")
         case 0x56 => // sastore
@@ -751,20 +751,21 @@ class JVM(classLoader: JVMClassLoader,
     }
   }
 
-//  private def execute(cf: JVMClassFile, code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Unit = {
-//    executeOpcodes(cf, code, parms)
-//  }
+  private[jvm] def createStackFrame(cls: JVMClassFile, functionName: String, parms: ExecuteParams): Unit = {
+    cls.getMethod(functionName) match {
+      case Some(method) =>
+        val code = method.getCode().codeOrig
+        val sf = new StackFrame(cls)
+        executeFrame(sf, code, parms)
+      case _            => JVM.err(s"Unable to find method $functionName in class ${cls.className}")
+    }
+  }
 
   def execute(className: String, functionName: String, parms: ExecuteParams = ExecuteParams()): Unit = {
     classLoader.loadClass(className) match {
       case Some(clsFound) =>
-        clsFound.getMethod(functionName) match {
-          case Some(method) =>
-            val code = method.getCode().codeOrig
-            executeOpcodes(clsFound, code, parms)
-          case _ => JVM.err(s"Unable to find method $functionName in class $className")
-        }
-      case _ => JVM.err(s"Unable to find class $className")
+        createStackFrame(clsFound, functionName, parms)
+      case _              => JVM.err(s"Unable to find class $className")
     }
   }
 }
@@ -775,6 +776,7 @@ object JVM {
     throw new InternalError(message)
   }
 }
+
 //
 //
 //  def main(args: Array[String]): Unit = {

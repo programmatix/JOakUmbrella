@@ -1,4 +1,4 @@
-package compiling
+package jvm
 
 import compiling.JVMOpCodes._
 import jvm.JVMByteCode._
@@ -13,8 +13,8 @@ class JVMOpcodesSpec extends FunSuite {
       makeInt(bipush, 10),
       makeInt(bipush, 20)
     )
-    val jvm = CompilingTestUtils.executeOpcode(opcodes)
-    assert (jvm.stack.head.stack.length == 2)
+    val sf = CompilingTestUtils.executeOpcode(opcodes).sf
+    assert (sf.stack.length == 2)
   }
 
   test("if_icmpge 1 >= 1") {
@@ -25,8 +25,8 @@ class JVMOpcodesSpec extends FunSuite {
       makeInt(bipush, 10),
       makeInt(bipush, 20)
     )
-    val jvm = CompilingTestUtils.executeOpcode(opcodes)
-    assert (jvm.stack.head.stack.length == 1)
+    val sf = CompilingTestUtils.executeOpcode(opcodes).sf
+    assert (sf.stack.length == 1)
   }
 
   test("if_icmpge 2 >= 1") {
@@ -37,8 +37,8 @@ class JVMOpcodesSpec extends FunSuite {
       makeInt(bipush, 10),
       makeInt(bipush, 20)
     )
-    val jvm = CompilingTestUtils.executeOpcode(opcodes)
-    assert (jvm.stack.head.stack.length == 1)
+    val sf = CompilingTestUtils.executeOpcode(opcodes).sf
+    assert (sf.stack.length == 1)
   }
 
 
@@ -48,9 +48,9 @@ class JVMOpcodesSpec extends FunSuite {
       makeInt(istore_3),
       makeInt(iinc, 3, 5)
     )
-    val jvm = CompilingTestUtils.executeOpcode(opcodes)
-    assert (jvm.stack.head.stack.length == 0)
-    assert (jvm.stack.head.locals.values.toArray sameElements Array(JVMVarInt(15)))
+    val sf = CompilingTestUtils.executeOpcode(opcodes).sf
+    assert (sf.stack.length == 0)
+    assert (sf.locals.values.toArray sameElements Array(JVMVarInt(15)))
   }
 
   test("goto -2") {
@@ -60,8 +60,8 @@ class JVMOpcodesSpec extends FunSuite {
       makeInt(return_), // 1
       makeInt(goto, -1) // 3
     )
-    val jvm = CompilingTestUtils.executeOpcode(opcodes)
-    assert (jvm.stack.head.stack.length == 1)
+    val sf = CompilingTestUtils.executeOpcode(opcodes).sf
+    assert (sf.stack.length == 1)
   }
 
 }
