@@ -5,6 +5,7 @@ import jvm.JVMClassFileReader.ReadParams
 import jvm.JVMClassFileTypes._
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 class StackFrame(val cf: JVMClassFile, val methodName: String) {
   val locals = mutable.Map[Int, JVMVar]()
@@ -36,13 +37,74 @@ case class ExecuteParams(
                           onReturn: Option[(StackFrame) => Unit] = None
                         )
 
+class JVMContext {
+  val staticClasses = ArrayBuffer.empty[JVMClassStatic]
+}
+
 // A Java Virtual Machine implementation, just for learning purposes
 // See 'JVMClassLoader' for a discussion over why two classloaders are provided (rather than standard chaining)
 class JVM(classLoader: JVMClassLoader,
           systemClassLoader: ClassLoader = ClassLoader.getSystemClassLoader) {
 
+  private[jvm] val context = new JVMContext
 
-  private def createNewInstance(sf: StackFrame, cls: ConstantClass, params: ExecuteParams) = JVMStackFrame.createNewInstance(sf, cls, classLoader, systemClassLoader, params)
+  private[jvm] def putField(sf: StackFrame, index: Int, objectRef: Option[JVMObjectRef], params: ExecuteParams, context: JVMContext): Unit = {
+    val cf = sf.cf
+    //  java/io/PrintStream
+    val fieldRef = cf.getConstant(index).asInstanceOf[ConstantFieldref]
+    val clsRef = cf.getConstant(fieldRef.classIndex).asInstanceOf[ConstantClass]
+    val className = cf.getString(clsRef.nameIndex).replace('/','.')
+    val nameAndType = cf.getConstant(fieldRef.nameAndTypeIndex).asInstanceOf[ConstantNameAndType]
+
+    val name = cf.getString(nameAndType.nameIndex)
+    // Ljava/lang/String;
+    val descriptor = cf.getString(nameAndType.descriptorIndex)
+
+    val fieldType = JVMMethodDescriptors.fieldDescriptorToTypes(descriptor)
+
+    val value = sf.stack.pop()
+
+    objectRef match {
+      case Some(v: JVMVarObjectRefManaged) =>
+        v.klass.putField(name, fieldType, value)
+
+      case Some(v: JVMVarObjectRefUnmanaged) =>
+        JVM.err(sf, "cannot putfield on non-klas yet")
+
+      case _ =>
+        context.staticClasses.find(_.cf.fullName() == className) match {
+          case Some(sc) =>
+            sc.putField(name, fieldType, value)
+          case _ =>
+            JVM.err(sf, s"do not have static class for ${sf.cf.className}")
+        }
+    }
+  }
+
+  // Returns JVMClassInstance if it's a managed class, else None and the (NEWINST1) procedure kicks in
+  private[jvm] def createNewInstance(sf: StackFrame, cls: ConstantClass, classLoader: JVMClassLoader, systemClassLoader: ClassLoader, params: ExecuteParams): Option[JVMVar] = {
+    val cf = sf.cf
+    //  java/io/PrintStream
+    val className = cf.getString(cls.nameIndex)
+
+    val resolvedClassName = className.replace("/", ".")
+
+    // See JVMClassLoader for a description of what's going on here
+    classLoader.loadClass(resolvedClassName, this, params) match {
+
+      case Some(clsRef) =>
+        val klass = new JVMClassInstance(clsRef)
+        Some(JVMVarObjectRefManaged(klass))
+
+      case _ =>
+        //        val clsRef = systemClassLoader.loadClass(resolvedClassName)
+        // Class.getDeclaredConstructor(String.class).newInstance("HERESMYARG");
+        //        val newInstance = clsRef.newInstance().asInstanceOf[Object]
+        //        JVMVarObject(newInstance)
+        None
+    }
+
+  }
 
   private def invokeMethodRef(sf: StackFrame, index: Int, getObjectRef: Boolean, params: ExecuteParams, specialNewInstanceMode: Boolean = false): Unit = {
     val cf = sf.cf
@@ -62,7 +124,7 @@ class JVM(classLoader: JVMClassLoader,
     val resolvedClassName = className.replace("/", ".")
 
     // See JVMClassLoader for a description of what's going on here
-    classLoader.loadClass(resolvedClassName) match {
+    classLoader.loadClass(resolvedClassName, this, params) match {
 
       case Some(clsRef) =>
         clsRef.getMethod(methodName) match {
@@ -149,7 +211,7 @@ class JVM(classLoader: JVMClassLoader,
     ctor.newInstance(args: _*).asInstanceOf[Object]
   }
 
-  private[jvm] def executeFrame(sf: StackFrame, code: Seq[JVMOpCodeWithArgs], parms: ExecuteParams = ExecuteParams()): Option[JVMVar] = {
+  private[jvm] def executeFrame(sf: StackFrame, code: Seq[JVMOpCodeWithArgs], params: ExecuteParams = ExecuteParams()): Option[JVMVar] = {
     val cf = sf.cf
 
     def popInt(): Int = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
@@ -198,7 +260,7 @@ class JVM(classLoader: JVMClassLoader,
     var specialNewInstanceMode = false
 
     def doReturn(): Unit = {
-      if (parms.onReturn.isDefined) parms.onReturn.get(sf)
+      if (params.onReturn.isDefined) params.onReturn.get(sf)
       done = true
       out = Some(sf.stack.pop())
     }
@@ -450,7 +512,7 @@ class JVM(classLoader: JVMClassLoader,
           val fieldRef = cf.getConstant(index).asInstanceOf[ConstantFieldref]
           val cls = cf.getConstant(fieldRef.classIndex).asInstanceOf[ConstantClass]
           //  java/lang/System
-          val className = cf.getString(cls.nameIndex)
+          val className = cf.getString(cls.nameIndex).replace('/','.')
           val nameAndType = cf.getConstant(fieldRef.nameAndTypeIndex).asInstanceOf[ConstantNameAndType]
           // out
           val name = cf.getString(nameAndType.nameIndex)
@@ -459,11 +521,23 @@ class JVM(classLoader: JVMClassLoader,
           //          val field = ClassLoader.getSystemClassLoader.loadClass("java.lang.System").getField("out")
           //          ClassLoader.getSystemClassLoader.loadClass("java.lang.System").getField("out").get(classOf[java.io.PrintStream])
 
-          val clsRef = ClassLoader.getSystemClassLoader.loadClass("java.lang.System")
-          val fieldRef2 = clsRef.getField(name)
-          val fieldType = fieldRef2.getType
-          val fieldInstance = fieldRef2.get(fieldType)
-          sf.stack.push(JVMVarObject(fieldInstance))
+          classLoader.loadClass(className, this, params) match {
+            case Some(clsRef) =>
+              context.staticClasses.find(_.cf.className == className) match {
+                case Some(sc) =>
+                  val value = sc.getField(name)
+                  sf.stack.push(value)
+                case _ => JVM.err(sf, s"could not find static class $className")
+              }
+
+
+            case _            =>
+              val clsRef = ClassLoader.getSystemClassLoader.loadClass(className)
+              val fieldRef2 = clsRef.getField(name)
+              val fieldType = fieldRef2.getType
+              val fieldInstance = fieldRef2.get(fieldType)
+              sf.stack.push(JVMVarObject(fieldInstance))
+          }
 
         case 0xa7 => // goto
           val offset = op.args.head.asInstanceOf[JVMVarInteger].asInt
@@ -647,23 +721,23 @@ class JVM(classLoader: JVMClassLoader,
           val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
           if (specialNewInstanceMode) {
             specialNewInstanceMode = false
-            val newInstance = specialNewInstanceModeInit(sf, index, false, parms)
+            val newInstance = specialNewInstanceModeInit(sf, index, false, params)
             sf.push(JVMVarObjectRefUnmanaged(newInstance))
           }
           else {
             // TODO there are some rules to do with choosing the method here that we don't follow
-            invokeMethodRef(sf, index, true, parms, specialNewInstanceMode)
+            invokeMethodRef(sf, index, true, params, specialNewInstanceMode)
           }
 
         case 0xb8 => // invokestatic
           val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
-          invokeMethodRef(sf, index, false, parms)
+          invokeMethodRef(sf, index, false, params)
 
         case 0xb6 => // invokevirtual
           // invoke virtual method on object objectref and puts the result on the stack (might be void); the method is
           // identified by method reference index in constant pool (indexbyte1 << 8 + indexbyte2)
           val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
-          invokeMethodRef(sf, index, true, parms)
+          invokeMethodRef(sf, index, true, params)
 
         case 0x80 => // ior
           val v1 = sf.stack.pop().asInstanceOf[JVMVarInteger]
@@ -820,7 +894,7 @@ class JVM(classLoader: JVMClassLoader,
         case 0xbb => // new
           val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
           val cls = cf.getConstant(index).asInstanceOf[ConstantClass]
-          createNewInstance(sf, cls, parms) match {
+          createNewInstance(sf, cls, classLoader, systemClassLoader, params) match {
             case Some(newInstance) => sf.stack.push(newInstance)
             case _                 => specialNewInstanceMode = true
           }
@@ -845,14 +919,16 @@ class JVM(classLoader: JVMClassLoader,
         case 0xb5 => // putfield
           val objectRef = sf.stack.pop().asInstanceOf[JVMObjectRef]
           val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
-          JVMStackFrame.putField(sf, index, objectRef, parms)
+          putField(sf, index, Some(objectRef), params, context)
 
         case 0xb3 => // putstatic
-          JVM.err("Cannot handle opcode putstatic yet")
+          val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
+          putField(sf, index, None, params, context)
+
         case 0xa9 => // ret
           JVM.err("Cannot handle opcode ret yet")
         case 0xb1 => // return
-          if (parms.onReturn.isDefined) parms.onReturn.get(sf)
+          if (params.onReturn.isDefined) params.onReturn.get(sf)
           done = true
         case 0x35 => // saload
           JVM.err("Cannot handle opcode saload yet")
@@ -883,16 +959,16 @@ class JVM(classLoader: JVMClassLoader,
     cls.getMethod(functionName) match {
       case Some(method) =>
         val code = method.getCode().codeOrig
-        val sf = new StackFrame(cls, "<init>")
+        val sf = new StackFrame(cls, functionName)
         executeFrame(sf, code, parms)
       case _            => JVM.err(s"Unable to find method $functionName in class ${cls.className}")
     }
   }
 
-  def execute(className: String, functionName: String, parms: ExecuteParams = ExecuteParams()): Unit = {
-    classLoader.loadClass(className) match {
+  def execute(className: String, functionName: String, params: ExecuteParams = ExecuteParams()): Unit = {
+    classLoader.loadClass(className, this, params) match {
       case Some(clsFound) =>
-        createEmptyStackFrame(clsFound, functionName, parms)
+        createEmptyStackFrame(clsFound, functionName, params)
       case _              => JVM.err(s"Unable to find class $className")
     }
   }

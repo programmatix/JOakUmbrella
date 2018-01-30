@@ -47,6 +47,7 @@ object JVMOpCode {
 
     val args: Array[JVMOpCodeArg] = variablesDesc.trim match {
       case ""                                                      => Array()
+      case "1: atype"                                              => Array(JVMOpCodeArg(1, "atype"))
       case "1: index"                                              => Array(JVMOpCodeArg(1, "index"))
       case "2: byte1, byte2"                                       => Array(JVMOpCodeArg(2, "value"))
       case "2: indexbyte1, indexbyte2"                             => Array(JVMOpCodeArg(2, "index"))

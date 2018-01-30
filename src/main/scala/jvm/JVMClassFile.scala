@@ -5,12 +5,19 @@ import jvm.JVMClassFileTypes._
 case class JVMClassFile(fullPath: String,
                         jvmMajorVersion: Int,
                         jvmMinorVersion: Int,
+                        // com.example
                         packageName: Option[String],
                         className: String,
                         constants: Seq[Constant],
                         methods: Seq[MethodInfo],
                         fields: Seq[FieldInfo],
                         interfaces: Seq[ConstantClass]) {
+
+  // com.example.MyClass
+  def fullName() = packageName match {
+    case Some(pn) => pn + "." + className
+    case _        => className
+  }
 
   def getConstant(idx: Int): Constant = {
     // constant indexing is 1-based

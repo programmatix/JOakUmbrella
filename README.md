@@ -27,9 +27,9 @@ sbt assembly
 launch4j to produce exe
 
 # Javap replacement
-Benefits:
-* Displays fields (actually javap does this)
-* In verbose mode, logs as it reads so gives much better debugging if something's wrong with the .class file.
+So 99% of the time you should just use javap - it has more features, is an offical Java tool, and is generally better.
+
+This tool does have its uses though.  Specifically, when you're dealing with .class files that are broken, it gives much better output.
 
 # JVM
 A toy Java Virtual Machine, written in Scala. 

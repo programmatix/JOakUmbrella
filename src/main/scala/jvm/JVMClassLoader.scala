@@ -45,7 +45,8 @@ case class JVMClassLoaderParams(verbose: Boolean = false,
 class JVMClassLoader(paths: Seq[String], params: JVMClassLoaderParams = JVMClassLoaderParams()) {
   private[jvm] val classFiles = ArrayBuffer.empty[JVMClassFile]
 
-  def loadClass(name: String): Option[JVMClassFile] = {
+  // jvm is provided so that static initialisation can happen
+  def loadClass(name: String, jvm: JVM, parms: ExecuteParams): Option[JVMClassFile] = {
     var out: Option[JVMClassFile] = None
 
     val (clsName: String, packageName: Option[String]) = if (name.contains(".")) {
@@ -66,7 +67,7 @@ class JVMClassLoader(paths: Seq[String], params: JVMClassLoaderParams = JVMClass
 
     if (out.isEmpty) {
       paths.foreach(path => {
-        val pathName = packageName.map(pn => path + "/" + pn.replace('.','/')).getOrElse(path)
+        val pathName = packageName.map(pn => path + "/" + pn.replace('.', '/')).getOrElse(path)
         val dir = new File(pathName)
         val javaFiles = dir.listFiles(new FileFilter {
           override def accept(pathname: File): Boolean = pathname.getName.stripSuffix(".class") == clsName
@@ -80,6 +81,18 @@ class JVMClassLoader(paths: Seq[String], params: JVMClassLoaderParams = JVMClass
               case Some(cf) =>
                 classFiles += cf
                 out = Some(cf)
+
+                cf.getMethod("<clinit>") match {
+                  case Some(clinit) =>
+                    // Note there are all sorts of steps we're not doing from "2.17.5 Detailed Initialization Procedure" here, for thread-safety etc.  Toy JVM!
+                  val staticClass = new JVMClassStatic(cf)
+                    jvm.context.staticClasses += staticClass
+                    val sf = new StackFrame(cf, "<clinit>")
+                    jvm.executeFrame(sf, clinit.getCode().codeOrig, parms)
+
+                  case _ =>
+                }
+
 
               case _ => JVM.err(s"unable to read classfile ${javaFile.getCanonicalPath}")
             }

@@ -5,6 +5,9 @@ import org.scalatest.FunSuite
 
 class JVMSpec extends FunSuite {
 
+  test("SetLocale") {
+    CompilingTestUtils.compileAndExecuteJavaFileX("SetLocale.java")
+  }
 
   test("Sample10Plus33") {
     val jvm = CompilingTestUtils.compileAndExecuteJavaFileX("Sample10Plus33.java", "Sample10Plus33", "test", (sf) => {
@@ -103,7 +106,17 @@ class JVMSpec extends FunSuite {
     val jvm = CompilingTestUtils.compileAndExecuteJavaFile("ForLoop100.java", (sf) => {
       assert(CompilingTestUtils.containsVar(sf, JVMVarInt(100)))
     }).jvm
+  }
 
+  test("StaticFields") {
+    var ret = 0
+    val jvm = CompilingTestUtils.compileAndExecuteJavaFile("StaticFields.java", (sf) => {
+      if (ret == 1) {
+        assert(CompilingTestUtils.containsVar(sf, JVMVarInt(10)))
+      }
+      ret += 1
+//      assert(CompilingTestUtils.containsVar(sf, JVMVarInt(100)))
+    }).jvm
   }
 
   test("SimpleIf") {

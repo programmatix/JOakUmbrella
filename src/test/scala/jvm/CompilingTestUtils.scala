@@ -5,13 +5,14 @@ import java.util
 import javax.tools.{DiagnosticCollector, JavaFileObject, ToolProvider}
 
 import jvm.JVMByteCode.{JVMOpCodeWithArgs, JVMVar, JVMVarObjectRefManaged}
+import jvm.JVMClassFileReader.ReadParams
 
 
 object CompilingTestUtils {
   def compareStack(sf: StackFrame, expected: Array[JVMByteCode.JVMVar]): Boolean = {
     val real = sf.stack.toArray
-    assert (real sameElements  expected, s"${real.mkString(",")} != ${expected.mkString(",")}")
-    real sameElements  expected
+    assert(real sameElements expected, s"${real.mkString(",")} != ${expected.mkString(",")}")
+    real sameElements expected
   }
 
 
@@ -92,25 +93,29 @@ object CompilingTestUtils {
   case class CompileResults(jvm: JVM)
 
   def compileAndExecuteJavaFile(resource: String, onReturn: (StackFrame) => Unit = (sf) => {
-    assert (sf.stack.isEmpty)
+    assert(sf.stack.isEmpty)
   }): CompileResults = {
     compileAndExecuteJavaFileX(resource, resource.stripSuffix(".java"), "main", onReturn)
   }
 
 
-    def compileAndExecuteJavaFileX(resource: String, classToExecute: String, funcToExecute: String = "main", onReturn: (StackFrame) => Unit = (sf) => {
-      assert (sf.stack.isEmpty)
-    }): CompileResults = {
+  def compileAndExecuteJavaFileX(resource: String): CompileResults = {
+    compileAndExecuteJavaFileX(resource, resource.stripSuffix(".java"))
+  }
+
+  def compileAndExecuteJavaFileX(resource: String, classToExecute: String, funcToExecute: String = "main", onReturn: (StackFrame) => Unit = (sf) => {
+    assert(sf.stack.isEmpty)
+  }): CompileResults = {
     //    val javaFilename = Thread.currentThread().getContextClassLoader().getResource(resource)
     val sampleDir = "./src/test/java/"
     val javaFilename = sampleDir + resource
     val javaFile = new File(javaFilename)
     assert(javaFile.exists())
-val classPathDir = new File(sampleDir)
+    val classPathDir = new File(sampleDir)
 
     CompilingTestUtils.compileJavaFile(javaFile, classPathDir) match {
       case Some(classFile) =>
-        val classLoader = new JVMClassLoader(Seq(sampleDir), JVMClassLoaderParams(verbose = true))
+        val classLoader = new JVMClassLoader(Seq(sampleDir), JVMClassLoaderParams(verbose = true,ReadParams(verbose = false)))
         val jvm = new JVM(classLoader)
         jvm.execute(classToExecute, funcToExecute, ExecuteParams(onReturn = Some(onReturn)))
 

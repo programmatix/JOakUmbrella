@@ -199,8 +199,10 @@ object JVMClassFileReader {
 
     val attributeName = cf.getString(attribute_name_index)
     attributeName match {
-      case "Code"       => readCodeAttribute(params, in, cf, indent, attribute_name_index)
-      case "Exceptions" => readExceptionsAttribute(params, in, cf, indent, attribute_name_index)
+      case "Code"       =>
+        readCodeAttribute(params, in, cf, indent, attribute_name_index)
+      case "Exceptions" =>
+        readExceptionsAttribute(params, in, cf, indent, attribute_name_index)
     }
 
 
@@ -224,15 +226,16 @@ object JVMClassFileReader {
     val max_locals = readUnsignedShort(in)
     if (params.verbose) good(in, indent, s"max_locals = $max_locals")
 
-    var code_length = readInt(in)
+    val code_length = readInt(in)
     if (params.verbose) good(in, indent, s"code_length = $code_length")
 
     val temp = new ByteArrayOutputStream()
 
-    while (code_length > 0) {
+    var code_idx = 0
+    while (code_idx < code_length) {
       val b = in.readUnsignedByte().toByte
       temp.write(b)
-      code_length -= 1
+      code_idx += 1
     }
     val code = temp.toByteArray
     val opcodes = readCode(new DataInputStream(new ByteArrayInputStream(code)), cf, indent + 1, code_length)
@@ -403,7 +406,7 @@ object JVMClassFileReader {
 
     if (major_version > 50) {
       val realVersion = major_version - 44
-      JVM.err(s"can handle up to Java 6 only currently, and this is Java ${realVersion} - please recompile code as Java 6")
+      println(s"Warning: Can handle up to Java 6 only currently, and this is compiled with Java ${realVersion} - results are undefined and depend on which features from Java 7+ are used")
     }
 
     if (params.verbose) good(in, s"Version: major=$major_version minor=$minor_version")
