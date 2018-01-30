@@ -153,6 +153,12 @@ object JVMClassFileTypes {
     }
   }
 
+  case class ConstantDummy() extends Constant {
+    override def tag(): Int = -1
+
+    override def write(out: ByteArrayOutputStream, charset: Charset): Unit = {}
+  }
+
   /*
       CONSTANT_NameAndType_info {
         u1 tag;
@@ -356,6 +362,47 @@ object JVMClassFileTypes {
     override def write(out: Writer, charset: Charset): Unit = {
       out.write(s"constant=$valueIndex")
     }
+  }
+
+  /*
+      Synthetic_attribute {
+    	u2 attribute_name_index;
+    	u4 attribute_length;
+    }
+
+   */
+  case class SyntheticAttribute(attributeNameIndex: Int) extends Attribute {
+    override def lengthBytes(): Int = 0
+
+    def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
+      JVMClassFileBuilderUtils.writeShort(out, attributeNameIndex)
+      JVMClassFileBuilderUtils.writeInt(out, lengthBytes())
+    }
+
+    override def write(out: Writer, charset: Charset): Unit = {
+      out.write(s"synthetic")
+    }
+  }
+
+  /*
+    Deprecated_attribute {
+    u2 attribute_name_index;
+    u4 attribute_length;
+  }
+
+ */
+  case class DeprecatedAttribute(attributeNameIndex: Int) extends Attribute {
+    override def lengthBytes(): Int = 0
+
+    def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
+      JVMClassFileBuilderUtils.writeShort(out, attributeNameIndex)
+      JVMClassFileBuilderUtils.writeInt(out, lengthBytes())
+    }
+
+    override def write(out: Writer, charset: Charset): Unit = {
+      out.write(s"deprecated")
+    }
+
   }
 
   /*

@@ -26,22 +26,31 @@ Reads C source and compiles it into Java .class files so it can run on the JVM.
 sbt assembly
 launch4j to produce exe
 
+# Javap replacement
+Benefits:
+* Displays fields (actually javap does this)
+* In verbose mode, logs as it reads so gives much better debugging if something's wrong with the .class file.
+
 # JVM
+A toy Java Virtual Machine, written in Scala. 
 
 ## Terms
 Managed code/class - Handled by this JVM, vs unmanaged which is handled by the standard Java JVM we're running upon.
 
 ## Limitations
-This is a toy JVM running on top of a real JVM, so some parts are left to the real JVM, including:
+This is a toy JVM intended to be a learning exercise.  A real optimised and fully-functional JVM would take at least man-months of effort, so many important features aren't implemented.  These include: 
 
-* Memory management.
-* Loading and execution of core Java libraries, like String, or any jars passed to the standard Java classloader.
-* Threading.
-
-Unlikely to be supported:
+* .class files compiled with Java 7+.
 * Jar files.
 * synchronized keyword.
 * native keyword.
+* float & double operations.
+
+In addition, some important parts work but are left to the 'real' Java JVM we're running on, including:
+
+* Memory management.
+* Loading and execution of core Java libraries, like String.
+* Threading.
 
 
 Release Process
