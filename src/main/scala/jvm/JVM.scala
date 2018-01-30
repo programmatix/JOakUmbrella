@@ -81,8 +81,123 @@ class JVM(classLoader: JVMClassLoader,
     }
   }
 
+  private[jvm] def getMethodArgsAsObjects(sf: StackFrame, methodTypes: JVMMethodDescriptors.MethodDescriptor, params: ExecuteParams): (Seq[Object], Seq[Class[_]]) = {
+    val args = ArrayBuffer.empty[Object]
+    val argTypes = ArrayBuffer.empty[Class[_]]
+
+    methodTypes.args.foreach(arg => {
+      val next = sf.pop()
+      arg match {
+        case v: JVMTypeObjectStr =>
+          if (v.clsRaw == "java/lang/String") {
+            args += next.asInstanceOf[JVMVarString].v.asInstanceOf[Object]
+            argTypes += classOf[java.lang.String]
+          }
+          else {
+            val obj = next.asInstanceOf[JVMVarObject].o
+            args += obj
+            argTypes += obj.getClass
+          }
+        case v: JVMTypeVoid      =>
+          JVM.err(s"not expecting void here")
+          null
+        case v: JVMTypeBoolean   =>
+          args += next.asInstanceOf[JVMVarBoolean].v.asInstanceOf[Object]
+          argTypes += Boolean.getClass
+        case v: JVMTypeInt       =>
+          args += next.asInstanceOf[JVMVarInt].v.asInstanceOf[Object]
+          argTypes += Int.getClass
+        case v: JVMTypeShort     =>
+          args += next.asInstanceOf[JVMVarShort].v.asInstanceOf[Object]
+          argTypes += Short.getClass
+        case v: JVMTypeByte      =>
+          args += next.asInstanceOf[JVMVarByte].v.asInstanceOf[Object]
+          argTypes += Byte.getClass
+        case v: JVMTypeChar      =>
+          args += next.asInstanceOf[JVMVarChar].v.asInstanceOf[Object]
+          argTypes += Char.getClass
+        case v: JVMTypeFloat     =>
+          args += next.asInstanceOf[JVMVarFloat].v.asInstanceOf[Object]
+          argTypes += Float.getClass
+        case v: JVMTypeDouble    =>
+          args += next.asInstanceOf[JVMVarDouble].v.asInstanceOf[Object]
+          argTypes += Double.getClass
+        case v: JVMTypeLong      =>
+          args += next.asInstanceOf[JVMVarLong].v.asInstanceOf[Object]
+          argTypes += Long.getClass
+        case v: JVMTypeObjectStr =>
+          // java/util/List
+          val className = v.clsRaw.replace('/', '.')
+
+          classLoader.loadClass(className, this, params) match {
+            case Some(clsRef) =>
+              JVM.err(sf, "can't handle passing around managed types")
+
+            case _ =>
+              val raw = next.asInstanceOf[JVMVarObjectRefUnmanaged].o
+              val clsRef = ClassLoader.getSystemClassLoader.loadClass(className)
+              args += raw
+              argTypes += clsRef
+          }
+
+        case v: JVMTypeArray =>
+          val array = next.asInstanceOf[JVMVarObjectRefUnmanaged].o
+          v.typ match {
+            case _: JVMTypeVoid    =>
+              args += array.asInstanceOf[Array[Void]]
+              argTypes += classOf[Array[Void]]
+            case _: JVMTypeBoolean =>
+              args += array.asInstanceOf[Array[Boolean]]
+              argTypes += classOf[Array[Boolean]]
+            case _: JVMTypeInt     =>
+              args += array.asInstanceOf[Array[Int]]
+              argTypes += classOf[Array[Int]]
+            case _: JVMTypeShort   =>
+              args += array.asInstanceOf[Array[Short]]
+              argTypes += classOf[Array[Short]]
+            case _: JVMTypeChar    =>
+              args += array.asInstanceOf[Array[Char]]
+              argTypes += classOf[Array[Char]]
+            case _: JVMTypeByte    =>
+              args += array.asInstanceOf[Array[Byte]]
+              argTypes += classOf[Array[Byte]]
+            case _: JVMTypeFloat   =>
+              args += array.asInstanceOf[Array[Float]]
+              argTypes += classOf[Array[Float]]
+            case _: JVMTypeDouble  =>
+              args += array.asInstanceOf[Array[Double]]
+              argTypes += classOf[Array[Double]]
+            case _: JVMTypeLong    =>
+              args += array.asInstanceOf[Array[Long]]
+              argTypes += classOf[Array[Long]]
+            case _: JVMTypeString  =>
+              args += array.asInstanceOf[Array[String]]
+              argTypes += classOf[Array[String]]
+            case v: JVMTypeObjectStr =>
+              // java/util/List
+              val className = v.clsRaw.replace('/', '.')
+
+              classLoader.loadClass(className, this, params) match {
+                case Some(clsRef) =>
+                  JVM.err(sf, "can't handle passing around managed types")
+
+                case _ =>
+                  val clsRef = ClassLoader.getSystemClassLoader.loadClass(className)
+                  args += array
+                  argTypes += classOf[Array[Object]]
+              }
+          }
+      }
+    }
+    )
+
+    (args.toVector, argTypes.toVector)
+  }
+
   // Returns JVMClassInstance if it's a managed class, else None and the (NEWINST1) procedure kicks in
-  private[jvm] def createNewInstance(sf: StackFrame, cls: ConstantClass, classLoader: JVMClassLoader, systemClassLoader: ClassLoader, params: ExecuteParams): Option[JVMVar] = {
+  private[jvm] def createNewInstance(sf: StackFrame, cls: ConstantClass, classLoader: JVMClassLoader, systemClassLoader: ClassLoader, params: ExecuteParams): Option[JVMVar]
+
+  = {
     val cf = sf.cf
     //  java/io/PrintStream
     val className = cf.getString(cls.nameIndex)
@@ -109,7 +224,9 @@ class JVM(classLoader: JVMClassLoader,
 
   }
 
-  private def invokeMethodRef(sf: StackFrame, index: Int, getObjectRef: Boolean, params: ExecuteParams): Unit = {
+  private def invokeMethodRef(sf: StackFrame, index: Int, getObjectRef: Boolean, params: ExecuteParams): Unit
+
+  = {
     val cf = sf.cf
     val fieldRef = cf.getConstant(index).asInstanceOf[ConstantMethodref]
     val cls = cf.getConstant(fieldRef.classIndex).asInstanceOf[ConstantClass]
@@ -165,7 +282,7 @@ class JVM(classLoader: JVMClassLoader,
         val clsRef = systemClassLoader.loadClass(resolvedClassName)
 
         // This pops from the stack
-        val (args, argTypes) = JVMStackFrame.getMethodArgsAsObjects(sf, methodTypes)
+        val (args, argTypes) = getMethodArgsAsObjects(sf, methodTypes, params)
 
         val next = if (getObjectRef) sf.stack.pop() else null
 
@@ -176,7 +293,8 @@ class JVM(classLoader: JVMClassLoader,
             val ctor = newInstance.clsRef.getDeclaredConstructor(argTypes: _*)
             val created = ctor.newInstance(args: _*).asInstanceOf[Object]
             newInstance.created = Some(created)
-//            sf.push(JVMVarObjectRefUnmanaged(created))
+          // Don't want to push, the newInstance token is already on the stack
+          //            sf.push(JVMVarObjectRefUnmanaged(created))
 
           case _ =>
             // Don't need to call <init>, it's done for us for unmanaged classes by real JVM
@@ -191,14 +309,22 @@ class JVM(classLoader: JVMClassLoader,
 
               val methodRef = clsRef.getMethod(methodName, argTypes: _*)
 
-              methodRef.invoke(objectRef, args: _*) // :_* is the hint to expand the Seq to varargs
+              val result = methodRef.invoke(objectRef, args: _*) // :_* is the hint to expand the Seq to varargs
+
+              result match {
+                case _: Void =>
+                case _       =>
+                  sf.push(JVMVarObjectRefUnmanaged(result))
+              }
             }
         }
     }
   }
 
 
-  private[jvm] def executeFrame(sf: StackFrame, code: Seq[JVMOpCodeWithArgs], params: ExecuteParams = ExecuteParams()): Option[JVMVar] = {
+  private[jvm] def executeFrame(sf: StackFrame, code: Seq[JVMOpCodeWithArgs], params: ExecuteParams = ExecuteParams()): Option[JVMVar]
+
+  = {
     val cf = sf.cf
 
     def popInt(): Int = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
@@ -263,8 +389,22 @@ class JVM(classLoader: JVMClassLoader,
       val op = code(opcodeIdx)
       op.oc.hexcode match {
         case 0x32 => // aaload
+          val index = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val arrayrefRaw = sf.stack.pop().asInstanceOf[JVMVarObjectRefUnmanaged]
+          val arrayref = arrayrefRaw.o.asInstanceOf[Array[Object]]
+          val value = arrayref(index)
+          sf.stack.push(JVMVarObjectRefUnmanaged(value))
+
         case 0x53 => // aastore
-          JVM.err("Cannot handle opcode aastore yet")
+          val value: Object = sf.stack.pop() match {
+            case v: JVMVarObjectRefUnmanaged => v.o
+            case v: JVMVarString             => v.v
+          }
+          val index = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val arrayrefRaw = sf.stack.pop().asInstanceOf[JVMVarObjectRefUnmanaged]
+          val arrayref = arrayrefRaw.o.asInstanceOf[Array[Object]]
+          arrayref(index) = value
+
         case 0x01 => // aconst_null
           JVM.err("Cannot handle opcode aconst_null yet")
         case 0x19 => // aload
@@ -285,9 +425,13 @@ class JVM(classLoader: JVMClassLoader,
           sf.push(sf.getLocal(3))
 
         case 0xbd => // anewarray
-          JVM.err("Cannot handle opcode anewarray yet")
+          val count = popInt()
+          val array = new Array[Object](count)
+          sf.push(JVMVarObjectRefUnmanaged(array))
+
         case 0xb0 => // areturn
-          JVM.err("Cannot handle opcode areturn yet")
+          doReturn()
+
         case 0xbe => // arraylength
           val array = sf.stack.pop().asInstanceOf[JVMVarObjectRefUnmanaged].o.asInstanceOf[Array[_]]
           sf.push(JVMVarInt(array.length))
@@ -414,7 +558,7 @@ class JVM(classLoader: JVMClassLoader,
         case 0x67 => // dsub
           JVM.err("Cannot handle opcode dsub yet")
         case 0x59 => // dup
-            sf.stack.push(sf.stack.head)
+          sf.stack.push(sf.stack.head)
 
         case 0x5a => // dup_x1
           JVM.err("Cannot handle opcode dup_x1 yet")
@@ -751,8 +895,8 @@ class JVM(classLoader: JVMClassLoader,
         case 0xb7 => // invokespecial
           // https://cs.au.dk/~mis/dOvs/jvmspec/ref--33.html
           val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
-            // TODO there are some rules to do with choosing the method here that we don't follow
-            invokeMethodRef(sf, index, true, params)
+          // TODO there are some rules to do with choosing the method here that we don't follow
+          invokeMethodRef(sf, index, true, params)
 
         case 0xb8 => // invokestatic
           val index = op.args.head.asInstanceOf[JVMVarInteger].asInt
@@ -1018,7 +1162,9 @@ class JVM(classLoader: JVMClassLoader,
     out
   }
 
-  private[jvm] def createEmptyStackFrame(cls: JVMClassFile, functionName: String, parms: ExecuteParams): Unit = {
+  private[jvm] def createEmptyStackFrame(cls: JVMClassFile, functionName: String, parms: ExecuteParams): Unit
+
+  = {
     cls.getMethod(functionName) match {
       case Some(method) =>
         val code = method.getCode().codeOrig

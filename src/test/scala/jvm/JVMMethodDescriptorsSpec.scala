@@ -1,6 +1,6 @@
 package jvm
 
-import jvm.JVMByteCode.{JVMTypeDouble, JVMTypeInt, JVMTypeObjectStr, JVMTypeVoid}
+import jvm.JVMByteCode._
 import org.scalatest.FunSuite
 
 class JVMMethodDescriptorsSpec extends FunSuite {
@@ -20,6 +20,9 @@ class JVMMethodDescriptorsSpec extends FunSuite {
       JVMMethodDescriptors.MethodDescriptor(JVMTypeVoid(), Seq(JVMTypeObjectStr("java/lang/String"))))
     assert (JVMMethodDescriptors.methodDescriptorToTypes("(Ljava/lang/String;I)V") ==
       JVMMethodDescriptors.MethodDescriptor(JVMTypeVoid(), Seq(JVMTypeObjectStr("java/lang/String"),JVMTypeInt())))
+    assert (JVMMethodDescriptors.methodDescriptorToTypes("([Ljava/lang/Object;)Ljava/util/List;") ==
+      JVMMethodDescriptors.MethodDescriptor(JVMTypeObjectStr("java/util/List"), Seq(JVMTypeArray(JVMTypeObjectStr("java/lang/Object")))))
+
   }
 
   test("objectType") {

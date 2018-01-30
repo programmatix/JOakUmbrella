@@ -46,6 +46,11 @@ This is a toy JVM intended to be a learning exercise.  A real optimised and full
 * native keyword.
 * float & double operations.
 
+Want:
+
+* Passing and return managed types.
+* try/catch/finally.
+
 In addition, some important parts work but are left to the 'real' Java JVM we're running on, including:
 
 * Memory management.

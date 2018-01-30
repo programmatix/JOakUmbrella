@@ -63,6 +63,7 @@ class JVMClassLoader(paths: Seq[String], params: JVMClassLoaderParams = JVMClass
 
     if (params.verbose && paths.isEmpty) println(s"Classloader: no paths configured")
 
+    // See if we've already loaded it
     out = classFiles.find(cf => cf.packageName == packageName && cf.className == clsName)
 
     if (out.isEmpty) {
@@ -85,7 +86,7 @@ class JVMClassLoader(paths: Seq[String], params: JVMClassLoaderParams = JVMClass
                 cf.getMethod("<clinit>") match {
                   case Some(clinit) =>
                     // Note there are all sorts of steps we're not doing from "2.17.5 Detailed Initialization Procedure" here, for thread-safety etc.  Toy JVM!
-                  val staticClass = new JVMClassStatic(cf)
+                    val staticClass = new JVMClassStatic(cf)
                     jvm.context.staticClasses += staticClass
                     val sf = new StackFrame(cf, "<clinit>")
                     jvm.executeFrame(sf, clinit.getCode().codeOrig, parms)

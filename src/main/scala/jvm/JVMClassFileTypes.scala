@@ -342,6 +342,19 @@ object JVMClassFileTypes {
     }
   }
 
+  case class AttributeRaw(attributeNameIndex: Int,
+                          data: Array[Byte]) extends Attribute {
+    def lengthBytes(): Int = data.size
+
+    def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
+      JVMClassFileBuilderUtils.writeShort(out, attributeNameIndex)
+      JVMClassFileBuilderUtils.writeShort(out, lengthBytes())
+      data.foreach(byte => JVMClassFileBuilderUtils.writeByte(out, byte))
+    }
+
+    override def write(out: Writer, charset: Charset): Unit = {}
+  }
+
   /*
     ConstantValue_attribute {
     	u2 attribute_name_index;

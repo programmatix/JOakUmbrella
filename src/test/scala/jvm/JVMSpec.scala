@@ -1,5 +1,7 @@
 package jvm
 
+import java.util
+
 import jvm.JVMByteCode._
 import org.scalatest.FunSuite
 
@@ -137,7 +139,19 @@ class JVMSpec extends FunSuite {
     val jvm = CompilingTestUtils.compileAndExecuteJavaFile("SimpleIf.java", (sf) => {
       assert (sf.locals.values.last == JVMVarInt(40))
     }).jvm
+  }
 
+  test("ArrayAsList") {
+    var ret = 0
+    val jvm = CompilingTestUtils.compileAndExecuteJavaFile("ArrayAsList.java", (sf) => {
+      if (ret == 1) {
+        val array = sf.locals.head._2.asInstanceOf[JVMVarObjectRefUnmanaged].o.asInstanceOf[util.AbstractList[String]]
+//        assert (array.length == 2)
+        assert (array.get(0) == "p")
+        assert (array.get(1) == "pid")
+      }
+      ret += 1
+    }).jvm
   }
 
   test("ReturnValFromFunc") {

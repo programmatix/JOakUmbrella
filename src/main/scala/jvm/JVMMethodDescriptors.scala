@@ -20,7 +20,7 @@ object JVMMethodDescriptors {
   private[jvm] lazy val arrayType: P[JVMType] = P(P("[") ~ componentType).map(v => JVMTypeArray(v))
   private[jvm] val returnDescriptor: P[JVMType] = fieldType | P("V").map(v => JVMTypeVoid())
   private[jvm] val parameterDescriptor: P[JVMType] = fieldType
-  private[jvm] val methodDescriptor: P[MethodDescriptor] = (P("(") ~ parameterDescriptor.rep(0) ~ P(")") ~ returnDescriptor).
+  private[jvm] val methodDescriptor: P[MethodDescriptor] = (P("(") ~ parameterDescriptor.rep(0).map(_.toList) ~ P(")") ~ returnDescriptor).
     map(v => MethodDescriptor(v._2, v._1))
 
   case class MethodDescriptor(ret: JVMType, args: Seq[JVMType])

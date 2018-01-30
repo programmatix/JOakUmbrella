@@ -203,6 +203,15 @@ object JVMClassFileReader {
         readCodeAttribute(params, in, cf, indent, attribute_name_index)
       case "Exceptions" =>
         readExceptionsAttribute(params, in, cf, indent, attribute_name_index)
+      case _ =>
+        var len = attribute_length
+        val temp = new ByteArrayOutputStream()
+        while (len > 0) {
+          val byte = readUnsignedByte(in)
+          temp.write(byte)
+        len -= 1
+        }
+        AttributeRaw(attribute_name_index, temp.toByteArray)
     }
 
 
