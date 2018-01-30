@@ -456,4 +456,31 @@ object JVMClassFileTypes {
     }
   }
 
+  /*
+      Exceptions_attribute {
+    	u2 attribute_name_index;
+    	u4 attribute_length;
+    	u2 number_of_exceptions;
+    	u2 exception_index_table[number_of_exceptions];
+    }
+
+
+   */
+  case class ExceptionsAttribute(attributeNameIndex: Int,
+                                 exceptionsIndexTable: Seq[Int]) extends Attribute {
+
+    def write(out: ByteArrayOutputStream, charset: Charset): Unit = {
+      JVMClassFileBuilderUtils.writeShort(out, attributeNameIndex)
+      JVMClassFileBuilderUtils.writeInt(out, lengthBytes())
+      JVMClassFileBuilderUtils.writeShort(out, exceptionsIndexTable.length)
+      exceptionsIndexTable.foreach(v => JVMClassFileBuilderUtils.writeShort(out, v))
+    }
+
+    override def lengthBytes(): Int = {
+      2 + (exceptionsIndexTable.length * 2)
+    }
+
+    override def write(out: Writer, charset: Charset): Unit = {
+    }
+  }
 }

@@ -190,13 +190,34 @@ object JVMClassFileReader {
   }
 
 
-  private def readCodeAttribute(params: ReadParams, in: DataInputStream, cf: JVMClassFileBuilderForReading, indent: Int): CodeAttribute = {
+  private def readMethodAttribute(params: ReadParams, in: DataInputStream, cf: JVMClassFileBuilderForReading, indent: Int): Attribute = {
     val attribute_name_index = readUnsignedShort(in)
-    if (params.verbose) goodConstant(in, indent, cf, "attribute_name_index", attribute_name_index)
+    if (params.verbose) goodConstant(in, indent, cf, s"attribute_name_index (${cf.getConstant(attribute_name_index)})", attribute_name_index)
 
     val attribute_length = readInt(in)
     if (params.verbose) good(in, indent, s"attribute_length = $attribute_length")
 
+    val attributeName = cf.getString(attribute_name_index)
+    attributeName match {
+      case "Code"       => readCodeAttribute(params, in, cf, indent, attribute_name_index)
+      case "Exceptions" => readExceptionsAttribute(params, in, cf, indent, attribute_name_index)
+    }
+
+
+  }
+
+  private def readExceptionsAttribute(params: ReadParams, in: DataInputStream, cf: JVMClassFileBuilderForReading, indent: Int, attribute_name_index: Int): ExceptionsAttribute = {
+    val number_of_exceptions = readUnsignedShort(in)
+    if (params.verbose) good(in, indent, s"number_of_exceptions = $number_of_exceptions")
+
+    val indices = Range(0, number_of_exceptions).map(idx => {
+      readUnsignedShort(in)
+    })
+
+    ExceptionsAttribute(attribute_name_index, indices)
+  }
+
+  private def readCodeAttribute(params: ReadParams, in: DataInputStream, cf: JVMClassFileBuilderForReading, indent: Int, attribute_name_index: Int): CodeAttribute = {
     val max_stack = readUnsignedShort(in)
     if (params.verbose) good(in, indent, s"max_stack = $max_stack")
 
@@ -216,10 +237,14 @@ object JVMClassFileReader {
     val code = temp.toByteArray
     val opcodes = readCode(new DataInputStream(new ByteArrayInputStream(code)), cf, indent + 1, code_length)
 
-    var exception_table_length = readUnsignedShort(in)
+    val exception_table_length = readUnsignedShort(in)
     if (params.verbose) good(in, indent, s"exception_table_length = $exception_table_length")
-    // TODO
-    assert(exception_table_length == 0)
+    for (idx <- Range(0, exception_table_length)) {
+      readUnsignedShort(in)
+      readUnsignedShort(in)
+      readUnsignedShort(in)
+      readUnsignedShort(in)
+    }
 
     var attributes_count = readUnsignedShort(in)
     if (params.verbose) good(in, indent, s"attributes_count = $attributes_count")
@@ -253,8 +278,8 @@ object JVMClassFileReader {
     if (params.verbose) good(in, indent, s"attribute_length = $attribute_length")
 
     attributeName match {
-      case "Synthetic" => SyntheticAttribute(attribute_name_index)
-      case "Deprecated" => DeprecatedAttribute(attribute_name_index)
+      case "Synthetic"     => SyntheticAttribute(attribute_name_index)
+      case "Deprecated"    => DeprecatedAttribute(attribute_name_index)
       case "ConstantValue" =>
         val constantvalue_index = readUnsignedShort(in)
         if (params.verbose) good(in, indent, s"constantvalue_index = $constantvalue_index ${cf.getConstant(constantvalue_index)}")
@@ -262,7 +287,7 @@ object JVMClassFileReader {
         ConstantValueAttribute(attribute_name_index,
           constantvalue_index
         )
-      case _ =>
+      case _               =>
         badParse(in, s"unsupported attribute ${attributeName}")
         null
     }
@@ -339,10 +364,10 @@ object JVMClassFileReader {
     val attributes_count = readUnsignedShort(in)
     if (params.verbose) good(in, indent, s"attributes_count = $attributes_count")
 
-    val attributes = ArrayBuffer.empty[CodeAttribute]
+    val attributes = ArrayBuffer.empty[Attribute]
     for (idx <- Range(0, attributes_count)) {
       if (params.verbose) good(in, indent, s"Method Attribute $idx")
-      attributes += readCodeAttribute(params: ReadParams, in, cf, indent + 1)
+      attributes += readMethodAttribute(params: ReadParams, in, cf, indent + 1)
     }
 
     MethodInfo(
