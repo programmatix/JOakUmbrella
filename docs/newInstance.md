@@ -9,6 +9,10 @@ For core types like String, the closest in Java is newInstance(\[args\]) I think
 
 1. Enter a special scanning mode on new, gathering arguments to pass to newInstance. (NEWINST1)
 2. Don't use the JVM at all, and create all objects even String in our own JVM.  Scary...
+3. Create a special token on the new op and add it to stack, one that can be treated like a standard object ref.  It contains an Object that is supplied on the subsequent <init> call.
+
+(NEWINST1) in more detail:
+(1) didn't work, doesn't handle new String(byte[] (0x31)), so added and changed to (3) above
 
 For types in the code being handled by our JVM, could:
 

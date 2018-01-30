@@ -1,6 +1,6 @@
 package jvm
 
-import jvm.JVMByteCode.{JVMVarInt, JVMVarLong, JVMVarObjectRefUnmanaged, JVMVarString}
+import jvm.JVMByteCode._
 import org.scalatest.FunSuite
 
 class JVMSpec extends FunSuite {
@@ -125,6 +125,13 @@ class JVMSpec extends FunSuite {
     }).jvm
   }
 
+  test("StringOfByteArray") {
+    val jvm = CompilingTestUtils.compileAndExecuteJavaFile("StringOfByteArray.java", (sf) => {
+      assert (sf.locals.size == 1) // there's a dup
+      val ni = sf.locals.head._2.asInstanceOf[JVMVarNewInstanceToken]
+      assert (ni.created.get.asInstanceOf[String] == "HE")
+    }).jvm
+  }
 
   test("SimpleIf") {
     val jvm = CompilingTestUtils.compileAndExecuteJavaFile("SimpleIf.java", (sf) => {
@@ -146,7 +153,7 @@ class JVMSpec extends FunSuite {
 
   test("CreateString") {
     val jvm = CompilingTestUtils.compileAndExecuteJavaFile("CreateString.java", (sf) => {
-      assert (sf.locals.values.last.asInstanceOf[JVMVarObjectRefUnmanaged].o.asInstanceOf[String] == "hello")
+      assert (sf.locals.values.last.asInstanceOf[JVMVarNewInstanceToken].created.get.asInstanceOf[String] == "hello")
     }).jvm
   }
 

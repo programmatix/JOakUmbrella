@@ -117,6 +117,23 @@ object JVMByteCode {
 
   case class JVMTypeArray(typ: JVMType) extends JVMType
 
+  def jvmTypeToClass(typ: JVMType): Class[_] = {
+    typ match {
+      case _: JVMTypeVoid => classOf[Void]
+      case _: JVMTypeBoolean => classOf[Boolean]
+      case _: JVMTypeInt => classOf[Int]
+      case _: JVMTypeShort => classOf[Short]
+      case _: JVMTypeChar => classOf[Char]
+      case _: JVMTypeByte => classOf[Byte]
+      case _: JVMTypeFloat => classOf[Float]
+      case _: JVMTypeDouble => classOf[Double]
+      case _: JVMTypeLong => classOf[Long]
+      case _: JVMTypeString => classOf[String]
+      case v: JVMTypeArray => classOf[Array[_]]
+    }
+  }
+
+
   // Only used in the JVM
   // longs and doubles are meant to take up two variables on the stack
   case class JVMTypeDummy() extends JVMTypeInternal
@@ -169,6 +186,10 @@ object JVMByteCode {
 
   case class JVMVarObjectRefUnmanaged(o: Object) extends JVMObjectRef
   case class JVMVarObjectRefManaged(klass: JVMClassInstance) extends JVMObjectRef
+  // (NEWINST1)
+  case class JVMVarNewInstanceToken(clsRef: Class[_]) extends JVMObjectRef {
+    var created: Option[Object] = None
+  }
 
   //  case class DefineFunction(name: Identifier, types: Types, passedVariables: Seq[DeclareVariable]) extends Command
 //  case class DeclareVariable(name: Identifier, typ: JVMType) extends Command
