@@ -1,6 +1,6 @@
 package jvm
 
-import jvm.JVMByteCode._
+import jvm.JVMByteCode.{JVMObjectRef, _}
 import jvm.JVMClassFileReader.ReadParams
 import jvm.JVMClassFileTypes._
 
@@ -305,7 +305,9 @@ class JVM(classLoader: JVMClassLoader,
         case 0xb0 => // areturn
           JVM.err("Cannot handle opcode areturn yet")
         case 0xbe => // arraylength
-          JVM.err("Cannot handle opcode arraylength yet")
+          val array = sf.stack.pop().asInstanceOf[JVMVarObjectRefUnmanaged].o.asInstanceOf[Array[_]]
+          sf.push(JVMVarInt(array.length))
+
         case 0x3a => // astore
           val index = sf.stack.head.asInstanceOf[JVMVarInteger].asInt
           val local = sf.stack.pop().asInstanceOf[JVMObjectRef]
@@ -580,7 +582,12 @@ class JVM(classLoader: JVMClassLoader,
           sf.stack.push(v3)
 
         case 0x2e => // iaload
-          JVM.err("Cannot handle opcode iaload yet")
+          val index = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val arrayrefRaw = sf.stack.pop().asInstanceOf[JVMVarObjectRefUnmanaged]
+          val arrayref = arrayrefRaw.o.asInstanceOf[Array[Int]]
+          val value = arrayref(index)
+          sf.stack.push(JVMVarInt(value))
+
         case 0x7e => // iand
           val v1 = sf.stack.pop().asInstanceOf[JVMVarInteger]
           val v2 = sf.stack.pop().asInstanceOf[JVMVarInteger]
@@ -588,7 +595,12 @@ class JVM(classLoader: JVMClassLoader,
           sf.stack.push(v3)
 
         case 0x4f => // iastore
-          JVM.err("Cannot handle opcode iastore yet")
+          val value = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val index = sf.stack.pop().asInstanceOf[JVMVarInteger].asInt
+          val arrayrefRaw = sf.stack.pop().asInstanceOf[JVMVarObjectRefUnmanaged]
+          val arrayref = arrayrefRaw.o.asInstanceOf[Array[Int]]
+          arrayref(index) = value
+
         case 0x02 => // iconst_m1
           sf.stack.push(JVMVarInt(-1))
 
@@ -901,9 +913,27 @@ class JVM(classLoader: JVMClassLoader,
 
 
         case 0xbc => // newarray
-          JVM.err("Cannot handle opcode newarray yet")
+          val atype = op.args.head.asInstanceOf[JVMVarInteger].asInt
+          val count = popInt()
+
+          // Scala doesn't let us create primitive arrays, but will compile to that where possible.  Avoid Scala collection
+          // methods to avoid boxing.
+          val array = atype match {
+            case 4 => new Array[Boolean](count)
+            case 5 => new Array[Char](count)
+            case 6 => new Array[Float](count)
+            case 7 => new Array[Double](count)
+            case 8 => new Array[Byte](count)
+            case 9 => new Array[Short](count)
+            case 10 => new Array[Int](count)
+            case 11 => new Array[Long](count)
+          }
+
+          sf.push(JVMVarObjectRefUnmanaged(array))
+
         case 0x00 => // nop
-          JVM.err("Cannot handle opcode nop yet")
+          // Our work here is done
+
         case 0x57 => // pop
           sf.stack.pop()
 

@@ -115,9 +115,16 @@ class JVMSpec extends FunSuite {
         assert(CompilingTestUtils.containsVar(sf, JVMVarInt(10)))
       }
       ret += 1
-//      assert(CompilingTestUtils.containsVar(sf, JVMVarInt(100)))
     }).jvm
   }
+
+  test("SimpleArray") {
+    val jvm = CompilingTestUtils.compileAndExecuteJavaFile("SimpleArray.java", (sf) => {
+        assert(CompilingTestUtils.containsVar(sf, JVMVarInt(10)))
+        assert(CompilingTestUtils.containsVar(sf, JVMVarInt(1)))
+    }).jvm
+  }
+
 
   test("SimpleIf") {
     val jvm = CompilingTestUtils.compileAndExecuteJavaFile("SimpleIf.java", (sf) => {
