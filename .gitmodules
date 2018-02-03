@@ -1,3 +1,12 @@
 [submodule "CParser"]
 	path = CParser
 	url = https://github.com/gropple/CParser.git
+[submodule "JOakAnalyser"]
+	path = JOakAnalyser
+	url = https://github.com/programmatix/JOakAnalyser
+[submodule "JOakClassFiles"]
+	path = JOakClassFiles
+	url = https://github.com/programmatix/JOakClassFiles
+[submodule "JOakJVM"]
+	path = JOakJVM
+	url = https://github.com/programmatix/JOakJVM

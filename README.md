@@ -1,14 +1,14 @@
-# JVM
+# JOak Umbrella
 An umbrella project for easily compiling all my projects related to creating, reading and running JVM .class files.
 
 It includes:
 
-* [JVM](https://github.com/programmatix/JVM): a basic, but functioning, JVM written in Scala.
-* [javap](https://github.com/programmatix/javap): a javap alternative/clone for debugging & analysing JVM .class files.
-* [JVMClassFiles](https://github.com/programmatix/ClassFiles): a JVM library for reading JVM .class files.
+* [JOak JVM](https://github.com/programmatix/JOakJVM): a basic, but functioning, JVM written in Scala.
+* [JOak Analyser](https://github.com/programmatix/JOakAnalyser): a command-line tool for debugging & analysing JVM .class files.
+* [JOak ClassFiles](https://github.com/programmatix/JOakClassFiles): a JVM micro-library for reading JVM .class files.
 
 ## Use
-Clone this project.
+Clone this project, then run:
 ```
 git submodule update --init --recursive
 ```
