@@ -1,71 +1,16 @@
-# Overview
-This has ballooned into a number of problems related to creating, reading and even running JVM .class files.
-
-## Status
-Parser working well with quite complex source, probably a few bugs left.
-A C generator working quite well, great for testing the parser.
-A ScalaJS widget that turns C into the AST, and back into C.  Working well.
-JVM class file generation started, but proving quite hard.
-JVM class file reading coming along, can read basic files.
-A JVM implemention, can do hello world.
-
-## Projects
-CParser: Parse C into a clean AST. And XML, and CLI?
-Enhanced javap: much better error diagnostics when you're trying to generate a class file.  Can parse a class file into XML or a case class.
-
-## Other ideas
-Inline JVM ASM, like C __asm - probably in Scala
-A DSL or toy language, compiled to JVM
-A Java parser
-A Java compiler
-
-# C to JVM
-Reads C source and compiles it into Java .class files so it can run on the JVM.
-
-## JVM release process
-sbt assembly
-launch4j to produce exe
-
-# Javap replacement
-So 99% of the time you should just use javap - it has more features, is an offical Java tool, and is generally better.
-
-This tool does have its uses though.  Specifically, when you're dealing with .class files that are broken, it gives much better output.
-
 # JVM
-A toy Java Virtual Machine, written in Scala. 
+An umbrella project for easily compiling all my projects related to creating, reading and running JVM .class files.
 
-## Terms
-Managed code/class - Handled by this JVM, vs unmanaged which is handled by the standard Java JVM we're running upon.
+It includes:
 
-## Limitations
-This is a toy JVM intended to be a learning exercise.  A real optimised and fully-functional JVM would take at least man-months of effort, so many important features aren't implemented.  These include: 
+* [JVM](https://github.com/programmatix/JVM): a basic, but functioning, JVM written in Scala.
+* [javap](https://github.com/programmatix/javap): a javap alternative/clone for debugging & analysing JVM .class files.
+* [JVMClassFiles](https://github.com/programmatix/ClassFiles): a JVM library for reading JVM .class files.
 
-* .class files compiled with Java 7+.
-* Jar files.
-* synchronized keyword.
-* native keyword.
-* float & double operations.
+## Use
+Clone this project.
+```
+git submodule update --init --recursive
+```
+See the individual projects for usage instructions.  This project simply makes sure that all dependencies are where they're expected to be.
 
-Want:
-
-* Passing and return managed types.
-* try/catch/finally.
-
-In addition, some important parts work but are left to the 'real' Java JVM we're running on, including:
-
-* Memory management.
-* Loading and execution of core Java libraries, like String.
-* Threading.
-
-
-Release Process
-===============
-sbt
-fastOptJS
-fullOptJS
-
-Copy to site:
-copy
-copyProd
-
-Build & release site
